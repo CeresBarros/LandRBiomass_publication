@@ -17,7 +17,7 @@ rm(list=ls()); amc::.gc()
 
 library(SpaDES)
 library(LandR)
-
+library(raster)
 
 ## define paths
 setPaths(modulePath = file.path("R/SpaDES/m"),
@@ -27,8 +27,18 @@ setPaths(modulePath = file.path("R/SpaDES/m"),
 ## -----------------------------------------------
 ## SIMULATION SETUP
 ## -----------------------------------------------
+## get larger study area and create a smaller one (half extent)
+studyAreaL <- shapefile("C:/Ceres/SKStudyAreaL")
 
-## Set up sppEquiv  ---------------------------
+largeExtent <- extent(studyAreaL)
+smallExtent <- extent(studyAreaL)
+smallExtent@xmax <- largeExtent@xmin + (largeExtent@xmax - largeExtent@xmin)/2
+smallExtent@ymax <- largeExtent@ymin + (largeExtent@ymax - largeExtent@ymin)/2
+
+studyAreaS <- as(smallExtent, "SpatialPolygons")
+studyAreaS <-  SpatialPolygonsDataFrame(studyAreaS, data.frame(id = 1:length(studyAreaS)))
+
+## Set up sppEquiv  ------------------------------
 data("sppEquivalencies_CA", package = "LandR")
 sppEquivalencies_CA[grep("Pin", LandR), `:=`(EN_generic_short = "Pine",
                                              EN_generic_full = "Pine",
