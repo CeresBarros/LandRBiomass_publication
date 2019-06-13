@@ -51,3 +51,80 @@ sppEquivalencies_CA <- na.omit(sppEquivalencies_CA, cols = sppEquivCol)
 ## create color palette for species used in model
 sppColorVect <- sppColors(sppEquivalencies_CA, sppEquivCol,
                           newVals = "Mixed", palette = "Accent")
+
+
+## Set up modelling parameters  ---------------------------
+options('reproducible.useNewDigestAlgorithm' = TRUE)
+runName <- "studyAreaL"
+eventCaching <- c(".inputObjects", "init")
+useParallel <- FALSE
+
+## paths
+pathsSim <- getPaths()
+pathsSim$outputPath <- file.path(pathsSim$outputPath, runName)
+pathsSim$cachePath <- file.path("R/SpaDES/cache", runName)
+
+## simulation params
+timesSim <- list(start = 0, end = 10)
+eventCaching <- c(".inputObjects", "init")
+
+
+vegLeadingProportion <- 0 # indicates what proportion the stand must be in one species group for it to be leading.
+successionTimestep <- 10L  # for dispersal and age reclass.
+
+modulesSim <- list("BiomassSpeciesData"
+                   , "Boreal_LBMRDataPrep"
+                   , "LBMR"
+)
+
+objectsSim <- list("studyArea" = get(runName)
+                   , "sppEquiv" = sppEquivalencies_CA
+                   , "sppColorVect" = sppColorVect
+)
+
+paramsSim <- list(
+  Boreal_LBMRDataPrep = list(
+    "sppEquivCol" = sppEquivCol
+    , "forestedLCCClasses" = c(1:15, 34:36)
+    # next two are used when assigning pixelGroup membership; what resolution for
+    #   age and biomass
+    , "pixelGroupAgeClass" = successionTimestep
+    , "pixelGroupBiomassClass" = 100
+    , "runName" = runName
+    , "useCloudCacheForStats" = FALSE
+    , "cloudFolderID" = NA
+    , ".useCache" = eventCaching
+  )
+  , LBMR = list(
+    "calcSummaryBGM" = c("start")
+    , "initialBiomassSource" = "cohortData" # can be 'biomassMap' or "spinup" too
+    , ".plotInitialTime" = timesSim$start
+    , "seedingAlgorithm" = "wardDispersal"
+    , "sppEquivCol" = sppEquivCol
+    , "successionTimestep" = successionTimestep
+    , "vegLeadingProportion" = vegLeadingProportion
+    , ".plotInterval" = 1
+    , ".plotMaps" = FALSE
+    , ".saveInitialTime" = NA
+    , ".useCache" = eventCaching[eventCaching] # seems slower to use Cache for both
+    , ".useParallel" = useParallel
+  )
+  , BiomassSpeciesData = list(
+    "types" = c("KNN")
+    , "sppEquivCol" = sppEquivCol
+    , ".useCache" = TRUE
+  )
+)
+
+options(spades.moduleCodeChecks = FALSE)
+graphics.off()
+LBMR_testSim <- simInitAndSpades(times = timesSim
+                                 , params = paramsSim
+                                 , modules = modulesSim
+                                 , objects = objectsSim
+                                 , paths = pathsSim
+                                 , debug = TRUE
+                                 , .plotInitialTime = NA
+)
+
+
