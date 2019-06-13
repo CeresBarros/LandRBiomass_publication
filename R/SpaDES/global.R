@@ -37,6 +37,15 @@ smallExtent@ymax <- largeExtent@ymin + (largeExtent@ymax - largeExtent@ymin)/2
 
 studyAreaS <- as(smallExtent, "SpatialPolygons")
 studyAreaS <-  SpatialPolygonsDataFrame(studyAreaS, data.frame(id = 1:length(studyAreaS)))
+crs(studyAreaS) <- crs(studyAreaL)
+
+studyAreaL <- spTransform(studyAreaL,
+                         "+proj=lcc +lat_1=49 +lat_2=77 +lat_0=0 +lon_0=-95 +x_0=0 +y_0=0 +datum=NAD83 +units=m +no_defs +ellps=GRS80 +towgs84=0,0,0")
+studyAreaS <- spTransform(studyAreaS,
+                          "+proj=lcc +lat_1=49 +lat_2=77 +lat_0=0 +lon_0=-95 +x_0=0 +y_0=0 +datum=NAD83 +units=m +no_defs +ellps=GRS80 +towgs84=0,0,0")
+
+
+plot(studyAreaL); plot(studyAreaS, add = TRUE, col = "red")
 
 ## Set up sppEquiv  ------------------------------
 data("sppEquivalencies_CA", package = "LandR")
