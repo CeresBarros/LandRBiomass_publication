@@ -136,5 +136,3 @@ LBMR_testSim <- simInitAndSpades(times = timesSim
                                  , debug = TRUE
                                  , .plotInitialTime = NA
 )
-
-
