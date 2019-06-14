@@ -127,6 +127,7 @@ paramsSim <- list(
 
 options(spades.moduleCodeChecks = FALSE)
 graphics.off()
+devtools::load_all("../LandR")
 LBMR_testSim <- simInitAndSpades(times = timesSim
                                  , params = paramsSim
                                  , modules = modulesSim
