@@ -1,8 +1,7 @@
 ## ------------------------------------------------------
-## FIRE MODELLING WITH SpaDES
-## TESTS
+## LBMR PUBLICATION SIMULATIONS
 ##
-## Ceres: Nov 2017
+## Ceres: June 2018
 ## ------------------------------------------------------
 
 ## clean workspace
