@@ -51,10 +51,19 @@ data("sppEquivalencies_CA", package = "LandR")
 sppEquivalencies_CA[grep("Pin", LandR), `:=`(EN_generic_short = "Pine",
                                              EN_generic_full = "Pine",
                                              Leading = "Pine leading")]
+# ## these species will be retained as separate
+sppEquivalencies_CA[grep("Betu_pap", LandR), `:=`(EN_generic_short = "Birch",
+                                             EN_generic_full = "Birch",
+                                             Leading = "Birch leading")]
+sppEquivalencies_CA[grep("Popu_bal", LandR), `:=`(EN_generic_short = "Poplar",
+                                                  EN_generic_full = "Poplar",
+                                                  Leading = "Poplar leading")]
+
 
 ## define spp column to use for model
 sppEquivCol <- "Boreal"
-sppEquivalencies_CA <- na.omit(sppEquivalencies_CA, cols = sppEquivCol)
+sppEquivalencies_CA <- sppEquivalencies_CA[!"", on = sppEquivCol]
+sppEquivalencies_CA <- na.omit(sppEquivalencies_CA, sppEquivCol)
 
 ## create color palette for species used in model
 sppColorVect <- sppColors(sppEquivalencies_CA, sppEquivCol,
@@ -73,7 +82,7 @@ pathsSim$outputPath <- file.path(pathsSim$outputPath, runName)
 pathsSim$cachePath <- file.path("R/SpaDES/cache", runName)
 
 ## simulation params
-timesSim <- list(start = 0, end = 10)
+timesSim <- list(start = 0, end = 400)
 eventCaching <- c(".inputObjects", "init")
 
 
@@ -112,7 +121,7 @@ paramsSim <- list(
     , "successionTimestep" = successionTimestep
     , "vegLeadingProportion" = vegLeadingProportion
     , ".plotInterval" = 1
-    , ".plotMaps" = FALSE
+    , ".plotMaps" = TRUE
     , ".saveInitialTime" = NA
     , ".useCache" = eventCaching[eventCaching] # seems slower to use Cache for both
     , ".useParallel" = useParallel
@@ -133,5 +142,6 @@ LBMR_testSim <- simInitAndSpades(times = timesSim
                                  , objects = objectsSim
                                  , paths = pathsSim
                                  , debug = TRUE
-                                 , .plotInitialTime = NA
+                                 # , .plotInitialTime = NA
 )
+
