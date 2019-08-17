@@ -130,13 +130,13 @@ paramsSim <- list(
     , ".plotInterval" = 1
     , ".plotMaps" = TRUE
     , ".saveInitialTime" = NA
-    , ".useCache" = eventCaching[eventCaching] # seems slower to use Cache for both
+    , ".useCache" = eventCaching # seems slower to use Cache for both
     , ".useParallel" = useParallel
   )
   , BiomassSpeciesData = list(
     "types" = c("KNN")
     , "sppEquivCol" = sppEquivCol
-    , ".useCache" = TRUE
+    , ".useCache" = eventCaching
   )
 )
 
