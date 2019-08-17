@@ -78,7 +78,9 @@ sppColorVect <- sppColors(sppEquivalencies_CA, sppEquivCol,
 
 ## Set up modelling parameters  ---------------------------
 options('reproducible.useNewDigestAlgorithm' = TRUE)
-runName <- "studyAreaL"
+# runName <- "testAllModules"
+# runName <- "testLBMRonly"
+runName <- "studyAreaS"
 eventCaching <- c(".inputObjects", "init")
 useParallel <- FALSE
 
@@ -100,7 +102,7 @@ modulesSim <- list("BiomassSpeciesData"
                    , "LBMR"
 )
 
-objectsSim <- list("studyArea" = get(runName)
+objectsSim <- list("studyArea" = if (grepl("study", runName)) get(runName) else studyAreaS
                    , "sppEquiv" = sppEquivalencies_CA
                    , "sppColorVect" = sppColorVect
 )
