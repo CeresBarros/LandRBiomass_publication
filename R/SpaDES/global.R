@@ -141,14 +141,14 @@ paramsSim <- list(
 )
 
 options(spades.moduleCodeChecks = FALSE)
+options("reproducible.useCache" = TRUE)
 graphics.off()
-devtools::load_all("../LandR")
 LBMR_testSim <- simInitAndSpades(times = timesSim
                                  , params = paramsSim
                                  , modules = modulesSim
                                  , objects = objectsSim
                                  , paths = pathsSim
                                  , debug = TRUE
-                                 # , .plotInitialTime = NA
+                                 , .plotInitialTime = NA
 )
 
