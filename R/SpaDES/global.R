@@ -90,9 +90,8 @@ pathsSim$outputPath <- file.path(pathsSim$outputPath, runName)
 pathsSim$cachePath <- file.path("R/SpaDES/cache", runName)
 
 ## simulation params
-timesSim <- list(start = 0, end = 400)
+timesSim <- list(start = 0, end = 50)
 eventCaching <- c(".inputObjects", "init")
-
 
 vegLeadingProportion <- 0 # indicates what proportion the stand must be in one species group for it to be leading.
 successionTimestep <- 10L  # for dispersal and age reclass.
