@@ -91,7 +91,7 @@ pathsSim$outputPath <- file.path(pathsSim$outputPath, runName)
 pathsSim$cachePath <- file.path("R/SpaDES/cache", runName)
 
 ## simulation params
-timesSim <- list(start = 0, end = 50)
+timesSim <- list(start = 0, end = 500)
 eventCaching <- c(".inputObjects", "init")
 
 vegLeadingProportion <- 0 # indicates what proportion the stand must be in one species group for it to be leading.
@@ -143,13 +143,12 @@ paramsSim <- list(
 
 options(spades.moduleCodeChecks = FALSE)
 options("reproducible.useCache" = TRUE)
-graphics.off()
 LBMR_testSim <- simInitAndSpades(times = timesSim
                                  , params = paramsSim
                                  , modules = modulesSim
                                  , objects = objectsSim
                                  , paths = pathsSim
                                  , debug = TRUE
-                                 , .plotInitialTime = NA
+                                 # , .plotInitialTime = NA
 )
-
+unlink(file.path(Paths$outputPath, "figures"), recursive = TRUE) ## remove unnecessary figures
