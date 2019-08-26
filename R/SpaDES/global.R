@@ -6,6 +6,7 @@
 
 ## clean workspace
 rm(list=ls()); amc::.gc()
+stopifnot(utils::packageVersion("googledrive") == "1.0.0")
 
 ## requires as of June 10th 2019
 # loading reproducible     0.2.8.9001
