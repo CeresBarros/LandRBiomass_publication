@@ -60,8 +60,8 @@ sppEquivalencies_CA[grep("Pin", LandR), `:=`(EN_generic_short = "Pine",
                                              Leading = "Pine leading")]
 # ## these species will be retained as separate
 sppEquivalencies_CA[grep("Betu_pap", LandR), `:=`(EN_generic_short = "Birch",
-                                             EN_generic_full = "Birch",
-                                             Leading = "Birch leading")]
+                                                  EN_generic_full = "Birch",
+                                                  Leading = "Birch leading")]
 sppEquivalencies_CA[grep("Popu_bal", LandR), `:=`(EN_generic_short = "Poplar",
                                                   EN_generic_full = "Poplar",
                                                   Leading = "Poplar leading")]
@@ -81,7 +81,8 @@ sppColorVect <- sppColors(sppEquivalencies_CA, sppEquivCol,
 options('reproducible.useNewDigestAlgorithm' = TRUE)
 # runName <- "testAllModules"
 # runName <- "testLBMRonly"
-runName <- "studyAreaS"
+# runName <- "studyAreaS"
+runName <- "studyAreaL"
 eventCaching <- c(".inputObjects", "init")
 useParallel <- FALSE
 
@@ -141,6 +142,8 @@ paramsSim <- list(
   )
 )
 
+cat(paste0("Start time: ", date()))  ## from a clear cache
+## Start time: Wed Aug 28 14:31:00 2019
 options(spades.moduleCodeChecks = FALSE)
 options("reproducible.useCache" = TRUE)
 LBMR_testSim <- simInitAndSpades(times = timesSim
@@ -149,6 +152,9 @@ LBMR_testSim <- simInitAndSpades(times = timesSim
                                  , objects = objectsSim
                                  , paths = pathsSim
                                  , debug = TRUE
-                                 # , .plotInitialTime = NA
+                                 , .plotInitialTime = NA
 )
+cat(paste0("End time: ", date()))
+# End time: Wed Aug 28 17:16:08 2019
+
 unlink(file.path(Paths$outputPath, "figures"), recursive = TRUE) ## remove unnecessary figures
