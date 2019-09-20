@@ -83,13 +83,12 @@ simObjects <- list("studyArea" = if (grepl("study", runName)) get(runName) else 
                    , "sppEquiv" = sppEquivalencies_CA
                    , "sppColorVect" = sppColorVect
                    , "speciesLayers" = simOutSpeciesLayers$speciesLayers
-                   , "treed" = treed
-                   , "numTreed" = numTreed
-                   , "nonZeroCover" = nonZeroCover
+                   , "treed" = simOutSpeciesLayers$treed
+                   , "numTreed" = simOutSpeciesLayers$numTreed
+                   , "nonZeroCover" = simOutSpeciesLayers$nonZeroCover
 )
 
-cat(paste0("Start time: ", date()))  ## from a clear cache
-## Start time: Wed Aug 28 14:31:00 2019
+startTime <- date()
 options(spades.moduleCodeChecks = FALSE)
 options("reproducible.useCache" = TRUE)
 LBMR_testSim <- simInitAndSpades(times = simTimes
