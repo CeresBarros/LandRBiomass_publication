@@ -99,7 +99,8 @@ LBMR_testSim <- simInitAndSpades(times = simTimes
                                  , debug = TRUE
                                  , .plotInitialTime = NA
 )
-cat(paste0("End time: ", date()))
+endTime <- date()
+cat(paste0("Took: ", endTime - startTime))
 # End time: Wed Aug 28 17:16:08 2019
 
 unlink(file.path(Paths$outputPath, "figures"), recursive = TRUE) ## remove unnecessary figures
