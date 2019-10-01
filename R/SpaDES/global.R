@@ -28,8 +28,9 @@ source("1_simObjects.R")
 
 ## Set up modelling parameters  ---------------------------
 options('reproducible.useNewDigestAlgorithm' = TRUE)
-# runName <- "studyAreaS"
-runName <- "studyAreaL"
+runName <- "studyAreaS"
+# runName <- "studyAreaL"
+# runName <- "parametriseSALarge"
 eventCaching <- c(".inputObjects", "init")
 useParallel <- FALSE
 
@@ -39,7 +40,7 @@ simPaths <- list(cachePath = file.path("R/SpaDES/cache", runName),
                  inputPath = file.path("R/SpaDES/inputs"),
                  outputPath = file.path("R/SpaDES/outputs", runName))
 ## simulation params
-simTimes <- list(start = 0, end = 500)
+simTimes <- list(start = 0, end = 100)
 vegLeadingProportion <- 0 # indicates what proportion the stand must be in one species group for it to be leading.
 successionTimestep <- 10L  # for dispersal and age reclass.
 
@@ -79,14 +80,27 @@ simParams <- list(
 ## Run Biomass_speciesData to get species layers
 source("2_speciesLayers.R")
 
-simObjects <- list("studyArea" = if (grepl("study", runName)) get(runName) else studyAreaS
-                   , "sppEquiv" = sppEquivalencies_CA
-                   , "sppColorVect" = sppColorVect
-                   , "speciesLayers" = simOutSpeciesLayers$speciesLayers
-                   , "treed" = simOutSpeciesLayers$treed
-                   , "numTreed" = simOutSpeciesLayers$numTreed
-                   , "nonZeroCover" = simOutSpeciesLayers$nonZeroCover
-)
+if (runName == "parametriseSALarge") {
+  simObjects <- list("studyArea" = studyAreaS
+                     , "studyAreaLarge" = studyAreaL
+                     , "sppEquiv" = sppEquivalencies_CA
+                     , "sppColorVect" = sppColorVect
+                     , "speciesLayers" = simOutSpeciesLayers$speciesLayers
+                     , "treed" = simOutSpeciesLayers$treed
+                     , "numTreed" = simOutSpeciesLayers$numTreed
+                     , "nonZeroCover" = simOutSpeciesLayers$nonZeroCover
+  )
+} else {
+  simObjects <- list("studyArea" = if (grepl("study", runName)) get(runName) else studyAreaS
+                     , "sppEquiv" = sppEquivalencies_CA
+                     , "sppColorVect" = sppColorVect
+                     , "speciesLayers" = simOutSpeciesLayers$speciesLayers
+                     , "treed" = simOutSpeciesLayers$treed
+                     , "numTreed" = simOutSpeciesLayers$numTreed
+                     , "nonZeroCover" = simOutSpeciesLayers$nonZeroCover
+  )
+
+}
 
 startTime <- date()
 options(spades.moduleCodeChecks = FALSE)

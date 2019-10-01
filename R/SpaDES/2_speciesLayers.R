@@ -22,10 +22,18 @@ speciesParameters <- list(
   )
 )
 
-speciesObjects <- list("studyArea" = if (grepl("study", runName)) get(runName) else studyAreaS
-                   , "sppEquiv" = sppEquivalencies_CA
-                   , "sppColorVect" = sppColorVect
-)
+if (runName == "parametriseSALarge") {
+  speciesObjects <- list("studyArea" = studyAreaS
+                         , "studyAreaLarge" = studyAreaL
+                         , "sppEquiv" = sppEquivalencies_CA
+                         , "sppColorVect" = sppColorVect
+  )
+} else {
+  speciesObjects <- list("studyArea" = if (grepl("study", runName)) get(runName) else studyAreaS
+                         , "sppEquiv" = sppEquivalencies_CA
+                         , "sppColorVect" = sppColorVect
+  )
+}
 
 simOutSpeciesLayers <- Cache(simInitAndSpades
                              , times = list(start = 0, end = 1)
