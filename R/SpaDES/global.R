@@ -116,6 +116,6 @@ LBMR_testSim <- simInitAndSpades(times = simTimes
 endTime <- date()
 cat(paste0("Took: ", endTime - startTime))
 # End time: Wed Aug 28 17:16:08 2019
-saveRDS(LBMR_testSim, file.path(simPaths$outputPath, paste0("simList_", runName)))
+saveRDS(LBMR_testSim, file.path(simPaths$outputPath, paste0("simList_", runName, ".rds")))
 
 unlink(file.path(Paths$outputPath, "figures"), recursive = TRUE) ## remove unnecessary figures
