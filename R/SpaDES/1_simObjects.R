@@ -26,10 +26,10 @@ studyAreaS <-  SpatialPolygonsDataFrame(studyAreaS, data.frame(id = 1:length(stu
 crs(studyAreaS) <- originalcrs
 studyAreaS <- spTransform(studyAreaS, originalcrs)
 
-## now reproject to LBMR standard
-LBMRcrs <- "+proj=lcc +lat_1=49 +lat_2=77 +lat_0=0 +lon_0=-95 +x_0=0 +y_0=0 +datum=NAD83 +units=m +no_defs +ellps=GRS80 +towgs84=0,0,0"
-studyAreaL <- spTransform(studyAreaL, LBMRcrs)
-studyAreaS <- spTransform(studyAreaS, LBMRcrs)
+## now reproject to Biomass_core standard
+Biomass_corecrs <- "+proj=lcc +lat_1=49 +lat_2=77 +lat_0=0 +lon_0=-95 +x_0=0 +y_0=0 +datum=NAD83 +units=m +no_defs +ellps=GRS80 +towgs84=0,0,0"
+studyAreaL <- spTransform(studyAreaL, Biomass_corecrs)
+studyAreaS <- spTransform(studyAreaS, Biomass_corecrs)
 
 plot(studyAreaL); plot(studyAreaS, add = TRUE, col = "red")
 

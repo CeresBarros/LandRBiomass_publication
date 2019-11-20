@@ -3,7 +3,7 @@
 ## -----------------------------------
 
 ## this script makes a pre-simulation object that makes species layers
-## by running BiomassSpeciesData. This is the longest module to run and,
+## by running Biomass_speciesData This is the longest module to run and,
 ## unless the study area or the species needed change, it whould only
 ## be run once (even if other things change, like the simulation rep,
 ## or other modules). That's why caching is kept separate from the rest

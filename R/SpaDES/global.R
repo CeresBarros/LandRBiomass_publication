@@ -1,5 +1,5 @@
 ## ------------------------------------------------------
-## LBMR PUBLICATION SIMULATIONS
+## LandR Biomass PUBLICATION SIMULATIONS
 ##
 ## Ceres: June 2018
 ## ------------------------------------------------------
@@ -44,12 +44,12 @@ simTimes <- list(start = 0, end = 100)
 vegLeadingProportion <- 0 # indicates what proportion the stand must be in one species group for it to be leading.
 successionTimestep <- 10L  # for dispersal and age reclass.
 
-simModules <- list("Boreal_LBMRDataPrep"
-                   , "LBMR"
+simModules <- list("Biomass_borealDataPrep"
+                   , "Biomass_core"
 )
 
 simParams <- list(
-  Boreal_LBMRDataPrep = list(
+  Biomass_borealDataPrep = list(
     "sppEquivCol" = sppEquivCol
     , "forestedLCCClasses" = c(1:15, 34:36)
     # next two are used when assigning pixelGroup membership; what resolution for
@@ -61,7 +61,7 @@ simParams <- list(
     , "cloudFolderID" = NA
     , ".useCache" = eventCaching
   )
-  , LBMR = list(
+  , Biomass_core = list(
     "calcSummaryBGM" = c("start")
     , "initialBiomassSource" = "cohortData" # can be 'biomassMap' or "spinup" too
     , ".plotInitialTime" = simTimes$start
@@ -106,7 +106,7 @@ startTime <- date()
 options(spades.moduleCodeChecks = FALSE)
 options("reproducible.useCache" = TRUE)
 # reproducible::clearCache(simPaths$cachePath)
-LBMR_testSim <- simInitAndSpades(times = simTimes
+Biomass_core_testSim <- simInitAndSpades(times = simTimes
                                  , params = simParams
                                  , modules = simModules
                                  , objects = simObjects
@@ -117,6 +117,6 @@ LBMR_testSim <- simInitAndSpades(times = simTimes
 endTime <- date()
 cat(paste0("Took: ", endTime - startTime))
 # End time: Wed Aug 28 17:16:08 2019
-saveRDS(LBMR_testSim, file.path(simPaths$outputPath, paste0("simList_", runName, ".rds")))
+saveRDS(Biomass_core_testSim, file.path(simPaths$outputPath, paste0("simList_", runName, ".rds")))
 
 unlink(file.path(simPaths$outputPath, "figures"), recursive = TRUE) ## remove unnecessary figures
