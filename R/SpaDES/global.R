@@ -28,8 +28,8 @@ source("R/SpaDES/1_simObjects.R")
 
 ## Set up modelling parameters  ---------------------------
 options('reproducible.useNewDigestAlgorithm' = TRUE)
-# runName <- "studyAreaS"
-runName <- "studyAreaL"
+runName <- "studyAreaS"
+# runName <- "studyAreaL"
 # runName <- "parametriseSALarge"
 eventCaching <- c(".inputObjects", "init")
 useParallel <- FALSE
@@ -105,6 +105,7 @@ if (runName == "parametriseSALarge") {
 startTime <- date()
 options(spades.moduleCodeChecks = FALSE)
 options("reproducible.useCache" = TRUE)
+# reproducible::clearCache(simPaths$cachePath)
 LBMR_testSim <- simInitAndSpades(times = simTimes
                                  , params = simParams
                                  , modules = simModules
@@ -118,4 +119,4 @@ cat(paste0("Took: ", endTime - startTime))
 # End time: Wed Aug 28 17:16:08 2019
 saveRDS(LBMR_testSim, file.path(simPaths$outputPath, paste0("simList_", runName, ".rds")))
 
-unlink(file.path(Paths$outputPath, "figures"), recursive = TRUE) ## remove unnecessary figures
+unlink(file.path(simPaths$outputPath, "figures"), recursive = TRUE) ## remove unnecessary figures
