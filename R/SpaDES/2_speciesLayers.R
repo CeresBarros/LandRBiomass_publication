@@ -15,7 +15,7 @@ speciesPaths <-list(cachePath = file.path("R/SpaDES/cache", "speciesLayers"),
                     outputPath = file.path("R/SpaDES/outputs", runName))
 
 speciesParameters <- list(
-  BiomassSpeciesData = list(
+  Biomass_speciesData = list(
     "types" = c("KNN")
     , "sppEquivCol" = sppEquivCol
     , ".useCache" = eventCaching
@@ -31,7 +31,7 @@ speciesObjects <- list("studyAreaLarge" = if (grepl("study", runName)) get(runNa
 simOutSpeciesLayers <- Cache(simInitAndSpades
                              , times = list(start = 0, end = 1)
                              , params = speciesParameters
-                             , modules = "BiomassSpeciesData"
+                             , modules = "Biomass_speciesData"
                              , objects = speciesObjects
                              , paths = speciesPaths
                              , debug = TRUE
