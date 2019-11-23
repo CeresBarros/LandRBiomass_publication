@@ -46,6 +46,7 @@ successionTimestep <- 10L  # for dispersal and age reclass.
 
 simModules <- list("Biomass_borealDataPrep"
                    , "Biomass_core"
+                   , "Biomass_validationKNN"
 )
 
 simParams <- list(
@@ -75,6 +76,9 @@ simParams <- list(
     , ".saveInitialTime" = NA
     , ".useCache" = eventCaching # seems slower to use Cache for both
     , ".useParallel" = useParallel
+  )
+  , Biomass_validationKNN = list(
+
   )
 )
 
