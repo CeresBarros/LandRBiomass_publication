@@ -85,6 +85,17 @@ simParams <- list(
 ## Run Biomass_speciesData to get species layers
 source("R/SpaDES/2_speciesLayers.R")
 
+## check species layers:
+plot(sim$speciesLayers)
+## Pinus contorta and Populus grandidentata should not be in SK, and will be excluded
+## Popu_sp has v. few (one?) pixels and should also be dropeed
+toRm <- which(names(simOutSpeciesLayers$speciesLayers) %in% c("Pinu_Con_Lat", "Popu_Gra", "Popu_Spp"))
+simOutSpeciesLayers$speciesLayers <- dropLayer(simOutSpeciesLayers$speciesLayers, i = toRm)
+rm(toRm)
+
+## subset sppEquivalencies
+sppEquivalencies_CA <- sppEquivalencies_CA[Boreal %in% names(simOutSpeciesLayers$speciesLayers)]
+
 if (runName == "parametriseSALarge") {
   simObjects <- list("studyArea" = studyAreaS
                      , "studyAreaLarge" = studyAreaL
