@@ -78,7 +78,8 @@ simParams <- list(
     , ".useParallel" = useParallel
   )
   , Biomass_validationKNN = list(
-
+    "sppEquivCol" = sppEquivCol
+    , ".useCache" = eventCaching
   )
 )
 
