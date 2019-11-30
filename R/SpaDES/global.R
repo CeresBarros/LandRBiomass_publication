@@ -29,9 +29,9 @@ source("R/SpaDES/1_simObjects.R")
 
 ## Set up modelling parameters  ---------------------------
 options('reproducible.useNewDigestAlgorithm' = TRUE)
-runName <- "studyAreaS"
+# runName <- "studyAreaS"
 # runName <- "studyAreaL"
-# runName <- "parametriseSALarge"
+runName <- "parametriseSALarge"
 eventCaching <- c(".inputObjects", "init")
 useParallel <- FALSE
 
@@ -58,7 +58,6 @@ simParams <- list(
     #   age and biomass
     , "pixelGroupAgeClass" = successionTimestep
     , "pixelGroupBiomassClass" = 100
-    , "runName" = runName
     , "useCloudCacheForStats" = FALSE
     , "cloudFolderID" = NA
     , ".useCache" = eventCaching
