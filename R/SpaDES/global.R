@@ -16,6 +16,7 @@ stopifnot(utils::packageVersion("googledrive") == "1.0.0")
 # loading SpaDES.addins    0.1.2
 
 library(SpaDES)
+library(SpaDES.experiment)
 library(LandR)
 library(raster)
 
@@ -65,7 +66,8 @@ simParams <- list(
   , Biomass_core = list(
     "calcSummaryBGM" = c("start")
     , "initialBiomassSource" = "cohortData" # can be 'biomassMap' or "spinup" too
-    , ".plotInitialTime" = simTimes$start
+    # , ".plotInitialTime" = simTimes$start
+    , ".plotInitialTime" = NA ## for experiment
     , "plotOverstory" = TRUE
     , "seedingAlgorithm" = "wardDispersal"
     , "sppEquivCol" = sppEquivCol
@@ -74,7 +76,8 @@ simParams <- list(
     , ".plotInterval" = 1
     , ".plotMaps" = TRUE
     , ".saveInitialTime" = NA
-    , ".useCache" = eventCaching # seems slower to use Cache for both
+    # , ".useCache" = eventCaching
+    , ".useCache" = eventCaching[1] # experiment doesn't like when init is cached
     , ".useParallel" = useParallel
   )
   , Biomass_validationKNN = list(
@@ -96,6 +99,30 @@ rm(toRm)
 
 ## subset sppEquivalencies
 sppEquivalencies_CA <- sppEquivalencies_CA[Boreal %in% names(simOutSpeciesLayers$speciesLayers)]
+
+simOutputs <- data.frame(expand.grid(objectName = c("cohortData"),
+                                  saveTime = c(0:15, seq(20, 100, 5)),
+                                  eventPriority = 10,
+                                  stringsAsFactors = FALSE))
+simOutputs[1, "eventPriority"] <- 5.5  ## in the beggining, after init events, before mortalityAndGrowth
+simOutputs <- rbind(simOutputs, data.frame(objectName = "vegTypeMap",
+                                     saveTime = c(0:15, seq(20, 100, 5)),
+                                     eventPriority = 10))
+simOutputs <- rbind(simOutputs, data.frame(objectName = "pixelGroupMap",
+                                     saveTime = c(0:15, seq(20, 100, 5)),
+                                     eventPriority = 10))
+simOutputs <- rbind(simOutputs, data.frame(objectName = "rstDisturbedPix",
+                                           saveTime = c(0),
+                                           eventPriority = 10))
+simOutputs <- rbind(simOutputs, data.frame(objectName = "rawBiomassMapValidation",
+                                           saveTime = c(0),
+                                           eventPriority = 10))
+simOutputs <- rbind(simOutputs, data.frame(objectName = "standAgeMapValidation",
+                                           saveTime = c(0),
+                                           eventPriority = 10))
+simOutputs <- rbind(simOutputs, data.frame(objectName = "speciesLayersValidation",
+                                           saveTime = c(0),
+                                           eventPriority = 10))
 
 if (runName == "parametriseSALarge") {
   simObjects <- list("studyArea" = studyAreaS
@@ -122,17 +149,28 @@ startTime <- date()
 options(spades.moduleCodeChecks = FALSE)
 options("reproducible.useCache" = TRUE)
 # reproducible::clearCache(simPaths$cachePath)
-Biomass_core_testSim <- simInitAndSpades(times = simTimes
-                                 , params = simParams
-                                 , modules = simModules
-                                 , objects = simObjects
-                                 , paths = simPaths
-                                 , debug = TRUE
-                                 , .plotInitialTime = NA
-)
-endTime <- date()
-cat(paste0("Took: ", endTime - startTime))
-# End time: Wed Aug 28 17:16:08 2019
-saveRDS(Biomass_core_testSim, file.path(simPaths$outputPath, paste0("simList_", runName, ".rds")))
+Biomass_core_testSim <- simInit(times = simTimes
+                                , params = simParams
+                                , modules = simModules
+                                , objects = simObjects
+                                , outputs = simOutputs
+                                , paths = simPaths)
 
-unlink(file.path(simPaths$outputPath, "figures"), recursive = TRUE) ## remove unnecessary figures
+## to avoid synonim bug run the spades call once for 1 year.
+end(Biomass_core_testSim) <- 0
+spades(Biomass_core_testSim
+       , debug = TRUE
+       , .plotInitialTime = NA)
+end(Biomass_core_testSim) <- 30   ## now change back for experiment.
+# saveRDS(Biomass_core_testSim, file.path(simPaths$outputPath, paste0("simList_", runName, ".rds")))
+# unlink(file.path(simPaths$outputPath, "figures"), recursive = TRUE) ## remove unnecessary figures
+
+
+library(future)
+plan("multiprocess", workers = 6)
+factorialSimulations <- experiment2(
+  sim1 = Biomass_core_testSim,
+  clearSimEnv = TRUE,
+  replicates = 10)
+
+saveRDS(factorialSimulations, file.path(simPaths$outputPath, paste0("simList_factorialSimulations", runName, ".rds")))
