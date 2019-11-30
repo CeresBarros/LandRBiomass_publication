@@ -21,7 +21,7 @@ defineModule(sim, list(
   citation = list("citation.bib"),
   documentation = list("README.txt", "Biomass_validationKNN.Rmd"),
   reqdPkgs = list("crayon", "reproducible", "raster",
-                  "sf"),
+                  "sf", "XML", "RCurl"),
   parameters = rbind(
     defineParameter("coverThresh", "integer", "10", NA, NA,
                     paste("The minimum % cover a species needs to have (per pixel) in the study",
@@ -40,6 +40,10 @@ defineModule(sim, list(
                     desc = "Controls cache; caches the init event by default")
     ),
   inputObjects = bind_rows(
+    createsOutput("biomassMap", "RasterLayer",
+                  desc = paste("total biomass raster layer in study area, filtered for pixels covered by cohortData.",
+                               "Used to calculate total no. of pixels being simulated",
+                               "If not supplied, will default to 'rawBiomassMap'.")),
     expectsInput("firePerimeters", "sf",
                  desc = paste("A map of fire perimeters in the study area that can be used to exclude pixels",
                               "that have been burnt during the validation period. Defaults to the Canadian",
@@ -74,12 +78,18 @@ defineModule(sim, list(
                               "Defaults to the Canadian Forestry Service, National Forest Inventory,",
                               "kNN-derived species cover maps from 2011 -",
                               "see https://open.canada.ca/data/en/dataset/ec9e2659-1c29-4ddb-87a2-6aced147a990 for metadata"),
+                 sourceURL = "http://ftp.maps.canada.ca/pub/nrcan_rncan/Forests_Foret/canada-forests-attributes_attributs-forests-canada/2011-attributes_attributs-2011/"),
+    expectsInput("standAgeMapValidation", "RasterLayer",
+                 desc = paste("stand age raster layer in study area used for validation. Defaults to the",
+                              "Canadian Forestry Service, National Forest Inventory, kNN-derived stand age",
+                              "map from 2011. See",
+                              "https://open.canada.ca/data/en/dataset/ec9e2659-1c29-4ddb-87a2-6aced147a990"),
                  sourceURL = "http://ftp.maps.canada.ca/pub/nrcan_rncan/Forests_Foret/canada-forests-attributes_attributs-forests-canada/2011-attributes_attributs-2011/")
   ),
   outputObjects = bind_rows(
-    createsOutput("disturbedIDs", "RasterLayer",
-                  desc = paste("pixels that have been disturbed by fire or suffered land-cover changes",
-                               "during the validation period. These pixels are excluded form the validation.")),
+    createsOutput("rstDisturbedPix", "RasterLayer",
+                  desc = paste("Raster of pixel IDs (as a mask) that have been disturbed by fire or suffered land-cover",
+                               "changes during the validation period. These pixels are excluded form the validation.")),
     createsOutput("rawBiomassMapValidation", "RasterLayer",
                   desc = paste("total biomass raster layer in study area used for validation.",
                                "Filtered to exclude pixels that were disturbed during the validation period")),
@@ -120,15 +130,19 @@ Init <- function(sim) {
 
   ## make vector of pixels that are both in fire perimeters and LCChange
   ## export to sim
-  sim$disturbedIDs <- union(inFireIDs, inLCChangeIDs)
+  disturbedIDs <- union(inFireIDs, inLCChangeIDs)
+
+  sim$rstDisturbedPix <- sim$rasterToMatch
+  sim$rstDisturbedPix <- setValues(sim$rstDisturbedPix, values = NA)
+  sim$rstDisturbedPix[disturbedIDs] <- 1
 
   ## exclude these pixels from validation layers
-  sim$speciesLayersValidation[sim$disturbedIDs] <- NA
-  sim$rawBiomassMapValidation[sim$disturbedIDs] <- NA
+  sim$speciesLayersValidation[disturbedIDs] <- NA
+  sim$rawBiomassMapValidation[disturbedIDs] <- NA
 
   ## return some statistics about excluded pixels
-  excludedPixStats <- data.table(noPixels = length(sim$disturbedIDs),
-                                 landscapePrc = round(length(sim$disturbedIDs)/
+  excludedPixStats <- data.table(noPixels = length(disturbedIDs),
+                                 landscapePrc = round(length(disturbedIDs)/
                                                         sum(!is.na(getValues(sim$biomassMap))),
                                                       2) * 100)
   message(blue("Pixels disturbed during the validation period will be excluded from validation, representing a loss of:\n",
@@ -461,7 +475,7 @@ Init <- function(sim) {
          their properties. Please check")
   }
 
-  ## Biomass layer ----------------------------------------------------
+  ## Biomass layers ----------------------------------------------------
   if (!suppliedElsewhere("rawBiomassMapValidation", sim)) {
     ## get all online file names
     fileURLs <- getURL(extractURL("rawBiomassMapValidation"), dirlistonly = TRUE)
@@ -485,12 +499,42 @@ Init <- function(sim) {
                                          omitArgs = c("userTags"))
   }
 
+  if (!suppliedElsewhere("biomassMap", sim)) {
+    ## get all online file names
+    sim$biomassMap <- sim$rawBiomassMap
+  }
+
   ## check rasters
   if (!compareRaster(sim$rawBiomassMapValidation,
                      sim$rasterToMatch, stopiffalse = FALSE)) {
     stop("'rawBiomassMapValidation' and 'rasterToMatch' differ in
          their properties. Please check")
   }
+
+  ## Age layer ----------------------------------------------------
+  if (!suppliedElsewhere("standAgeMapValidation", sim)) {
+    ## get all online file names
+    fileURLs <- getURL(extractURL("standAgeMapValidation"), dirlistonly = TRUE)
+    fileNames <- getHTMLLinks(fileURLs)
+    standAgeValFileName <- grep("Stand_Age.*.tif$", fileNames, value = TRUE)
+    standAgeValURL <- paste0(extractURL("standAgeMapValidation"), standAgeValFileName)
+
+    sim$standAgeMapValidation <- Cache(prepInputs,
+                                       targetFile = asPath(standAgeValFileName),
+                                       url = standAgeValURL,
+                                       destinationPath = asPath(dPath),
+                                       fun = "raster::raster",
+                                       studyArea = sim$studyArea,
+                                       rasterToMatch = sim$rasterToMatch,
+                                       useSAcrs = FALSE,
+                                       method = "bilinear",
+                                       datatype = "INT2U",
+                                       filename2 = TRUE,
+                                       overwrite = TRUE,
+                                       userTags = c(cacheTags, "standAgeMapValidation"),
+                                       omitArgs = c("userTags"))
+  }
+
 
   return(invisible(sim))
 }
