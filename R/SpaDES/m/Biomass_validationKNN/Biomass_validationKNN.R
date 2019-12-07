@@ -139,6 +139,7 @@ Init <- function(sim) {
   ## exclude these pixels from validation layers
   sim$speciesLayersValidation[disturbedIDs] <- NA
   sim$rawBiomassMapValidation[disturbedIDs] <- NA
+  sim$standAgeMapValidation[disturbedIDs] <- NA
 
   ## return some statistics about excluded pixels
   excludedPixStats <- data.table(noPixels = length(disturbedIDs),
