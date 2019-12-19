@@ -55,11 +55,18 @@ pixelGroupMapStk <- stack(apply(outputFiles[objectName == "pixelGroupMap"], MARG
   pixelGroupMap
 }))
 
-vegTypeMapStk <- stack(apply(outputFiles[objectName == "vegTypeMap"], MARGIN = 1, FUN = function(x) {
-  vegTypeMap <- readRDS(x["file"])
-  names(vegTypeMap) <- paste0("year", as.numeric(x["saveTime"]), "_rep", as.numeric(x["rep"]))
-  vegTypeMap
-}))
+vegTypeMapStk <- apply(outputFiles[objectName == "vegTypeMap"], MARGIN = 1, FUN = function(x) {
+  vegTypeMap <- try(readRDS(x["file"]), silent = TRUE)
+  if (class(vegTypeMap) != "try-error") {
+    names(vegTypeMap) <- paste0("year", as.numeric(x["saveTime"]), "_rep", as.numeric(x["rep"]))
+    vegTypeMap
+  }
+})
+
+## cheat - TODO: need to figure out why some reps have no vegMap for year 0
+vegTypeMapStk[sapply(vegTypeMapStk, is.null)] <- vegTypeMapStk[1]
+vegTypeMapStk <- stack(vegTypeMapStk)
+names(vegTypeMapStk)[names(vegTypeMapStk) %in% c("year0_rep1.1", "year0_rep1.2", "year0_rep1.3", "year0_rep1.4")] <- c("year0_rep1", "year0_rep3", "year0_rep6", "year0_rep7")
 
 ## load validation layers
 rstDisturbedPix <- readRDS(list.files(simPaths$outputPath, "rstDisturbed", full.names = TRUE))
