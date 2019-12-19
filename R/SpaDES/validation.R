@@ -213,6 +213,9 @@ standCohortData[, `:=`(landscapeB = sum(B, na.rm = TRUE),
                        landscapeBValid = sum(BValid, na.rm = TRUE)),
                 by = .(rep, year)]
 
+## convert NAs to zeros in biomasses
+standCohortData[is.na(B), B := 0]
+standCohortData[is.na(BValid), BValid := 0]
 
 ## plot labels
 speciesLabels <- c("Abie_Bal" = "Fir", "Lari_Lar" = "Larch",
