@@ -294,7 +294,7 @@ Init <- function(sim) {
                              userTags = c("rstLCChange", cacheTags),
                              omitArgs = c("destinationPath", "targetFile", "userTags"))
 
-    rstLCChangeYr <- Cache(prepInputs,
+    sim$rstLCChangeYr <- Cache(prepInputs,
                            targetFile = LCChangeYrFilename,
                            archive = asPath("C2C_change_year_1985_2011.zip"),
                            url = extractURL("rstLCChangeYr"),
@@ -311,10 +311,11 @@ Init <- function(sim) {
 
     ## only keep pixels that have been disturbed during the validation period
     pixKeep <- getValues(sim$rstLCChange) > 0 &
-      getValues(rstLCChangeYr) > 100 &
-      getValues(rstLCChangeYr) < 112
+      getValues(sim$rstLCChangeYr) > 100 &
+      getValues(sim$rstLCChangeYr) < 112
 
     sim$rstLCChange[!pixKeep] <- NA
+    sim$rstLCChangeYr[!pixKeep] <- NA
   }
 
   if (!compareRaster(sim$rstLCChange,
