@@ -74,10 +74,32 @@ speciesLayersValidation <- readRDS(list.files(simPaths$outputPath, "speciesLayer
 rawBiomassMapValidation <- readRDS(list.files(simPaths$outputPath, "rawBiomassMapValidation", full.names = TRUE))
 standAgeMapValidation <- readRDS(list.files(simPaths$outputPath, "standAgeMapValidation", full.names = TRUE))
 
-## make a validation data table, corrected for mismatches and with covers rescaled
+speciesLayersInit <- simListInit$speciesLayers
+rawBiomassMapInit <- simListInit$rawBiomassMap
+standAgeMapInit <- simListInit$standAgeMap
+## make a validation data tables, corrected for mismatches and with covers rescaled
 ## use makePixelTable and .createCohortData to rescale covers (to sum to 100)
 ## and filter bad data.
 
+## year 2001
+pixelTable <- makePixelTable(speciesLayers = speciesLayersInit,
+                             biomassMap = rawBiomassMapInit,
+                             standAgeMap = standAgeMapInit,
+                             rasterToMatch = raster(file.path(simPaths$cachePath, "rasterToMatch.tif")))
+pixelTable[, initialEcoregionCode := NULL]
+pixelTable <- unique(pixelTable)
+Bclass <- P(simListInit)$Biomass_borealDataPrep$pixelGroupBiomassClass
+validationDataInit <- LandR:::.createCohortData(pixelTable, rescale = TRUE,
+                                                pixelGroupBiomassClass = Bclass,
+                                                doAssertion = FALSE)
+validationDataInit[cover > 0 & age == 0, B := 0L]
+validationDataInit[cover == 0 & age > 0, B := 0L]
+validationDataInit[, totalBiomass := asInteger(sum(B)), by = "pixelIndex"]
+validationDataInit[, relativeAbundValid := B/totalBiomass,
+               by = .(pixelIndex, speciesCode)]
+validationDataInit[, logAge := NULL]
+
+## year 2011
 pixelTable <- makePixelTable(speciesLayers = speciesLayersValidation,
                              biomassMap = rawBiomassMapValidation,
                              standAgeMap = standAgeMapValidation,
@@ -107,6 +129,23 @@ allCohortData <- rbindlist(fill = TRUE, use.names = TRUE,
 
 ## add validation data to cohort Data
 cols <- c("pixelIndex", "speciesCode",
+combinationsInit <- as.data.table(expand.grid(list(speciesCode = unique(standCohortData$speciesCode),
+                                                   pixelIndex = unique(validationDataInit$pixelIndex),
+                                                   rep = 1:10,
+                                                   year = 0)))
+
+combinationsValid <- as.data.table(expand.grid(list(speciesCode = unique(standCohortData$speciesCode),
+                                                    pixelIndex = unique(validationData$pixelIndex),
+                                                    rep = 1:10,
+                                                    year = 10)))
+validationDataInit <- validationDataInit[combinationsInit,
+                                         on = c("pixelIndex", "speciesCode")]
+validationData <- validationData[combinationsValid,
+                                 on = c("pixelIndex", "speciesCode")]
+validationData <- rbindlist(list(validationDataInit, validationData),
+                            use.names = TRUE)
+
+## TODO: exclude pixels that are not simulated (?)
           "cover", "B", "totalBiomass", "relativeAbundValid")
 allCohortData <- allCohortData[validationData[, ..cols],
                                on = c("pixelIndex", "speciesCode"),
