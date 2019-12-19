@@ -127,8 +127,27 @@ allCohortData <- rbindlist(fill = TRUE, use.names = TRUE,
                              pixelCohortData
                            }, allCohortData = allCohortData))
 
-## add validation data to cohort Data
-cols <- c("pixelIndex", "speciesCode",
+## JOIN VALIDATION AND SIMULATED DATA
+## before joining, summarize cohortData to stand totalB per species and
+## and biomass-averaged stand age.
+standCohortData <- allCohortData[, .(B, sum(B), age),
+                                 by = .(pixelIndex, rep, year, speciesCode)]
+standCohortData <- standCohortData[, standAge := sum(age * B, na.rm = TRUE) / sum(B, na.rm = TRUE),
+                                   by = .(pixelIndex, rep, year)]
+
+## drop unnecessary columns and remove separate cohorts
+standCohortData[, B := V2] ## overwrite
+standCohortData[, `:=`(V2 = NULL, age = NULL)]
+standCohortData <- unique(standCohortData)
+
+
+## add validation data to standCohortData
+## note that some pixelIndex X spp combinations are lacking
+## because the validation data has spp in some pixels that are not found in the simulation
+## data, and vice-versa. To make sure that the validation pixel X spp combinations are added to each
+## rep/year the validation dataset needs to be extended - other wise some
+## times the validation data is only joined to some reps/years, making the validation
+## averages "vary" across reps/years
 combinationsInit <- as.data.table(expand.grid(list(speciesCode = unique(standCohortData$speciesCode),
                                                    pixelIndex = unique(validationDataInit$pixelIndex),
                                                    rep = 1:10,
@@ -146,12 +165,18 @@ validationData <- rbindlist(list(validationDataInit, validationData),
                             use.names = TRUE)
 
 ## TODO: exclude pixels that are not simulated (?)
+validationData <- validationData[pixelIndex %in% standCohortData$pixelIndex]
+
+## clean up
+rm(combinationsInit, combinationsValid, validationDataInit)
+
+cols <- c("rep", "year", "pixelIndex", "speciesCode",
           "cover", "B", "totalBiomass", "relativeAbundValid")
-allCohortData <- allCohortData[validationData[, ..cols],
-                               on = c("pixelIndex", "speciesCode"),
-                               nomatch = 0]
-setnames(allCohortData, c("cover", "totalBiomass", "B", "i.B"),
-         c("coverValid", "totalBValid", "BValid", "B"))
+standCohortData <- validationData[, ..cols][standCohortData,
+                                   on = c("rep", "year", "pixelIndex", "speciesCode")]
+
+setnames(standCohortData, c("cover", "B", "totalBiomass", "i.B"),
+         c("coverValid", "BValid", "totalBValid", "B"))
 
 
 ## add vegType
@@ -166,34 +191,29 @@ vegTypeTable <- rbindlist(fill = TRUE, use.names = TRUE,
                           }, pixelGroupMap = as.list(pixelGroupMapStk),
                           vegTypeMap = as.list(vegTypeMapStk), SIMPLIFY = FALSE))
 vegTypeTable <- na.omit(vegTypeTable)
-allCohortData <- vegTypeTable[allCohortData, on = c("rep", "year", "pixelIndex")]
+standCohortData <- vegTypeTable[standCohortData, on = c("rep", "year", "pixelIndex")]
 
 vegTypeLabels <- as.data.table(levels(vegTypeMapStk[[1]]))
-allCohortData <- vegTypeLabels[, .(ID, VALUE)][allCohortData, on = "ID==vegType"]
-setnames(allCohortData, old = c("ID", "VALUE"),
+standCohortData <- vegTypeLabels[, .(ID, VALUE)][standCohortData, on = "ID==vegType"]
+setnames(standCohortData, old = c("ID", "VALUE"),
          new = c("vegTypeID", "vegType"))
 
 ## remove disturbed pixels
 disturbedPix <- which(!is.na(getValues(rstDisturbedPix)))
-allCohortData <- allCohortData[!pixelIndex %in% disturbedPix]
+standCohortData <- standCohortData[!pixelIndex %in% disturbedPix]
 
 ## calculate some summary metrics
-allCohortData[, `:=`(noSppPix = as.numeric(length(unique(speciesCode))),
-                     noCohortsPix = as.numeric(length(unique(age))),
-                     totalBpix = sum(B, na.rm = TRUE)),
+standCohortData[, `:=`(noSppPix = as.numeric(length(unique(speciesCode))),
+                       standB = sum(B, na.rm = TRUE)),
               by = .(rep, year, pixelIndex)]
-allCohortData[, relativeAbund := B/totalBpix,
+standCohortData[, relativeAbund := B/standB,
               by = .(rep, year, pixelIndex, speciesCode)]
+standCohortData[, `:=`(landscapeB = sum(B, na.rm = TRUE),
+                       landscapeBValid = sum(BValid, na.rm = TRUE)),
+                by = .(rep, year)]
 
 
-# summaryAllCohortData <- allCohortData[, list(BiomassBySpecies = as.numeric(sum(B * noPixels, na.rm = TRUE)),
-#                                              MortalityBySpecies = as.numeric(sum(mortality * noPixels, na.rm = TRUE)),
-#                                              aNPPBySpecies = as.numeric(sum(aNPPAct * noPixels, na.rm = TRUE)),
-#                                              AgeBySppWeighted = as.numeric(sum(age * B * noPixels, na.rm = TRUE) /
-#                                                                              sum(B * noPixels, na.rm = TRUE)),
-#                                              noCohorts = as.numeric(length(unique(age)))),
-#                                       by = .(rep, year, speciesCode)]
-
+## plot labels
 speciesLabels <- c("Abie_Bal" = "Fir", "Lari_Lar" = "Larch",
                    "Betu_Pap" = "Birch", "Pice_Gla" = "Wh. spruce",
                    "Pice_Mar" = "Bl. spruce", "Pinu_Ban" = "Jack pine",
@@ -201,9 +221,17 @@ speciesLabels <- c("Abie_Bal" = "Fir", "Lari_Lar" = "Larch",
 speciesColours <- levels(vegTypeMapStk[[1]])[[1]]$colors
 names(speciesColours) <- levels(vegTypeMapStk[[1]])[[1]]$VALUE
 
-plotData <- allCohortData[year == 10, list(relativeAbund = mean(relativeAbund, na.rm = TRUE),
-                                           relativeAbundValid = relativeAbundValid),
-                                           by = .(speciesCode, rep)]
+## TODO: the number of pixels with B for each species varies
+## between reps and years, and combinations os spp, pixel, are not
+## the same between sim and valid
+## also, I don't think these landscape-wide averages are working.
+## because relative abundances won't sum to one, if calculated per pixel.
+# standCohortData[, mean(relativeAbundValid, na.rm = TRUE), by = .(rep, year, speciesCode)] %>%
+#   +     .[, mean(V1), by = speciesCode] %>%
+#   +     .[,sum(V1)]
+
+## calculate everything at landscape level
+
 plot1 <- ggplot(data = plotData,
                 aes(x = speciesCode, y = relativeAbund)) +
   stat_summary(fun.y = "mean", geom = "bar") +
