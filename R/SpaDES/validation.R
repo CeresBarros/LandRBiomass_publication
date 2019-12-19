@@ -7,6 +7,7 @@ library(ggplot2)
 library(raster)
 library(quickPlot)
 library(ggpubr)
+library(gridExtra)
 library(SpaDES)
 library(LandR)
 library(SpaDES.experiment)
@@ -26,7 +27,10 @@ simPaths <- list(cachePath = file.path("R/SpaDES/cache", runName),
                  inputPath = file.path("R/SpaDES/inputs"),
                  outputPath = file.path("R/SpaDES/outputs", runName))
 
-factorialSimulations <- readRDS(file.path(simPaths$outputPath, paste0("simList_factorialSimulations", runName, ".rds")))
+## simLists
+factorialSimulations <- readRDS(list.files(simPaths$outputPath, "simList_factorialSimulations",
+                                           full.names = TRUE))
+simListInit <- readRDS(list.files(simPaths$outputPath, paste0("simList_", runName), full.names = TRUE))
 
 ## get files of validation year per rep
 outputFiles <- lapply(factorialSimulations, outputs)
