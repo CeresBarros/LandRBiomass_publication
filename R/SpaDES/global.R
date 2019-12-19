@@ -89,7 +89,7 @@ simParams <- list(
 source("R/SpaDES/2_speciesLayers.R")
 
 ## check species layers:
-plot(sim$speciesLayers)
+plot(simOutSpeciesLayers$speciesLayers)
 ## Pinus contorta and Populus grandidentata should not be in SK, and will be excluded
 ## Popu_sp has v. few (one?) pixels and should also be dropeed
 toRm <- which(names(simOutSpeciesLayers$speciesLayers) %in% c("Pinu_Con_Lat", "Popu_Gra", "Popu_Spp"))
@@ -160,13 +160,13 @@ end(Biomass_core_testSim) <- 0
 spades(Biomass_core_testSim
        , debug = TRUE
        , .plotInitialTime = NA)
+saveRDS(Biomass_core_testSim,
+        file.path(simPaths$outputPath, paste0("simList_", runName, ".rds")))
 end(Biomass_core_testSim) <- 30   ## now change back for experiment.
-# saveRDS(Biomass_core_testSim, file.path(simPaths$outputPath, paste0("simList_", runName, ".rds")))
 # unlink(file.path(simPaths$outputPath, "figures"), recursive = TRUE) ## remove unnecessary figures
 
-
 library(future)
-plan("multiprocess", workers = 6)
+plan("multiprocess", workers = 3)
 factorialSimulations <- experiment2(
   sim1 = Biomass_core_testSim,
   clearSimEnv = TRUE,
