@@ -187,7 +187,8 @@ vegTypeTable <- rbindlist(fill = TRUE, use.names = TRUE,
                             rp <- as.numeric(sub(".*_rep", "", names(pixelGroupMap)))
                             data.table(pixelIndex = 1:ncell(pixelGroupMap),
                                        vegType = getValues(vegTypeMap),
-                                       year = yr, rep = rp)
+                                       year = yr,
+                                       rep = rp)
                           }, pixelGroupMap = as.list(pixelGroupMapStk),
                           vegTypeMap = as.list(vegTypeMapStk), SIMPLIFY = FALSE))
 vegTypeTable <- na.omit(vegTypeTable)
