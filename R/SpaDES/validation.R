@@ -75,8 +75,42 @@ rawBiomassMapValidation <- readRDS(list.files(simPaths$outputPath, "rawBiomassMa
 standAgeMapValidation <- readRDS(list.files(simPaths$outputPath, "standAgeMapValidation", full.names = TRUE))
 
 speciesLayersInit <- simListInit$speciesLayers
-rawBiomassMapInit <- simListInit$rawBiomassMap
 standAgeMapInit <- simListInit$standAgeMap
+rawBiomassMapInit <- simListInit$rawBiomassMap
+
+fileURLs <- getURL(paste0("http://ftp.maps.canada.ca/pub/nrcan_rncan/Forests_Foret/",
+                          "canada-forests-attributes_attributs-forests-canada/2001-attributes_attributs-2001/"),
+                   dirlistonly = TRUE)
+fileNames <- getHTMLLinks(fileURLs)
+rawBiomassMapInitFileName <- grep("Biomass_TotalLiveAboveGround.*.tif$", fileNames, value = TRUE)
+rawBiomassMapInitURL <- paste0(paste0("http://ftp.maps.canada.ca/pub/nrcan_rncan/Forests_Foret/",
+                                      "canada-forests-attributes_attributs-forests-canada/2001-attributes_attributs-2001/"),
+                               rawBiomassMapInitFileName)
+standAgeMapInitFileName <- grep("Stand_Age.*.tif$", fileNames, value = TRUE)
+standAgeMapInitURL <- paste0(paste0("http://ftp.maps.canada.ca/pub/nrcan_rncan/Forests_Foret/",
+                                      "canada-forests-attributes_attributs-forests-canada/2001-attributes_attributs-2001/"),
+                               rawBiomassMapInitFileName)
+
+rawBiomassMapInit2 <- prepInputs(targetFile = asPath(rawBiomassMapInitFileName),
+                           url = rawBiomassMapInitURL,
+                           destinationPath = tempdir(),
+                           fun = "raster::raster",
+                           studyArea = simListInit$studyArea,
+                           rasterToMatch = simListInit$rasterToMatch,
+                           useSAcrs = FALSE,
+                           method = "bilinear",
+                           datatype = "INT2U",
+                           filename2 = TRUE,
+                           overwrite = TRUE,
+                           useCache = FALSE)
+
+d1 <- rawBiomassMapValidation - rawBiomassMapInit
+d2 <- rawBiomassMapValidation - rawBiomassMapInit2
+Plot(stkDs, col = RColorBrewer::brewer.pal(11, "BrBG"),
+title = c("deltaB w/ 2001 kNN map used by Biomass_boreal*", "deltaB w/ 'new' 2001 kNN map",
+          "difference between two delta maps"))
+
+
 ## make a validation data tables, corrected for mismatches and with covers rescaled
 ## use makePixelTable and .createCohortData to rescale covers (to sum to 100)
 ## and filter bad data.
