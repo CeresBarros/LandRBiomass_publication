@@ -17,7 +17,7 @@ stopifnot(utils::packageVersion("googledrive") == "1.0.0")
 
 library(SpaDES)
 library(SpaDES.experiment)
-library(LandR)
+devtools::load_all("E:/GitHub/LandR")
 library(raster)
 
 ## -----------------------------------------------
@@ -90,9 +90,8 @@ source("R/SpaDES/2_speciesLayers.R")
 
 ## check species layers:
 plot(simOutSpeciesLayers$speciesLayers)
-## Pinus contorta and Populus grandidentata should not be in SK, and will be excluded
-## Popu_sp has v. few (one?) pixels and should also be dropeed
-toRm <- which(names(simOutSpeciesLayers$speciesLayers) %in% c("Pinu_Con_Lat", "Popu_Gra", "Popu_Spp"))
+## Populus grandidentata shouldn't be inin SK (and has only v. few pixels in the layer) and will be excluded
+toRm <- which(names(simOutSpeciesLayers$speciesLayers) %in% c("Popu_Gra"))
 simOutSpeciesLayers$speciesLayers <- dropLayer(simOutSpeciesLayers$speciesLayers, i = toRm)
 rm(toRm)
 
