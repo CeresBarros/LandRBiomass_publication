@@ -38,14 +38,15 @@ data("sppEquivalencies_CA", package = "LandR")
 sppEquivalencies_CA[grep("Pin", LandR), `:=`(EN_generic_short = "Pine",
                                              EN_generic_full = "Pine",
                                              Leading = "Pine leading")]
-# ## these species will be retained as separate
 sppEquivalencies_CA[grep("Betu_pap", LandR), `:=`(EN_generic_short = "Birch",
                                                   EN_generic_full = "Birch",
                                                   Leading = "Birch leading")]
-sppEquivalencies_CA[grep("Popu_bal", LandR), `:=`(EN_generic_short = "Poplar",
-                                                  EN_generic_full = "Poplar",
-                                                  Leading = "Poplar leading")]
+## all Popu will be merged
+sppEquivalencies_CA[grep("Popu_", LandR), `:=`(EN_generic_short = "Poplar",
+                                               EN_generic_full = "Poplar",
+                                               Leading = "Poplar leading")]
 
+sppEquivalencies_CA[grep("Popu_", LandR), Boreal := "Popu_Spp"]
 
 ## define spp column to use for model
 sppEquivCol <- "Boreal"
