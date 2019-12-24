@@ -17,7 +17,6 @@ stopifnot(utils::packageVersion("googledrive") == "1.0.0")
 
 library(SpaDES)
 library(SpaDES.experiment)
-devtools::load_all("E:/GitHub/LandR")
 library(raster)
 
 ## -----------------------------------------------
