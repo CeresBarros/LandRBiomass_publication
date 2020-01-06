@@ -18,6 +18,7 @@ stopifnot(utils::packageVersion("googledrive") == "1.0.0")
 library(SpaDES)
 library(SpaDES.experiment)
 library(raster)
+library(LandR)
 
 ## -----------------------------------------------
 ## SIMULATION SETUP
