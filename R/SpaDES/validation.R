@@ -36,7 +36,7 @@ simListInit <- readRDS(list.files(simPaths$outputPath, paste0("simList_", runNam
 outputFiles <- lapply(factorialSimulations, outputs)
 outputFiles <- rbindlist(lapply(seq_along(outputFiles), FUN = function(x) {
   DT <- as.data.table(outputFiles[[x]])
-  DT <- DT[saveTime %in% c(0, 10)]   ## 2001 is the first year (0), 2011, is year 10
+  DT <- DT[saveTime %in% c(0, 1, 10)]   ## 2001 is the first year (0), 2011, is year 10, for
   DT[, rep := x]
 }), use.names = TRUE)
 
