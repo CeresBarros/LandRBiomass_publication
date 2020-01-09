@@ -24,9 +24,6 @@ library(LandR)
 ## SIMULATION SETUP
 ## -----------------------------------------------
 
-## Get necessary objects -----------------------
-source("R/SpaDES/1_simObjects.R")
-
 ## Set up modelling parameters  ---------------------------
 options('reproducible.useNewDigestAlgorithm' = TRUE)
 # runName <- "studyAreaS"
@@ -40,6 +37,10 @@ simPaths <- list(cachePath = file.path("R/SpaDES/cache", runName),
                  modulePath = file.path("R/SpaDES/m"),
                  inputPath = file.path("R/SpaDES/inputs"),
                  outputPath = file.path("R/SpaDES/outputs", runName))
+
+## Get necessary objects -----------------------
+source("R/SpaDES/1_simObjects.R")
+
 ## simulation params
 simTimes <- list(start = 0, end = 30)
 vegLeadingProportion <- 0 # indicates what proportion the stand must be in one species group for it to be leading.
@@ -98,29 +99,35 @@ rm(toRm)
 ## subset sppEquivalencies
 sppEquivalencies_CA <- sppEquivalencies_CA[Boreal %in% names(simOutSpeciesLayers$speciesLayers)]
 
+## objects will be saved at the start of the simulation (so they reflect the previous year)
 simOutputs <- data.frame(expand.grid(objectName = c("cohortData"),
-                                  saveTime = c(0:15, seq(20, 100, 5)),
-                                  eventPriority = 10,
-                                  stringsAsFactors = FALSE))
-simOutputs[1, "eventPriority"] <- 5.5  ## in the beggining, after init events, before mortalityAndGrowth
-simOutputs <- rbind(simOutputs, data.frame(objectName = "vegTypeMap",
                                      saveTime = c(0:15, seq(20, 100, 5)),
-                                     eventPriority = 10))
+                                     eventPriority = 1,
+                                     stringsAsFactors = FALSE))
 simOutputs <- rbind(simOutputs, data.frame(objectName = "pixelGroupMap",
-                                     saveTime = c(0:15, seq(20, 100, 5)),
-                                     eventPriority = 10))
+                                           saveTime = c(0:15, seq(20, 100, 5)),
+                                           eventPriority = 1))
 simOutputs <- rbind(simOutputs, data.frame(objectName = "rstDisturbedPix",
                                            saveTime = c(0),
-                                           eventPriority = 10))
+                                           eventPriority = 5.5))
 simOutputs <- rbind(simOutputs, data.frame(objectName = "rawBiomassMapValidation",
                                            saveTime = c(0),
-                                           eventPriority = 10))
+                                           eventPriority = 5.5))
 simOutputs <- rbind(simOutputs, data.frame(objectName = "standAgeMapValidation",
                                            saveTime = c(0),
-                                           eventPriority = 10))
+                                           eventPriority = 5.5))
 simOutputs <- rbind(simOutputs, data.frame(objectName = "speciesLayersValidation",
                                            saveTime = c(0),
-                                           eventPriority = 10))
+                                           eventPriority = 5.5))
+simOutputs <- rbind(simOutputs, data.frame(objectName = "vegTypeMap",
+                                           saveTime = c(0:15, seq(20, 100, 5)),
+                                           eventPriority = 1))
+
+## in the first year, objects have to be saved after init events, before mortalityAndGrowth
+## note that vegTypeMap won't be saved at yr 0, because it doens't exist at priority 5.5
+## and save is not scheduled twice (even if we changed the priority)
+simOutputs[simOutputs$saveTime == 0, "eventPriority"] <- 5.5
+
 
 if (runName == "parametriseSALarge") {
   simObjects <- list("studyArea" = studyAreaS
