@@ -33,7 +33,8 @@ studyAreaS <- spTransform(studyAreaS, Biomass_corecrs)
 
 plot(studyAreaL); plot(studyAreaS, add = TRUE, col = "red")
 
-## Set up sppEquiv  ------------------------------
+## SPECIES LISTS ---------------------------------------
+## Set up sppEquiV
 data("sppEquivalencies_CA", package = "LandR")
 sppEquivalencies_CA[grep("Pin", LandR), `:=`(EN_generic_short = "Pine",
                                              EN_generic_full = "Pine",
@@ -58,7 +59,8 @@ sppColorVect <- sppColors(sppEquivalencies_CA, sppEquivCol,
                           newVals = "Mixed", palette = "Accent")
 
 
-## Set up PSP data for LandR_speciesParameters  ------------------------------
+## PSP DATA ------------------------------------------------------------------
+## Set up PSP data for LandR_speciesParameters
 PSPmeasure <- Cache(prepInputs,
                     targetFile = "PSPmeasure.Rdat",
                     archive = "randomized_LandR_speciesParameters_Inputs.zip",
