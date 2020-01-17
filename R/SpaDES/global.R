@@ -49,9 +49,14 @@ successionTimestep <- 10L  # for dispersal and age reclass.
 simModules <- list("Biomass_borealDataPrep"
                    , "Biomass_core"
                    , "Biomass_validationKNN"
+                   , "LandR_speciesParameters"
 )
 
 simParams <- list(
+  LandR_speciesParameters = list(
+    "sppEquivCol" = sppEquivCol
+    , ".useCache" = eventCaching
+  ),
   Biomass_borealDataPrep = list(
     "sppEquivCol" = sppEquivCol
     , "forestedLCCClasses" = c(1:15, 34:36)
@@ -128,31 +133,30 @@ simOutputs <- rbind(simOutputs, data.frame(objectName = "vegTypeMap",
 ## and save is not scheduled twice (even if we changed the priority)
 simOutputs[simOutputs$saveTime == 0, "eventPriority"] <- 5.5
 
+## get the  land-cover change map (needed to have an RTM first.)
+source("R/SpaDES/3_simObjects4Valid.R")
+
+simObjects <- list("sppEquiv" = sppEquivalencies_CA
+                   , "sppColorVect" = sppColorVect
+                   , "speciesLayers" = simOutSpeciesLayers$speciesLayers
+                   , "treed" = simOutSpeciesLayers$treed
+                   , "numTreed" = simOutSpeciesLayers$numTreed
+                   , "nonZeroCover" = simOutSpeciesLayers$nonZeroCover
+                   , "PSPgis" = PSPgis
+                   , "PSPmeasure" = PSPmeasure
+                   , "PSPplot" = PSPplot
+                   , "rstLCChange" = rstLCChangeAllbin
+)
 
 if (runName == "parametriseSALarge") {
-  simObjects <- list("studyArea" = studyAreaS
-                     , "studyAreaLarge" = studyAreaL
-                     , "sppEquiv" = sppEquivalencies_CA
-                     , "sppColorVect" = sppColorVect
-                     , "speciesLayers" = simOutSpeciesLayers$speciesLayers
-                     , "treed" = simOutSpeciesLayers$treed
-                     , "numTreed" = simOutSpeciesLayers$numTreed
-                     , "nonZeroCover" = simOutSpeciesLayers$nonZeroCover
-  )
+  simObjects$studyArea <- studyAreaS
+  simObjects$studyAreaLarge <- studyAreaL
 } else {
-  simObjects <- list("studyArea" = if (grepl("study", runName)) get(runName) else studyAreaS
-                     , "sppEquiv" = sppEquivalencies_CA
-                     , "sppColorVect" = sppColorVect
-                     , "speciesLayers" = simOutSpeciesLayers$speciesLayers
-                     , "treed" = simOutSpeciesLayers$treed
-                     , "numTreed" = simOutSpeciesLayers$numTreed
-                     , "nonZeroCover" = simOutSpeciesLayers$nonZeroCover
-  )
+  simObjects$studyArea <- get(runName)
 }
 
 startTime <- date()
-options(spades.moduleCodeChecks = FALSE)
-options("reproducible.useCache" = TRUE)
+
 # reproducible::clearCache(simPaths$cachePath)
 Biomass_core_testSim <- simInit(times = simTimes
                                 , params = simParams
@@ -176,6 +180,6 @@ plan("multiprocess", workers = 3)
 factorialSimulations <- experiment2(
   sim1 = Biomass_core_testSim,
   clearSimEnv = TRUE,
-  replicates = 10)
+  replicates = 5)
 
 saveRDS(factorialSimulations, file.path(simPaths$outputPath, paste0("simList_factorialSimulations", runName, ".rds")))
