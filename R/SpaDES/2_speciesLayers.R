@@ -11,7 +11,7 @@
 
 speciesPaths <-list(cachePath = file.path("R/SpaDES/cache", "speciesLayers"),
                     modulePath = file.path("R/SpaDES/m"),
-                    inputPath = file.path("R/SpaDES/inputs"),
+                    inputPath = file.path("data/"),
                     outputPath = file.path("R/SpaDES/outputs", runName))
 
 speciesParameters <- list(

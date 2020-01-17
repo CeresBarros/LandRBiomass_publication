@@ -24,7 +24,7 @@ runName <- "parametriseSALarge"
 ## paths
 simPaths <- list(cachePath = file.path("R/SpaDES/cache", runName),
                  modulePath = file.path("R/SpaDES/m"),
-                 inputPath = file.path("R/SpaDES/inputs"),
+                 inputPath = file.path("data/"),
                  outputPath = file.path("R/SpaDES/outputs", runName))
 
 ## simLists
