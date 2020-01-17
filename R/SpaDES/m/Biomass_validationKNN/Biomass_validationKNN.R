@@ -27,6 +27,11 @@ defineModule(sim, list(
                     paste("The minimum % cover a species needs to have (per pixel) in the study",
                           "area to be considered present. Should be the same as the one used to obtain",
                           "the species cover layers for simualtion set up.")),
+    defineParameter("LCChangeYr", "integer", c(2001:2011), 1985, 2015,
+                    paste("An integer or vector of integers of the validation period years, defining which",
+                          "years of land-cover changes (i.e. disturbances) should be excluded.",
+                          "Only used if rstLCChangeYr is not NULL.",
+                          "See https://opendata.nfis.org/mapserver/nfis-change_eng.html for more information.")),
     defineParameter("sppEquivCol", "character", "Boreal", NA, NA,
                     "The column in sim$specieEquivalency data.table to use as a naming convention"),
     defineParameter(".plotInitialTime", "numeric", 0, NA, NA,
@@ -65,15 +70,18 @@ defineModule(sim, list(
                  sourceURL = paste0("http://ftp.maps.canada.ca/pub/nrcan_rncan/Forests_Foret/",
                                     "canada-forests-attributes_attributs-forests-canada/2011-attributes_attributs-2011/")),
     expectsInput("rstLCChange", "RasterLayer",
-                 desc = paste("A map of land cover change types in the study area that can be used to exclude pixels",
+                 desc = paste("A mask-type map of land cover changes in the study area that can be used to exclude pixels",
                               "that have been disturbed during the validation period. Defaults to Canada's forest",
-                              "change national map between 1985-2011 (CFS), subset to years 2001-2011 (inclusively).",
-                              "See https://opendata.nfis.org/mapserver/nfis-change_eng.html for more information."),
+                              "change national map between 1985-2011 (CFS), filtered for years 2001-2011 (inclusively)",
+                              "and all disturbances collapsed (map only has values of 1 and NA). See parameter LCChangeYr",
+                              "to change the period of disturbances, and",
+                              "https://opendata.nfis.org/mapserver/nfis-change_eng.html for more information."),
                  sourceURL = "https://opendata.nfis.org/downloads/forest_change/C2C_change_year_1985_2011.zip"),
     expectsInput("rstLCChangeYr", "RasterLayer",
-                 desc = paste("A map of land cover change years in the study area that can be used to exclude pixels",
-                              "that have been disturbed during the validation period. Defaults to Canada's forest",
-                              "change national map between 1985-2011 (CFS), subset to years 2001-2011 (inclusively).",
+                 desc = paste("An OPTIONAL map of land cover change years in the study area used to exclude pixels that have",
+                              "been disturbed during the validation period. Defaults to Canada's forest",
+                              "change national map between 1985-2011 (CFS). By default disturbances are subset to",
+                              " to years 2001-2011 (inclusively; see parameter LCChangeYr).",
                               "See https://opendata.nfis.org/mapserver/nfis-change_eng.html for more information."),
                  sourceURL = "https://opendata.nfis.org/downloads/forest_change/C2C_change_year_1985_2011.zip"),
     expectsInput("speciesLayers", "RasterStack",
@@ -198,9 +206,8 @@ Init <- function(sim) {
                                targetFile = rawBiomassMapFilename,
                                url = rawBiomassMapURL,
                                destinationPath = dPath,
-                               studyArea = sim$studyAreaLarge,   ## Ceres: makePixel table needs same no. pixels for this, RTM rawBiomassMap, LCC.. etc
-                               # studyArea = sim$studyArea,
-                               rasterToMatch = if (!needRTM) sim$rasterToMatchLarge else NULL,
+                               studyArea = sim$studyArea,
+                               rasterToMatch = if (!needRTM) sim$rasterToMatch else NULL,
                                # maskWithRTM = TRUE,    ## if RTM not supplied no masking happens (is this intended?)
                                maskWithRTM = if (!needRTM) TRUE else FALSE,
                                ## TODO: if RTM is not needed use SA CRS? -> this is not correct
@@ -303,6 +310,8 @@ Init <- function(sim) {
                              filename2 = TRUE, overwrite = TRUE,
                              userTags = c("rstLCChange", cacheTags),
                              omitArgs = c("destinationPath", "targetFile", "userTags"))
+    ## convert to mask
+    sim$rstLCChange[!is.na(sim$rstLCChange)] <- 1
 
     sim$rstLCChangeYr <- Cache(prepInputs,
                            targetFile = LCChangeYrFilename,
@@ -320,9 +329,10 @@ Init <- function(sim) {
                            omitArgs = c("destinationPath", "targetFile", "userTags"))
 
     ## only keep pixels that have been disturbed during the validation period
-    pixKeep <- getValues(sim$rstLCChange) > 0 &
-      getValues(sim$rstLCChangeYr) > 100 &
-      getValues(sim$rstLCChangeYr) < 112
+    ## convert years to the map's format
+    yrs <- P(sim)$LCChangeYr - 1900
+    pixKeep <- !is.na(getValues(sim$rstLCChange)) &
+      getValues(sim$rstLCChangeYr) %in% yrs
 
     sim$rstLCChange[!pixKeep] <- NA
     sim$rstLCChangeYr[!pixKeep] <- NA
@@ -333,7 +343,6 @@ Init <- function(sim) {
     stop("'rstLCChange' and 'rasterToMatch' differ in
          their properties. Please check")
   }
-
 
   ## Fire perimeter data ---------------------------------------------------
 
@@ -398,7 +407,6 @@ Init <- function(sim) {
     if (is.null(sim$sppColorVect))
       stop("If you provide 'sppEquiv' you MUST also provide 'sppColorVect'")
   }
-
 
   ## Species raster layers -------------------------------------------
   if (!suppliedElsewhere("sppEquiv", sim)) {
