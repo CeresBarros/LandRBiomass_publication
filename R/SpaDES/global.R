@@ -26,6 +26,9 @@ library(LandR)
 
 ## Set up modelling parameters  ---------------------------
 options('reproducible.useNewDigestAlgorithm' = TRUE)
+options("spades.moduleCodeChecks" = FALSE)
+options("reproducible.useCache" = TRUE)
+options("reproducible.inputPaths" = "data/")  ## store everything in data/ so that there are no duplicated files across modules
 # runName <- "studyAreaS"
 # runName <- "studyAreaL"
 runName <- "parametriseSALarge"
