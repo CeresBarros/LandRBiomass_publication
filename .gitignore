@@ -3,3 +3,9 @@
 .RData
 .Ruserdata
 .httr-oauth
+
+Rplots.pdf
+logR.txt
+
+# don't ignore
+!.gitignore

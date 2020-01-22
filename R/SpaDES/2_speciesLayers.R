@@ -9,10 +9,10 @@
 ## or other modules). That's why caching is kept separate from the rest
 ## of the simulation
 
-speciesPaths <-list(cachePath = file.path("R/SpaDES/cache", "speciesLayers"),
+speciesPaths <-list(cachePath = normPath(file.path("R/SpaDES/cache", "speciesLayers")),
                     modulePath = file.path("R/SpaDES/m"),
-                    inputPath = file.path("data/"),
-                    outputPath = file.path("R/SpaDES/outputs", runName))
+                    inputPath = normPath("data"),
+                    outputPath = normPath(file.path("R/SpaDES/outputs", runName)))
 
 speciesParameters <- list(
   Biomass_speciesData = list(

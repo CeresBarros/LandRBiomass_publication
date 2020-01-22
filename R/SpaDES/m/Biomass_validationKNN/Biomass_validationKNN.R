@@ -1,4 +1,3 @@
-
 # Everything in this file gets sourced during simInit, and all functions and objects
 # are put into the simList. To use objects, use sim$xxx, and are thus globally available
 # to all modules. Functions can be used without sim$ as they are namespaced, like functions

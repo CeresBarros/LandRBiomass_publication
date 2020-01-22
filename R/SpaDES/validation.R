@@ -33,10 +33,13 @@ factorialSimulations <- readRDS(list.files(simPaths$outputPath, "simList_factori
 simListInit <- readRDS(list.files(simPaths$outputPath, paste0("simList_", runName), full.names = TRUE))
 
 ## get files of validation year per rep
+## 2001 is the first year (0) and 2011, is year 10,
+## but choose years 1 and 11 because objects were saved at the beginning of the year, they reflect the end of the previous year
+## cohortData is the only that will vary across reps for year 0, because the beggining of year 1 already includes growth/mortality from year 0.
 outputFiles <- lapply(factorialSimulations, outputs)
 outputFiles <- rbindlist(lapply(seq_along(outputFiles), FUN = function(x) {
   DT <- as.data.table(outputFiles[[x]])
-  DT <- DT[saveTime %in% c(0, 1, 10)]   ## 2001 is the first year (0), 2011, is year 10, for
+  DT <- DT[saveTime %in% c(1, 11)]
   DT[, rep := x]
 }), use.names = TRUE)
 
@@ -73,43 +76,6 @@ speciesLayersInit <- simListInit$speciesLayers
 standAgeMapInit <- simListInit$standAgeMap
 rawBiomassMapInit <- simListInit$rawBiomassMap
 
-fileURLs <- getURL(paste0("http://ftp.maps.canada.ca/pub/nrcan_rncan/Forests_Foret/",
-                          "canada-forests-attributes_attributs-forests-canada/2001-attributes_attributs-2001/"),
-                   dirlistonly = TRUE)
-fileNames <- getHTMLLinks(fileURLs)
-rawBiomassMapInitFileName <- grep("Biomass_TotalLiveAboveGround.*.tif$", fileNames, value = TRUE)
-rawBiomassMapInitURL <- paste0(paste0("http://ftp.maps.canada.ca/pub/nrcan_rncan/Forests_Foret/",
-                                      "canada-forests-attributes_attributs-forests-canada/2001-attributes_attributs-2001/"),
-                               rawBiomassMapInitFileName)
-standAgeMapInitFileName <- grep("Stand_Age.*.tif$", fileNames, value = TRUE)
-standAgeMapInitURL <- paste0(paste0("http://ftp.maps.canada.ca/pub/nrcan_rncan/Forests_Foret/",
-                                      "canada-forests-attributes_attributs-forests-canada/2001-attributes_attributs-2001/"),
-                               rawBiomassMapInitFileName)
-
-# rawBiomassMapInit2 <- prepInputs(targetFile = asPath(rawBiomassMapInitFileName),
-#                            url = rawBiomassMapInitURL,
-#                            destinationPath = tempdir(),
-#                            fun = "raster::raster",
-#                            studyArea = simListInit$studyArea,
-#                            rasterToMatch = simListInit$rasterToMatch,
-#                            useSAcrs = FALSE,
-#                            method = "bilinear",
-#                            datatype = "INT2U",
-#                            filename2 = TRUE,
-#                            overwrite = TRUE,
-#                            useCache = FALSE)
-
-# d1 <- rawBiomassMapValidation - rawBiomassMapInit
-# d2 <- rawBiomassMapValidation - rawBiomassMapInit2
-# Plot(stkDs, col = RColorBrewer::brewer.pal(11, "BrBG"),
-# title = c("deltaB w/ 2001 kNN map used by Biomass_boreal*", "deltaB w/ 'new' 2001 kNN map",
-#           "difference between two delta maps"))
-
-
-## make a validation data tables, corrected for mismatches and with covers rescaled
-## use makePixelTable and .createCohortData to rescale covers (to sum to 100)
-## and filter bad data.
-
 ## year 2001
 pixelTable <- makePixelTable(speciesLayers = speciesLayersInit,
                              biomassMap = rawBiomassMapInit,
@@ -135,7 +101,7 @@ pixelTable <- makePixelTable(speciesLayers = speciesLayersValidation,
                              rasterToMatch = raster(file.path(simPaths$cachePath, "rasterToMatch.tif")))
 pixelTable[, initialEcoregionCode := NULL]
 pixelTable <- unique(pixelTable)
-Bclass <- P(factorialSimulations$sim1_rep01)$Biomass_borealDataPrep$pixelGroupBiomassClass
+Bclass <- P(factorialSimulations$sim1_rep1)$Biomass_borealDataPrep$pixelGroupBiomassClass
 validationData <- LandR:::.createCohortData(pixelTable, rescale = TRUE,
                                             pixelGroupBiomassClass = Bclass,
                                             doAssertion = FALSE)
@@ -193,7 +159,7 @@ validationData <- validationData[combinationsValid,
 validationData <- rbindlist(list(validationDataInit, validationData),
                             use.names = TRUE)
 
-## TODO: exclude pixels that are not simulated (?)
+## exclude pixels that are not simulated
 validationData <- validationData[pixelIndex %in% standCohortData$pixelIndex]
 
 ## clean up
