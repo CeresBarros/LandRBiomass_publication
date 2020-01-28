@@ -6,6 +6,7 @@ m/*/data
 m/*/cache
 m/*/*.zip
 inputs/*
+*.R.save
 
 ## don't ignore
 !m/*/data/CHECKSUMS.txt
