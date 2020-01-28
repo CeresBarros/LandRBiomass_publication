@@ -6,6 +6,8 @@
 
 Rplots.pdf
 logR.txt
+*.Rout
+*.sh.save
 
 # don't ignore
 !.gitignore
