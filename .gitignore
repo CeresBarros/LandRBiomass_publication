@@ -9,5 +9,8 @@ logR.txt
 *.Rout
 *.sh.save
 
+data/
+data
+
 # don't ignore
 !.gitignore
