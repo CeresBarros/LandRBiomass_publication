@@ -29,7 +29,7 @@ options("reproducible.useNewDigestAlgorithm" = TRUE)
 options("spades.moduleCodeChecks" = FALSE)
 options("reproducible.useCache" = TRUE)
 options("reproducible.inputPaths" = normPath("data"))  ## store everything in data/ so that there are no duplicated files across modules
-options("reproducible.destinationPath" = normPath("data")) 
+options("reproducible.destinationPath" = normPath("data"))
 # runName <- "studyAreaS"
 # runName <- "studyAreaL"
 runName <- "parametriseSALarge"
@@ -142,16 +142,18 @@ simOutputs <- rbind(simOutputs, data.frame(objectName = "speciesLayersValidation
 ## get the  land-cover change map (needed to have an RTM first.)
 source("R/SpaDES/3_simObjects4Valid.R")
 
-simObjects <- list("sppEquiv" = sppEquivalencies_CA
-                   , "sppColorVect" = sppColorVect
-                   , "speciesLayers" = simOutSpeciesLayers$speciesLayers
-                   , "treed" = simOutSpeciesLayers$treed
-                   , "numTreed" = simOutSpeciesLayers$numTreed
-                   , "nonZeroCover" = simOutSpeciesLayers$nonZeroCover
-                   , "PSPgis" = PSPgis
-                   , "PSPmeasure" = PSPmeasure
-                   , "PSPplot" = PSPplot
-                   , "rstLCChange" = rstLCChangeAllbin
+simObjects <- list(
+  # "sppEquiv" = sppEquivalencies_CA
+  # , "sppColorVect" = sppColorVect
+  "sppNamesVect" =
+    , "speciesLayers" = simOutSpeciesLayers$speciesLayers
+  , "treed" = simOutSpeciesLayers$treed
+  , "numTreed" = simOutSpeciesLayers$numTreed
+  , "nonZeroCover" = simOutSpeciesLayers$nonZeroCover
+  , "PSPgis" = PSPgis
+  , "PSPmeasure" = PSPmeasure
+  , "PSPplot" = PSPplot
+  , "rstLCChange" = rstLCChangeAllbin
 )
 
 if (runName == "parametriseSALarge") {
@@ -180,7 +182,7 @@ spades(Biomass_core_testSim
 saveRDS(Biomass_core_testSim,
         file.path(simPaths$outputPath, paste0("simList_", runName, ".rds")))
 end(Biomass_core_testSim) <- 30   ## now change back for experiment.
- unlink(file.path(simPaths$outputPath, "figures"), recursive = TRUE) ## remove unnecessary figures
+unlink(file.path(simPaths$outputPath, "figures"), recursive = TRUE) ## remove unnecessary figures
 
 library(future)
 plan("multiprocess", workers = 3)
