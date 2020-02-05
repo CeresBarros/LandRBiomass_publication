@@ -143,10 +143,10 @@ simOutputs <- rbind(simOutputs, data.frame(objectName = "speciesLayersValidation
 source("R/SpaDES/3_simObjects4Valid.R")
 
 simObjects <- list(
-  # "sppEquiv" = sppEquivalencies_CA
-  # , "sppColorVect" = sppColorVect
-  "sppNamesVect" =
-    , "speciesLayers" = simOutSpeciesLayers$speciesLayers
+  # "sppNamesVect" = names(simOutSpeciesLayers$speciesLayers)
+  "sppEquiv" = sppEquivalencies_CA
+  , "sppColorVect" = sppColorVect
+  , "speciesLayers" = simOutSpeciesLayers$speciesLayers
   , "treed" = simOutSpeciesLayers$treed
   , "numTreed" = simOutSpeciesLayers$numTreed
   , "nonZeroCover" = simOutSpeciesLayers$nonZeroCover
