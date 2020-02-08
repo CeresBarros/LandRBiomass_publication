@@ -22,5 +22,9 @@ rstLCChangeAllbin <- postProcess(x = rstLCChangeAllbin,
                                  overwrite = TRUE,
                                  cacheRepo = simPaths$cachePath,
                                  useCache = TRUE)
+
+## convert to mask
+rstLCChangeAllbin[getValues(rstLCChangeAllbin) != 1] <- NA
+
 rm(RTM); amc::.gc()
 

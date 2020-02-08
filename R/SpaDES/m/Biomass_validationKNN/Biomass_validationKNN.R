@@ -71,7 +71,7 @@ defineModule(sim, list(
     expectsInput("rstLCChange", "RasterLayer",
                  desc = paste("A mask-type map of land cover changes in the study area that can be used to exclude pixels",
                               "that have been disturbed during the validation period. Defaults to Canada's forest",
-                              "change national map between 1985-2011 (CFS), filtered for years 2001-2011 (inclusively)",
+                              "change map between 1985-2011 (CFS), filtered for years 2001-2011 (inclusively)",
                               "and all disturbances collapsed (map only has values of 1 and NA). See parameter LCChangeYr",
                               "to change the period of disturbances, and",
                               "https://opendata.nfis.org/mapserver/nfis-change_eng.html for more information."),
@@ -337,11 +337,8 @@ Init <- function(sim) {
     sim$rstLCChangeYr[!pixKeep] <- NA
   }
 
-  if (!compareRaster(sim$rstLCChange,
-                     sim$rasterToMatch, stopiffalse = FALSE)) {
-    stop("'rstLCChange' and 'rasterToMatch' differ in
-         their properties. Please check")
-  }
+  ## Check that rstLCChange is a mask and matches RTM
+  assertRstLCChange(sim$rstLCChange, sim$rasterToMatch)
 
   ## Fire perimeter data ---------------------------------------------------
 
