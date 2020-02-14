@@ -27,6 +27,10 @@ simPaths <- list(cachePath = file.path("R/SpaDES/cache", runName),
                  inputPath = file.path("data/"),
                  outputPath = file.path("R/SpaDES/outputs", runName))
 
+## define local and remote repo paths for file name subs:
+localProjPath <- getwd()
+remoteProjPath <- "/mnt/storage/cbarros/LandRBiomass_publication"
+
 ## simLists
 factorialSimulations <- readRDS(list.files(simPaths$outputPath, "simList_factorialSimulations",
                                            full.names = TRUE))
@@ -73,45 +77,80 @@ vegTypeMapStk <- stack(apply(outputFiles[objectName == "vegTypeMap"], MARGIN = 1
 
 ## load validation layers - they are saved in the outputs once for each rep.
 ## here the rstDisturbed only has 1s
-if (inMemory(simListInit$speciesLayers))
-speciesLayersInit <- simListInit$speciesLayers else
-  speciesLayersInit <- lapply(simListInit$speciesLayers@layers, function(x)
-    raster(list.files(simPaths$outputPath, basename(x@file@name),
-                      recursive = TRUE, full.names = TRUE)[1])
-  ) %>%
-  stack
+speciesLayersInit <- if (inMemory(simListInit$speciesLayers))
+  simListInit$speciesLayers else {
+    sppCodes <- as.character(unique(allCohortData$speciesCode))
+    sppCodesStr <- paste(sppCodes, collapse = "|")
 
-if (inMemory(simListInit$standAgeMap))
-  standAgeMapInit <- simListInit$standAgeMap else
-    standAgeMapInit <- raster(list.files(simPaths$outputPath, basename(simListInit$standAgeMap@file@name),
-                                         recursive = TRUE, full.names = TRUE)[1])
-if (inMemory(simListInit$rawBiomassMap))
-  rawBiomassMapInit <- simListInit$rawBiomassMap else
-    rawBiomassMapInit <- raster(list.files(simPaths$outputPath, basename(simListInit$rawBiomassMap@file@name),
-                                           recursive = TRUE, full.names = TRUE)[1])
+    speciesLayersInit <- lapply(simListInit$speciesLayers@layers, function(x) {
+      localFileName <- sub(remoteProjPath, localProjPath, x@file@name)
+      sppLayer <- raster(localFileName)
 
-if (inMemory(simListInit$rstLCChange))
-rstDisturbedPix <- simListInit$rstLCChange else
-  rstDisturbedPix <- raster(list.files(simPaths$outputPath, basename(simListInit$rstLCChange@file@name),
-                                      recursive = TRUE, full.names = TRUE)[1])
+      names(sppLayer) <- sub(paste0("(.*)(", sppCodesStr, ")(.*)"), "\\2",
+                             basename(localFileName))
+      return(sppLayer)
+    }
+    )
+    rm(sppCodes, sppCodesStr)
+    stack(speciesLayersInit)
+  }
 
-if (inMemory(simListInit$speciesLayersValidation))
-  speciesLayersValidation <- simListInit$speciesLayersValidation else
-    speciesLayersValidation <- lapply(simListInit$speciesLayersValidation@layers, function(x)
-      raster(list.files(simPaths$outputPath, basename(x@file@name),
-                        recursive = TRUE, full.names = TRUE)[1])
-    ) %>%
-  stack
+standAgeMapInit <- if (inMemory(simListInit$standAgeMap))
+  simListInit$standAgeMap else {
+    localFileName <- sub(remoteProjPath, localProjPath,
+                         simListInit$standAgeMap@file@name)
+    raster(localFileName)
+  }
 
-if (inMemory(simListInit$rawBiomassMapValidation))
-  rawBiomassMapValidation <- simListInit$rawBiomassMapValidation else
-    rawBiomassMapValidation <- raster(list.files(simPaths$outputPath, basename(simListInit$rawBiomassMapValidation@file@name),
-                                        recursive = TRUE, full.names = TRUE)[1])
+rawBiomassMapInit <- if (inMemory(simListInit$rawBiomassMap))
+  simListInit$rawBiomassMap else {
+    localFileName <- sub(remoteProjPath, localProjPath,
+                         simListInit$rawBiomassMap@file@name)
+    raster(localFileName)
+  }
 
-if (inMemory(simListInit$standAgeMapValidation))
-  standAgeMapValidation <- simListInit$standAgeMapValidation else
-    standAgeMapValidation <- raster(list.files(simPaths$outputPath, basename(simListInit$standAgeMapValidation@file@name),
-                                                recursive = TRUE, full.names = TRUE)[1])
+rstDisturbedPix <- if (inMemory(simListInit$rstLCChange))
+  simListInit$rstLCChange else {
+    localFileName <- sub(remoteProjPath, localProjPath,
+                         simListInit$rstLCChange@file@name)
+    raster(localFileName)
+  }
+
+speciesLayersValidation <- if (inMemory(simListInit$speciesLayersValidation))
+  simListInit$speciesLayersValidation else {
+    sppCodes <- as.character(unique(allCohortData$speciesCode))
+    sppCodesStr <- paste(sppCodes, collapse = "|")
+
+    speciesLayersValidation <- lapply(simListInit$speciesLayersValidation@layers, function(x) {
+      localFileName <- sub(remoteProjPath, localProjPath, x@file@name)
+      sppLayer <- raster(localFileName)
+
+      names(sppLayer) <- sub(paste0("(.*)(", sppCodesStr, ")(.*)"), "\\2",
+                             basename(localFileName))
+      return(sppLayer)
+    }
+    )
+    rm(sppCodes, sppCodesStr)
+    stack(speciesLayersValidation)
+  }
+
+standAgeMapValidation <- if (inMemory(simListInit$standAgeMapValidation))
+  simListInit$standAgeMapValidation else {
+    localFileName <- sub(remoteProjPath, localProjPath,
+                         simListInit$standAgeMapValidation@file@name)
+    raster(localFileName)
+  }
+
+rawBiomassMapValidation <- if (inMemory(simListInit$rawBiomassMapValidation))
+  simListInit$rawBiomassMapValidation else {
+    localFileName <- sub(remoteProjPath, localProjPath,
+                         simListInit$rawBiomassMapValidation@file@name)
+    raster(localFileName)
+  }
+
+## check names of species layers match
+if (!all(names(speciesLayersInit) %in% names(speciesLayersValidation)))
+  stop("validation species layers names do not match!")
 
 
 ## year 2001
@@ -126,10 +165,9 @@ validationDataInit <- LandR:::.createCohortData(pixelTable, rescale = TRUE,
                                                 pixelGroupBiomassClass = Bclass,
                                                 doAssertion = FALSE)
 validationDataInit[cover > 0 & age == 0, B := 0L]
-validationDataInit[cover == 0 & age > 0, B := 0L]
 validationDataInit[, totalBiomass := asInteger(sum(B)), by = "pixelIndex"]
 validationDataInit[, relativeAbundValid := B/totalBiomass,
-               by = .(pixelIndex, speciesCode)]
+                   by = .(pixelIndex, speciesCode)]
 validationDataInit[, logAge := NULL]
 
 ## year 2011
@@ -144,7 +182,6 @@ validationData <- LandR:::.createCohortData(pixelTable, rescale = TRUE,
                                             pixelGroupBiomassClass = Bclass,
                                             doAssertion = FALSE)
 validationData[cover > 0 & age == 0, B := 0L]
-validationData[cover == 0 & age > 0, B := 0L]
 validationData[, totalBiomass := asInteger(sum(B)), by = "pixelIndex"]
 validationData[, relativeAbundValid := B/totalBiomass,
                by = .(pixelIndex, speciesCode)]
@@ -208,7 +245,7 @@ rm(combinationsInit, combinationsValid, validationDataInit)
 cols <- c("rep", "year", "pixelIndex", "speciesCode",
           "cover", "B", "totalBiomass", "relativeAbundValid")
 standCohortData <- standCohortData[validationData[, ..cols],
-                         on = c("rep", "year", "pixelIndex", "speciesCode")]
+                                   on = c("rep", "year", "pixelIndex", "speciesCode")]
 setnames(standCohortData, c("cover", "i.B", "totalBiomass"),
          c("coverValid", "BValid", "totalBValid"))
 
@@ -246,9 +283,9 @@ standCohortData <- standCohortData[!pixelIndex %in% disturbedPix]
 ## calculate some summary metrics
 standCohortData[, `:=`(noSppPix = as.numeric(length(unique(speciesCode))),
                        standB = sum(B, na.rm = TRUE)),
-              by = .(rep, year, pixelIndex)]
+                by = .(rep, year, pixelIndex)]
 standCohortData[, relativeAbund := B/standB,
-              by = .(rep, year, pixelIndex, speciesCode)]
+                by = .(rep, year, pixelIndex, speciesCode)]
 standCohortData[, `:=`(landscapeB = sum(B, na.rm = TRUE),
                        landscapeBValid = sum(BValid, na.rm = TRUE)),
                 by = .(rep, year)]
@@ -284,8 +321,15 @@ names(standDeltaAgeValid) <- "stand delta-Age"
 Plot(standDeltaBValid, standDeltaAgeValid)
 
 ## what is the relationship between the two?
-standDeltaValidData <- na.omit(data.table(standDeltaBValid = getValues(standDeltaBValid),
+standDeltaValidData <- na.omit(data.table(pixelIndex = 1:ncell(standDeltaBValid),
+                                          standDeltaBValid = getValues(standDeltaBValid),
                                           standDeltaAgeValid = getValues(standDeltaAgeValid)))
+
+## try excluding all disturbances before 2001:
+# distYears <- raster("R/SpaDES/m/Biomass_validationKNN/data/SmallC2C_change_year_1985_2011.tif")
+# yrs <- seq(1980, 2011) - 1900
+# pixKeep <- which(getValues(distYears) %in% yrs)
+# standDeltaValidData <- standDeltaValidData[pixelIndex %in% pixKeep]
 
 ggplot(standDeltaValidData,
        aes(x = standDeltaAgeValid, y = standDeltaBValid)) +
@@ -293,6 +337,13 @@ ggplot(standDeltaValidData,
   stat_smooth(method = "lm")
 
 summary(lm(standDeltaBValid ~ standDeltaAgeValid, data = standDeltaValidData))
+
+ggplot(standDeltaValidData,
+       aes(x = standDeltaBValid)) +
+  geom_histogram()
+ggplot(standDeltaValidData,
+       aes(y = standDeltaBValid)) +
+  geom_boxplot()
 
 ggplot(standDeltaValidData,
        aes(x = standDeltaAgeValid)) +
@@ -305,11 +356,17 @@ ggplot(standDeltaValidData[standDeltaAgeValid == 10],
   geom_histogram()
 
 ## remove pixels were the aging was too extreme (lower/higher than 25% and 75% quantiles)
-quants <- quantile(standDeltaValidData$standDeltaAgeValid, probs = c(0.25, 0.75))
-extremeDeltaAgePix <- which(standDeltaValidData$standDeltaAgeValid <= quants["25%"] |
-                              standDeltaValidData$standDeltaAgeValid >= quants["75%"])
+# quants <- quantile(standDeltaValidData$standDeltaAgeValid, probs = c(0.25, 0.75))
+# extremeDeltaAgePix <- standDeltaValidData[standDeltaValidData$standDeltaAgeValid <= quants["25%"] |
+#                                             standDeltaValidData$standDeltaAgeValid >= quants["75%"],
+#                                           pixelIndex]
+# extremeDeltaAgePix <- standDeltaValidData[standDeltaValidData$standDeltaAgeValid != 10,
+#                                           pixelIndex]
+#
+# standCohortData <- standCohortData[!pixelIndex %in% extremeDeltaAgePix]
 
-standCohortData <- standCohortData[!pixelIndex %in% extremeDeltaAgePix]
+standCohortData <- standCohortData[pixelIndex %in% standDeltaValidData[standDeltaBValid > 0 & standDeltaAgeValid > 0,
+                                                                       pixelIndex]]
 
 ## LANDSCAPE-WIDE COMPARISONS IN A GIVEN YEAR --------------------
 ## relative abundance (biomass) per species
@@ -327,6 +384,24 @@ plot1 <- ggplot(data = plotData,
   theme_pubr() +
   facet_wrap(~ year, labeller = labeller(year = c("1" = "2001", "11" = "2011"))) +
   labs(title = "Landscape-wide species relative abundances",
+       x = "", y = expression(over("species B", "total B")))
+
+## pixel-level species'realtive abundances
+plotData <- standCohortData[year %in% c(1, 11),
+                            list(landRelativeAbund = sum(B, na.rm = TRUE)/unique(landscapeB),
+                                 landRelativeAbundValid = sum(BValid, na.rm = TRUE)/unique(landscapeBValid)),
+                            by = .(rep, year, pixelIndex, speciesCode)]
+plotData <- melt(plotData,
+                 id.vars = c("rep", "year", "pixelIndex", "speciesCode"))
+plot1.2 <- ggplot(data = plotData,
+                aes(x = speciesCode, y = value, fill = variable)) +
+  geom_boxplot() +
+  scale_x_discrete(labels = speciesLabels) +
+  scale_fill_discrete(labels = c("landRelativeAbund" = "simulated",
+                                 "landRelativeAbundValid" = "observed")) +
+  theme_pubr() +
+  facet_wrap(~ year, labeller = labeller(year = c("1" = "2001", "11" = "2011"))) +
+  labs(title = "Pixel-level species relative abundances",
        x = "", y = expression(over("species B", "total B")))
 
 ## no. pixels with a species
@@ -354,13 +429,13 @@ plot2 <- ggplot(data = plotData[dataType == "count"],
 ## relative abundance per dominant species
 ## get dominant species (those with maxB) - these match with model outputs, I checked
 plotData <- unique(standCohortData[year %in% c(1, 11),
-                            list(vegTypeID2 = speciesCode[which.max(B)],
-                                 B = max(B, na.rm = TRUE),
-                                 landscapeB = unique(landscapeB),
-                                 vegTypeID2Valid = speciesCode[which.max(BValid)],
-                                 BValid = max(BValid, na.rm = TRUE),
-                                 landscapeBValid = unique(landscapeBValid)),
-                            by = .(year, rep, pixelIndex)])
+                                   list(vegTypeID2 = speciesCode[which.max(B)],
+                                        B = max(B, na.rm = TRUE),
+                                        landscapeB = unique(landscapeB),
+                                        vegTypeID2Valid = speciesCode[which.max(BValid)],
+                                        BValid = max(BValid, na.rm = TRUE),
+                                        landscapeBValid = unique(landscapeBValid)),
+                                   by = .(year, rep, pixelIndex)])
 
 ## calculate relative abundances of dominant species and melt data.
 plotData[, landRelativeAbund := sum(B, na.rm = TRUE)/unique(landscapeB),
@@ -393,6 +468,7 @@ plot3 <- ggplot(data = plotData[dataType == "simulated"],
 
 ## no. pixels with a certain dominant species
 ## HERE: simualted and observed differ in no. of pixels in year 1... WHY?!
+## possibly due to Biomass being adjusted?
 plot4 <- ggplot(data = plotData[dataType == "simulated"],
                 aes(x = vegTypeID2)) +
   geom_bar() +
@@ -437,7 +513,7 @@ plot6 <- ggplot(data = plotData,
        x = "", y = expression(paste(Delta, "B")))
 
 plot6.2 <- ggplot(data = plotData[dataType == "deltaB"],
-                aes(x = speciesCode, y = deltaB)) +
+                  aes(x = speciesCode, y = deltaB)) +
   geom_boxplot() +
   stat_summary(data = plotData[dataType == "deltaBValid"],
                aes(x = speciesCode, y = deltaB, group = speciesCode),
