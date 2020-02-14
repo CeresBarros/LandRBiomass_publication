@@ -71,16 +71,48 @@ vegTypeMapStk <- stack(apply(outputFiles[objectName == "vegTypeMap"], MARGIN = 1
   }
 }))
 
-## load validation layers
+## load validation layers - they are saved in the outputs once for each rep.
 ## here the rstDisturbed only has 1s
-speciesLayersInit <- simListInit$speciesLayers
-standAgeMapInit <- simListInit$standAgeMap
-rawBiomassMapInit <- simListInit$rawBiomassMap
+if (inMemory(simListInit$speciesLayers))
+speciesLayersInit <- simListInit$speciesLayers else
+  speciesLayersInit <- lapply(simListInit$speciesLayers@layers, function(x)
+    raster(list.files(simPaths$outputPath, basename(x@file@name),
+                      recursive = TRUE, full.names = TRUE)[1])
+  ) %>%
+  stack
 
-rstDisturbedPix <- simListInit$rstLCChange
-speciesLayersValidation <- simListInit$speciesLayersValidation
-rawBiomassMapValidation <- simListInit$rawBiomassMapValidation
-standAgeMapValidation <- simListInit$standAgeMapValidation
+if (inMemory(simListInit$standAgeMap))
+  standAgeMapInit <- simListInit$standAgeMap else
+    standAgeMapInit <- raster(list.files(simPaths$outputPath, basename(simListInit$standAgeMap@file@name),
+                                         recursive = TRUE, full.names = TRUE)[1])
+if (inMemory(simListInit$rawBiomassMap))
+  rawBiomassMapInit <- simListInit$rawBiomassMap else
+    rawBiomassMapInit <- raster(list.files(simPaths$outputPath, basename(simListInit$rawBiomassMap@file@name),
+                                           recursive = TRUE, full.names = TRUE)[1])
+
+if (inMemory(simListInit$rstLCChange))
+rstDisturbedPix <- simListInit$rstLCChange else
+  rstDisturbedPix <- raster(list.files(simPaths$outputPath, basename(simListInit$rstLCChange@file@name),
+                                      recursive = TRUE, full.names = TRUE)[1])
+
+if (inMemory(simListInit$speciesLayersValidation))
+  speciesLayersValidation <- simListInit$speciesLayersValidation else
+    speciesLayersValidation <- lapply(simListInit$speciesLayersValidation@layers, function(x)
+      raster(list.files(simPaths$outputPath, basename(x@file@name),
+                        recursive = TRUE, full.names = TRUE)[1])
+    ) %>%
+  stack
+
+if (inMemory(simListInit$rawBiomassMapValidation))
+  rawBiomassMapValidation <- simListInit$rawBiomassMapValidation else
+    rawBiomassMapValidation <- raster(list.files(simPaths$outputPath, basename(simListInit$rawBiomassMapValidation@file@name),
+                                        recursive = TRUE, full.names = TRUE)[1])
+
+if (inMemory(simListInit$standAgeMapValidation))
+  standAgeMapValidation <- simListInit$standAgeMapValidation else
+    standAgeMapValidation <- raster(list.files(simPaths$outputPath, basename(simListInit$standAgeMapValidation@file@name),
+                                                recursive = TRUE, full.names = TRUE)[1])
+
 
 ## year 2001
 pixelTable <- makePixelTable(speciesLayers = speciesLayersInit,
@@ -251,9 +283,33 @@ names(standDeltaAgeValid) <- "stand delta-Age"
 
 Plot(standDeltaBValid, standDeltaAgeValid)
 
-lowerAgePix <- which(getValues(standDeltaAgeValid) < 0)
+## what is the relationship between the two?
+standDeltaValidData <- na.omit(data.table(standDeltaBValid = getValues(standDeltaBValid),
+                                          standDeltaAgeValid = getValues(standDeltaAgeValid)))
 
-standCohortData <- standCohortData[!pixelIndex %in% lowerAgePix]
+ggplot(standDeltaValidData,
+       aes(x = standDeltaAgeValid, y = standDeltaBValid)) +
+  geom_point() +
+  stat_smooth(method = "lm")
+
+summary(lm(standDeltaBValid ~ standDeltaAgeValid, data = standDeltaValidData))
+
+ggplot(standDeltaValidData,
+       aes(x = standDeltaAgeValid)) +
+  geom_histogram()
+ggplot(standDeltaValidData,
+       aes(y = standDeltaAgeValid)) +
+  geom_boxplot()
+ggplot(standDeltaValidData[standDeltaAgeValid == 10],
+       aes(x = standDeltaBValid)) +
+  geom_histogram()
+
+## remove pixels were the aging was too extreme (lower/higher than 25% and 75% quantiles)
+quants <- quantile(standDeltaValidData$standDeltaAgeValid, probs = c(0.25, 0.75))
+extremeDeltaAgePix <- which(standDeltaValidData$standDeltaAgeValid <= quants["25%"] |
+                              standDeltaValidData$standDeltaAgeValid >= quants["75%"])
+
+standCohortData <- standCohortData[!pixelIndex %in% extremeDeltaAgePix]
 
 ## LANDSCAPE-WIDE COMPARISONS IN A GIVEN YEAR --------------------
 ## relative abundance (biomass) per species
