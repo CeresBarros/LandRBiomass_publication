@@ -185,7 +185,7 @@ end(Biomass_core_testSim) <- 30   ## now change back for experiment.
 unlink(file.path(simPaths$outputPath, "figures"), recursive = TRUE) ## remove unnecessary figures
 
 library(future)
-plan("multiprocess", workers = 3)
+plan("multiprocess", workers = 3)   ## each worker consumming roughly 15Gb.
 factorialSimulations <- experiment2(
   sim1 = Biomass_core_testSim,
   clearSimEnv = TRUE,
