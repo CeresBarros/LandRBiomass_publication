@@ -355,18 +355,29 @@ ggplot(standDeltaValidData[standDeltaAgeValid == 10],
        aes(x = standDeltaBValid)) +
   geom_histogram()
 
+## TESTS:
 ## remove pixels were the aging was too extreme (lower/higher than 25% and 75% quantiles)
-# quants <- quantile(standDeltaValidData$standDeltaAgeValid, probs = c(0.25, 0.75))
-# extremeDeltaAgePix <- standDeltaValidData[standDeltaValidData$standDeltaAgeValid <= quants["25%"] |
-#                                             standDeltaValidData$standDeltaAgeValid >= quants["75%"],
-#                                           pixelIndex]
-# extremeDeltaAgePix <- standDeltaValidData[standDeltaValidData$standDeltaAgeValid != 10,
-#                                           pixelIndex]
-#
-# standCohortData <- standCohortData[!pixelIndex %in% extremeDeltaAgePix]
+## (this didn't work, no changes)
+tempDT <- unique(standCohortData[, .(year, rep, pixelIndex, standAgeValid)])
+tempDT <- tempDT[, .(standDeltaAgeValid = standAgeValid[year==11] - standAgeValid[year==1]),
+       by = .(rep, pixelIndex)]
+quants <- quantile(tempDT$standDeltaAgeValid, probs = c(0.25, 0.75))
+pixToKeep <- tempDT[standDeltaAgeValid > quants["25%"] |
+                               standDeltaAgeValid < quants["75%"],
+                             pixelIndex]
+## remove pixels were observed age changes were not 10yrs.
+# pixToKeep <- tempDT[standDeltaAgeValid == 10,
+#                              pixelIndex]
 
-standCohortData <- standCohortData[pixelIndex %in% standDeltaValidData[standDeltaBValid > 0 & standDeltaAgeValid > 0,
-                                                                       pixelIndex]]
+## Remove pixels were stand age or B decreased
+# tempDT <- unique(standCohortData[, .(year, rep, pixelIndex, standAgeValid, standBValid)])
+# tempDT <- tempDT[, .(standDeltaAgeValid = standAgeValid[year==11] - standAgeValid[year==1],
+#                      standDeltaBValid = standBValid[year==11] - standBValid[year==1]),
+#                  by = .(rep, pixelIndex)]
+# pixToKeep <- standDeltaValidData[standDeltaBValid > 0 & standDeltaAgeValid > 0,
+#                                  pixelIndex]
+
+standCohortData <- standCohortData[pixelIndex %in% pixToKeep]
 
 ## LANDSCAPE-WIDE COMPARISONS IN A GIVEN YEAR --------------------
 ## relative abundance (biomass) per species
