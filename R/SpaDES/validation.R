@@ -438,24 +438,6 @@ plot1 <- ggplot(data = plotData,
   labs(title = "Species relative abundances",
        x = "", y = expression(over("species B", "total B")))
 
-## pixel-level species'realtive abundances
-plotData <- standCohortData[year %in% c(1, 11),
-                            list(landRelativeAbund = sum(B, na.rm = TRUE)/unique(landscapeB),
-                                 landRelativeAbundValid = sum(BValid, na.rm = TRUE)/unique(landscapeBValid)),
-                            by = .(rep, year, pixelIndex, speciesCode)]
-plotData <- melt(plotData,
-                 id.vars = c("rep", "year", "pixelIndex", "speciesCode"))
-plot1.2 <- ggplot(data = plotData,
-                aes(x = speciesCode, y = value, fill = variable)) +
-  geom_boxplot() +
-  scale_x_discrete(labels = speciesLabels) +
-  scale_fill_discrete(labels = c("landRelativeAbund" = "simulated",
-                                 "landRelativeAbundValid" = "observed")) +
-  theme_pubr() +
-  facet_wrap(~ year, labeller = labeller(year = c("1" = "2001", "11" = "2011"))) +
-  labs(title = "Pixel-level species relative abundances",
-       x = "", y = expression(over("species B", "total B")))
-
 ## no. pixels with a species
 plotData <- standCohortData[year %in% c(1, 11),
                             list(count = sum(B > 0),
@@ -478,39 +460,41 @@ plot2 <- ggplot(data = plotData[dataType == "count"],
        x = "", y = "no. pixels",
        fill = "")
 
-## relative abundance per dominant species
-## get dominant species (those with maxB) - these match with model outputs, I checked
-plotData <- unique(standCohortData[year %in% c(1, 11),
-                                   list(vegTypeID2 = speciesCode[which.max(B)],
-                                        B = max(B, na.rm = TRUE),
-                                        landscapeB = unique(landscapeB),
-                                        vegTypeID2Valid = speciesCode[which.max(BValid)],
-                                        BValid = max(BValid, na.rm = TRUE),
-                                        landscapeBValid = unique(landscapeBValid)),
-                                   by = .(year, rep, pixelIndex)])
+## landscape-wide relative abundance per dominant species
+## get dominant species - these match with model outputs, I checked
+## note: don't use melt, because dominant spp differ between valid and simul data.
+## note2: mixed pixels get a "mixed" type
+tempDT <- standCohortData[year %in% c(1, 11),
+                list(noDoms = sum(relativeAbund == max(relativeAbund, na.rm = TRUE), na.rm = TRUE),
+                     noDomsValid = sum(relativeAbundValid == max(relativeAbundValid, na.rm = TRUE), na.rm = TRUE)),
+                by = .(year, rep, pixelIndex)]
 
-## calculate relative abundances of dominant species and melt data.
-plotData[, landRelativeAbund := sum(B, na.rm = TRUE)/unique(landscapeB),
-         by = .(year, rep, vegTypeID2)]
-plotData[, landRelativeAbundValid := sum(BValid, na.rm = TRUE)/unique(landscapeBValid),
-         by = .(year, rep, vegTypeID2Valid)]
-plotData1 <- plotData[, .(year, rep, pixelIndex, vegTypeID2, B, landscapeB, landRelativeAbund)]
-plotData1[, dataType := "simulated"]
-plotData2 <- plotData[, .(year, rep, pixelIndex, vegTypeID2Valid, BValid,
-                          landscapeBValid, landRelativeAbundValid)]
-plotData2[, dataType := "observed"]
-setnames(plotData2, grep("Valid", names(plotData2), value = TRUE),
-         sub("Valid", "", grep("Valid", names(plotData2), value = TRUE)))
+plotData <- unique(standCohortData[year %in% c(1, 11),
+                                   list(vegTypeID2 = speciesCode[which.max(relativeAbund)],
+                                        relativeAbund = max(relativeAbund, na.rm = TRUE),
+                                        vegTypeID2Valid = speciesCode[which.max(relativeAbundValid)],
+                                        relativeAbundValid = max(relativeAbundValid, na.rm = TRUE)),
+                                   by = .(year, rep, pixelIndex)])
+plotData <- tempDT[plotData, on = .(year, rep, pixelIndex)]
+
+plotData1 <- unique(plotData[, .(year, rep, pixelIndex, vegTypeID2, relativeAbund, noDoms)])
+plotData1[, dataType := "relativeAbund"]
+plotData2 <- unique(plotData[, .(year, rep, pixelIndex, vegTypeID2Valid, relativeAbundValid, noDomsValid)])
+plotData2[, dataType := "relativeAbundValid"]
+setnames(plotData2, c("vegTypeID2Valid", "relativeAbundValid", "noDomsValid"),
+         c("vegTypeID2", "relativeAbund", "noDoms"))
 
 plotData <- rbind(plotData1, plotData2)
 rm(plotData1, plotData2)
 
-plot3 <- ggplot(data = plotData[dataType == "simulated"],
-                aes(x = vegTypeID2, y = landRelativeAbund)) +
+plotData[noDoms > 1, vegTypeID2 := "Mixed"]
+
+plot3 <- ggplot(data = plotData[!grepl("Valid", dataType)],
+                aes(x = vegTypeID2, y = relativeAbund)) +
   stat_summary(fun.y = "mean", geom = "bar") +
   stat_summary(fun.data = "mean_sd", geom = "linerange", size = 1) +
-  stat_summary(data = plotData[dataType != "simulated"],
-               aes(x = vegTypeID2, y = landRelativeAbund),
+  stat_summary(data = plotData[grepl("Valid", dataType)],
+               aes(x = vegTypeID2, y = relativeAbund),
                fun.y = "mean", geom = "point", size = 2) +
   scale_x_discrete(labels = speciesLabels) +
   theme_pubr() + theme(axis.text.x = element_text(angle = 45, vjust = 0.5)) +
@@ -521,11 +505,14 @@ plot3 <- ggplot(data = plotData[dataType == "simulated"],
 ## no. pixels with a certain dominant species
 ## HERE: simualted and observed differ in no. of pixels in year 1... WHY?!
 ## possibly due to Biomass being adjusted?
-plot4 <- ggplot(data = plotData[dataType == "simulated"],
-                aes(x = vegTypeID2)) +
-  geom_bar() +
-  geom_point(data = plotData[dataType != "simulated"],
-             aes(x = vegTypeID2), stat = "count", size = 2) +
+plotData <- plotData[, list(count = length(pixelIndex)),
+                     by = .(rep, year, dataType, vegTypeID2)]
+plot4 <- ggplot(data = plotData[!grepl("Valid", dataType)],
+                aes(x = vegTypeID2, y = count)) +
+  stat_summary(fun.y = "mean", geom = "bar") +
+  stat_summary(fun.data = "mean_sd", geom = "linerange", size = 1) +
+  geom_point(data = plotData[grepl("Valid", dataType)],
+             aes(x = vegTypeID2, y = count), size = 2) +
   scale_x_discrete(labels = speciesLabels) +
   theme_pubr() + theme(axis.text.x = element_text(angle = 45, vjust = 0.5)) +
   facet_wrap(~ year, labeller = labeller(year = c("1" = "2001", "11" = "2011"))) +
@@ -533,8 +520,8 @@ plot4 <- ggplot(data = plotData[dataType == "simulated"],
        x = "", y = "no. pixels", fill = "")
 
 ## as previous, but in relative terms
-plot5 <- ggplot(data = plotData, aes(x = dataType, fill = vegTypeID2)) +
-  geom_histogram(stat = "count", position = "fill") +
+plot5 <- ggplot(data = plotData, aes(x = dataType, y = count, fill = vegTypeID2)) +
+  stat_summary(fun.y = "mean", geom = "bar", position = "fill") +
   scale_fill_brewer(palette = "Accent", labels = speciesLabels) +
   theme_pubr() + theme(legend.position = "right",
                        axis.text.x = element_text(angle = 45, vjust = 0.5)) +
@@ -546,6 +533,67 @@ grid.arrange(grobs = list(plot1, plot2, plot3, plot4),
              top = "Landscape-averaged comparisons",
              nrow = 2, ncol = 2)
 
+## PIXEL-LEVEL COMPARISONS IN A GIVEN YEAR --------------------
+## pixel-level relative abundances per species
+plotData <- standCohortData[year %in% c(1, 11),
+                            .(rep, year, pixelIndex, speciesCode,
+                              relativeAbund, relativeAbundValid)]
+plotData <- melt(plotData,
+                 id.vars = c("rep", "year", "pixelIndex", "speciesCode"))
+plot6 <- ggplot(data = plotData,
+                aes(x = speciesCode, y = value, fill = variable)) +
+  geom_boxplot() +
+  scale_x_discrete(labels = speciesLabels) +
+  scale_fill_discrete(labels = c("relativeAbund" = "simulated",
+                                 "relativeAbundValid" = "observed")) +
+  theme_pubr() + theme(axis.text.x = element_text(angle = 45, vjust = 0.5)) +
+  facet_wrap(~ year, labeller = labeller(year = c("1" = "2001", "11" = "2011"))) +
+  labs(title = "Species relative abundances", fill = "",
+       x = "", y = expression(over("species B", "stand B")))
+
+## pixel-level relative abundance per dominant species
+## get dominant species (those with maxB) - these match with model outputs, I checked
+tempDT <- standCohortData[year %in% c(1, 11),
+                          list(noDoms = sum(relativeAbund == max(relativeAbund, na.rm = TRUE), na.rm = TRUE),
+                               noDomsValid = sum(relativeAbundValid == max(relativeAbundValid, na.rm = TRUE), na.rm = TRUE)),
+                          by = .(year, rep, pixelIndex)]
+
+plotData <- unique(standCohortData[year %in% c(1, 11),
+                                   list(vegTypeID2 = speciesCode[which.max(relativeAbund)],
+                                        relativeAbund = max(relativeAbund, na.rm = TRUE),
+                                        vegTypeID2Valid = speciesCode[which.max(relativeAbundValid)],
+                                        relativeAbundValid = max(relativeAbundValid, na.rm = TRUE)),
+                                   by = .(year, rep, pixelIndex)])
+plotData <- tempDT[plotData, on = .(year, rep, pixelIndex)]
+
+plotData1 <- unique(plotData[, .(year, rep, pixelIndex, vegTypeID2, relativeAbund, noDoms)])
+plotData1[, dataType := "relativeAbund"]
+plotData2 <- unique(plotData[, .(year, rep, pixelIndex, vegTypeID2Valid, relativeAbundValid, noDomsValid)])
+plotData2[, dataType := "relativeAbundValid"]
+setnames(plotData2, c("vegTypeID2Valid", "relativeAbundValid", "noDomsValid"),
+         c("vegTypeID2", "relativeAbund", "noDoms"))
+
+plotData <- rbind(plotData1, plotData2)
+rm(plotData1, plotData2)
+
+plotData[noDoms > 1, vegTypeID2 := "Mixed"]
+
+plot7 <- ggplot(data = plotData,
+                aes(x = vegTypeID2, y = relativeAbund, fill = dataType)) +
+  geom_boxplot() +
+  scale_fill_discrete(labels = c("relativeAbund" = "simulated",
+                                 "relativeAbund" = "observed")) +
+  scale_x_discrete(labels = speciesLabels) +
+  theme_pubr() + theme(axis.text.x = element_text(angle = 45, vjust = 0.5)) +
+  facet_wrap(~ year, labeller = labeller(year = c("1" = "2001", "11" = "2011"))) +
+  labs(title = "Dominant species' relative abundances",
+       x = "", y = expression(atop("relative abundance", over("species B", "total B"))),
+       fill = "")
+
+grid.arrange(grobs = list(plot6, plot7),
+             top = "Pixel-level comparisons",
+             ncol = 2)
+
 ## COMPARISONS OF DELTA PER PIXEL-------------------
 ## per species
 plotData <- standCohortData[year %in% c(1,11),]
@@ -555,7 +603,19 @@ plotData <- plotData[, list(deltaB = B[which(year == 11)] - B[which(year == 1)],
 plotData <- melt(plotData, measure.vars = c("deltaB", "deltaBValid"),
                  variable.name = "dataType", value.name = "deltaB")
 
-plot6 <- ggplot(data = plotData,
+plot8 <-  ggplot(data = plotData[!grepl("Valid", dataType)],
+                 aes(x = speciesCode, y = deltaB, group = rep)) +
+  stat_summary(fun.y = "mean", geom = "bar") +
+  stat_summary(fun.data = "mean_sd", geom = "linerange", size = 1) +
+  stat_summary(data = plotData[grepl("Valid", dataType)],
+               aes(x = speciesCode, y = deltaB, group = rep),
+               fun.y = "mean", geom = "point", size = 2) +
+  scale_x_discrete(labels = speciesLabels) +
+  theme_pubr() + theme(axis.text.x = element_text(angle = 45, vjust = 0.5)) +
+  labs(title = "Landscape-averaged changes in abundance",
+       x = "", y = expression(paste(Delta, "B")))
+
+plot9 <- ggplot(data = plotData,
                 aes(x = speciesCode, y = deltaB, fill = dataType)) +
   geom_boxplot() +
   scale_x_discrete(labels = speciesLabels) +
@@ -566,30 +626,5 @@ plot6 <- ggplot(data = plotData,
        x = "", y = expression(paste(Delta, "B")))
 
 grid.arrange(plot8, plot9,
-                  aes(x = speciesCode, y = deltaB)) +
-  geom_boxplot() +
-  stat_summary(data = plotData[dataType == "deltaBValid"],
-               aes(x = speciesCode, y = deltaB, group = speciesCode),
-               fun.y = "mean", geom = "point",
-               size = 2.5, shape = "square", col = "red") +
-  scale_x_discrete(labels = speciesLabels) +
-  labs(title = "Pixel-level changes in abundance", fill = "",
-       x = "", y = expression(paste(Delta, "B")))
-
-
-plotData <- plotData[, mean(deltaB) , by = .(rep, speciesCode, dataType)]
-
-plot7 <- ggplot(data = plotData[dataType == "deltaB"],
-                aes(x = speciesCode, y = V1)) +
-  stat_summary(fun.y = "mean", geom = "bar") +
-  stat_summary(fun.data = "mean_sd", geom = "linerange", size = 1) +
-  stat_summary(data = plotData[dataType == "deltaBValid"],
-               aes(x = speciesCode, y = V1),
-               fun.y = "mean", geom = "point", size = 2) +
-  scale_x_discrete(labels = speciesLabels) +
-  theme_pubr() +
-  labs(title = "Landscape-averaged changes in abundance",
-       x = "", y = expression(paste(Delta, "B")))
-
              ncol = 2)
 
