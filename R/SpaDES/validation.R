@@ -210,6 +210,12 @@ standCohortData[, B := V2] ## overwrite
 standCohortData[, `:=`(V2 = NULL, age = NULL)]
 standCohortData <- unique(standCohortData)
 
+## calculate stand biomass and spp relative abundances per pixel.
+standCohortData[, standB := asInteger(sum(B, na.rm = TRUE)),
+                .(rep, year, pixelIndex)]
+standCohortData[, relativeAbund := B/standB,
+                by = .(rep, year, pixelIndex, speciesCode)]
+standCohortData[is.nan(relativeAbund), relativeAbund := 0]
 
 ## add validation data to standCohortData
 ## note that some pixelIndex X spp combinations are lacking
