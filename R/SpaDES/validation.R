@@ -14,7 +14,6 @@ library(SpaDES.experiment)
 library(purrr)
 library(magick)
 
-
 ## Set up modelling parameters  ---------------------------
 options('reproducible.useNewDigestAlgorithm' = TRUE)
 # runName <- "studyAreaS"
@@ -205,8 +204,7 @@ allCohortData <- rbindlist(fill = TRUE, use.names = TRUE,
 standCohortData <- allCohortData[, .(B, sum(B), age),
                                  by = .(pixelIndex, rep, year, speciesCode)]
 standCohortData <- standCohortData[, standAge := sum(age * B, na.rm = TRUE) / sum(B, na.rm = TRUE),
-                                   by = .(pixelIndex, rep, year)]
-
+                                   by = .(rep, year, pixelIndex)]
 ## drop unnecessary columns and remove separate cohorts
 standCohortData[, B := V2] ## overwrite
 standCohortData[, `:=`(V2 = NULL, age = NULL)]
@@ -242,12 +240,13 @@ validationData <- validationData[pixelIndex %in% standCohortData$pixelIndex]
 ## clean up
 rm(combinationsInit, combinationsValid, validationDataInit)
 
-cols <- c("rep", "year", "pixelIndex", "speciesCode",
-          "cover", "B", "totalBiomass", "relativeAbundValid")
+## change names before joining.
+setnames(validationData, c("cover", "age", "B", "totalBiomass"),
+         c("coverValid", "standAgeValid", "BValid", "standBValid"))
+cols <- c("rep", "year", "pixelIndex", "speciesCode", "coverValid",
+          "standAgeValid", "BValid", "standBValid", "relativeAbundValid")
 standCohortData <- standCohortData[validationData[, ..cols],
                                    on = c("rep", "year", "pixelIndex", "speciesCode")]
-setnames(standCohortData, c("cover", "i.B", "totalBiomass"),
-         c("coverValid", "BValid", "totalBValid"))
 
 ## some NAs added on simutated data for year 2011
 standCohortData[is.na(B), B := 0]
@@ -280,12 +279,7 @@ if (!compareRaster(rstDisturbedPix, pixelGroupMapStk[[1]])) ## just check raster
 disturbedPix <- which(!is.na(getValues(rstDisturbedPix)))
 standCohortData <- standCohortData[!pixelIndex %in% disturbedPix]
 
-## calculate some summary metrics
-standCohortData[, `:=`(noSppPix = as.numeric(length(unique(speciesCode))),
-                       standB = sum(B, na.rm = TRUE)),
-                by = .(rep, year, pixelIndex)]
-standCohortData[, relativeAbund := B/standB,
-                by = .(rep, year, pixelIndex, speciesCode)]
+## calculate some landscape metrics
 standCohortData[, `:=`(landscapeB = sum(B, na.rm = TRUE),
                        landscapeBValid = sum(BValid, na.rm = TRUE)),
                 by = .(rep, year)]
@@ -294,7 +288,7 @@ standCohortData[, `:=`(landscapeB = sum(B, na.rm = TRUE),
 speciesLabels <- c("Abie_Bal" = "Fir", "Lari_Lar" = "Larch",
                    "Betu_Pap" = "Birch", "Pice_Gla" = "Wh. spruce",
                    "Pice_Mar" = "Bl. spruce", "Pinu_Ban" = "Jack pine",
-                   "Popu_Bal" = "Poplar")
+                   "Popu_Spp" = "Poplar")
 speciesColours <- levels(vegTypeMapStk[[1]])[[1]]$colors
 names(speciesColours) <- levels(vegTypeMapStk[[1]])[[1]]$VALUE
 
@@ -381,9 +375,9 @@ plot1 <- ggplot(data = plotData,
   stat_summary(aes(y = landRelativeAbundValid),
                fun.y = "mean", geom = "point", size = 2) +
   scale_x_discrete(labels = speciesLabels) +
-  theme_pubr() +
+  theme_pubr() + theme(axis.text.x = element_text(angle = 45, vjust = 0.5)) +
   facet_wrap(~ year, labeller = labeller(year = c("1" = "2001", "11" = "2011"))) +
-  labs(title = "Landscape-wide species relative abundances",
+  labs(title = "Species relative abundances",
        x = "", y = expression(over("species B", "total B")))
 
 ## pixel-level species'realtive abundances
@@ -420,7 +414,7 @@ plot2 <- ggplot(data = plotData[dataType == "count"],
                aes(x = speciesCode, y = count),
                fun.y = "mean", geom = "point", size = 2) +
   scale_x_discrete(labels = speciesLabels) +
-  theme_pubr() +
+  theme_pubr() + theme(axis.text.x = element_text(angle = 45, vjust = 0.5)) +
   facet_wrap(~ year, labeller = labeller(year = c("1" = "2001", "11" = "2011"))) +
   labs(title = "Species presences",
        x = "", y = "no. pixels",
@@ -461,9 +455,9 @@ plot3 <- ggplot(data = plotData[dataType == "simulated"],
                aes(x = vegTypeID2, y = landRelativeAbund),
                fun.y = "mean", geom = "point", size = 2) +
   scale_x_discrete(labels = speciesLabels) +
-  theme_pubr() +
+  theme_pubr() + theme(axis.text.x = element_text(angle = 45, vjust = 0.5)) +
   facet_wrap(~ year, labeller = labeller(year = c("1" = "2001", "11" = "2011"))) +
-  labs(title = "Landscape-wide dominant species",
+  labs(title = "Dominant species' relative abundances",
        x = "", y = expression(atop("relative abundance", over("species B", "total B"))))
 
 ## no. pixels with a certain dominant species
@@ -475,22 +469,23 @@ plot4 <- ggplot(data = plotData[dataType == "simulated"],
   geom_point(data = plotData[dataType != "simulated"],
              aes(x = vegTypeID2), stat = "count", size = 2) +
   scale_x_discrete(labels = speciesLabels) +
-  theme_pubr() +
+  theme_pubr() + theme(axis.text.x = element_text(angle = 45, vjust = 0.5)) +
   facet_wrap(~ year, labeller = labeller(year = c("1" = "2001", "11" = "2011"))) +
-  labs(title = "Landscape-wide dominant species",
-       x = "", y = "no. pixels",
-       fill = "")
+  labs(title = "Dominant species' presences",
+       x = "", y = "no. pixels", fill = "")
 
 ## as previous, but in relative terms
 plot5 <- ggplot(data = plotData, aes(x = dataType, fill = vegTypeID2)) +
   geom_histogram(stat = "count", position = "fill") +
   scale_fill_brewer(palette = "Accent", labels = speciesLabels) +
-  theme_pubr() +
+  theme_pubr() + theme(legend.position = "right",
+                       axis.text.x = element_text(angle = 45, vjust = 0.5)) +
   facet_wrap(~ year, labeller = labeller(year = c("1" = "2001", "11" = "2011"))) +
-  labs(title = "Landscape-wide species dominance", x = "",
-       y = "proportion of pixels", fill = "dominant species")
+  labs(title = "Dominant species presences", x = "",
+       y = "proportion of pixels", fill = "")
 
-grid.arrange(plot1, plot2, plot3, plot4,# plot5,
+grid.arrange(grobs = list(plot1, plot2, plot3, plot4),
+             top = "Landscape-averaged comparisons",
              nrow = 2, ncol = 2)
 
 ## COMPARISONS OF DELTA PER PIXEL-------------------
@@ -508,11 +503,11 @@ plot6 <- ggplot(data = plotData,
   scale_x_discrete(labels = speciesLabels) +
   scale_fill_discrete(labels = c("deltaB" = "simulated",
                                  "deltaBValid" = "observed")) +
-  theme_pubr() +
+  theme_pubr() + theme(axis.text.x = element_text(angle = 45, vjust = 0.5)) +
   labs(title = "Pixel-level changes in abundance", fill = "",
        x = "", y = expression(paste(Delta, "B")))
 
-plot6.2 <- ggplot(data = plotData[dataType == "deltaB"],
+grid.arrange(plot8, plot9,
                   aes(x = speciesCode, y = deltaB)) +
   geom_boxplot() +
   stat_summary(data = plotData[dataType == "deltaBValid"],
@@ -520,7 +515,6 @@ plot6.2 <- ggplot(data = plotData[dataType == "deltaB"],
                fun.y = "mean", geom = "point",
                size = 2.5, shape = "square", col = "red") +
   scale_x_discrete(labels = speciesLabels) +
-  theme_pubr() +
   labs(title = "Pixel-level changes in abundance", fill = "",
        x = "", y = expression(paste(Delta, "B")))
 
@@ -539,10 +533,9 @@ plot7 <- ggplot(data = plotData[dataType == "deltaB"],
   labs(title = "Landscape-averaged changes in abundance",
        x = "", y = expression(paste(Delta, "B")))
 
-grid.arrange(plot6, plot7,
              ncol = 2)
 
-## map delta b
+## MAP DELTA B
 plotData <- standCohortData[year %in% c(1,11),]
 plotData <- plotData[, list(deltaB = B[which(year == 11)] - B[which(year == 1)],
                             deltaBValid = BValid[which(year == 11)] - BValid[which(year == 1)]),
@@ -560,7 +553,8 @@ sppDeltaBValid <- lapply(unique(plotData$speciesCode), FUN = function(sp) {
 
   names(deltaBValid) <- sp
   return(deltaBValid)
-})
+}) %>%
+  stack(.)
 
-sppDeltaBValid <- stack(sppDeltaBValid)
+plot(sppDeltaB)
 plot(sppDeltaBValid)
