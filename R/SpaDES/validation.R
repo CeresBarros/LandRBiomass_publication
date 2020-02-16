@@ -355,6 +355,47 @@ ggplot(standDeltaValidData[standDeltaAgeValid == 10],
        aes(x = standDeltaBValid)) +
   geom_histogram()
 
+## MAPS OF OBSERVED CHANGES IN STAND BIOMASS AFTER ADJUSTMENTS -------
+plotData <- standCohortData[year %in% c(1,11),]
+plotData <- plotData[, list(deltaB = B[which(year == 11)] - B[which(year == 1)],
+                            deltaBValid = BValid[which(year == 11)] - BValid[which(year == 1)]),
+                     , by = .(rep, pixelIndex, speciesCode)]
+
+sppDeltaB <- lapply(unique(plotData$speciesCode), FUN = function(sp) {
+  ## subset data
+  tempData <- unique(plotData[speciesCode == sp, .(pixelIndex, deltaB)])
+
+  ## make raster
+  deltaB <- pixelGroupMapStk[[1]]
+  deltaB[] <- NA
+
+  deltaB[tempData$pixelIndex] <- tempData$deltaB
+
+  names(deltaB) <- sp
+  return(deltaB)
+}) %>%
+  stack(.)
+
+sppDeltaBValid <- lapply(unique(plotData$speciesCode), FUN = function(sp) {
+  ## subset data
+  tempData <- unique(plotData[speciesCode == sp, .(pixelIndex, deltaBValid)])
+
+  ## make raster
+  deltaBValid <- pixelGroupMapStk[[1]]
+  deltaBValid[] <- NA
+
+  deltaBValid[tempData$pixelIndex] <- tempData$deltaBValid
+
+  names(deltaBValid) <- sp
+  return(deltaBValid)
+}) %>%
+  stack(.)
+
+plot(sppDeltaB)
+plot(sppDeltaBValid)
+
+plot(sppDeltaB$Betu_Pap[] ~ sppDeltaBValid$Betu_Pap[])
+
 ## TESTS:
 ## remove pixels were the aging was too extreme (lower/higher than 25% and 75% quantiles)
 ## (this didn't work, no changes)
@@ -552,26 +593,3 @@ plot7 <- ggplot(data = plotData[dataType == "deltaB"],
 
              ncol = 2)
 
-## MAP DELTA B
-plotData <- standCohortData[year %in% c(1,11),]
-plotData <- plotData[, list(deltaB = B[which(year == 11)] - B[which(year == 1)],
-                            deltaBValid = BValid[which(year == 11)] - BValid[which(year == 1)]),
-                     , by = .(rep, pixelIndex, speciesCode)]
-
-sppDeltaBValid <- lapply(unique(plotData$speciesCode), FUN = function(sp) {
-  ## subset data
-  tempData <- unique(plotData[speciesCode == sp, .(pixelIndex, deltaBValid)])
-
-  ## make raster
-  deltaBValid <- pixelGroupMapStk[[1]]
-  deltaBValid[] <- NA
-
-  deltaBValid[tempData$pixelIndex] <- tempData$deltaBValid
-
-  names(deltaBValid) <- sp
-  return(deltaBValid)
-}) %>%
-  stack(.)
-
-plot(sppDeltaB)
-plot(sppDeltaBValid)
