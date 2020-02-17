@@ -175,7 +175,7 @@ Biomass_core_testSim <- simInit(times = simTimes
 
 ## to avoid synonim bug run the spades call once for 1 year.
 end(Biomass_core_testSim) <- 0
-spades(Biomass_core_testSim
+Biomass_core_testSim <- spades(Biomass_core_testSim
        , debug = TRUE
        , .plotInitialTime = NA)
 
