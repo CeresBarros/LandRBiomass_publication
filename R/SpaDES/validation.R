@@ -20,6 +20,11 @@ options('reproducible.useNewDigestAlgorithm' = TRUE)
 # runName <- "studyAreaL"
 runName <- "parametriseSALarge"
 
+## select simulation reps and years
+reps <- 1:10
+year1 <- 0
+year2 <- 11
+
 ## paths
 simPaths <- list(cachePath = file.path("R/SpaDES/cache", runName),
                  modulePath = file.path("R/SpaDES/m"),
@@ -37,12 +42,13 @@ simListInit <- readRDS(list.files(simPaths$outputPath, paste0("simList_", runNam
 
 ## get files of validation year per rep
 ## 2001 is the first year (0) and 2011, is year 10,
-## but choose years 1 and 11 because objects were saved at the beginning of the year, they reflect the end of the previous year
-## cohortData is the only that will vary across reps for year 0, because the beggining of year 1 already includes growth/mortality from year 0.
+## but choose years 0 and 11 because objects were saved at the beginning of the year, they reflect the end of the previous year
+## cohortData/pixelGroupMap, however, will vary across reps for year 0, because the beggining of year 1 already includes growth/mortality from year 0.
+## so, using year 0 and year 11 (equivalent to 10)
 outputFiles <- lapply(factorialSimulations, outputs)
 outputFiles <- rbindlist(lapply(seq_along(outputFiles), FUN = function(x) {
   DT <- as.data.table(outputFiles[[x]])
-  DT <- DT[saveTime %in% c(1, 11)]
+  DT <- DT[saveTime %in% c(year1, year2)]
   DT[, rep := x]
 }), use.names = TRUE)
 
@@ -64,14 +70,6 @@ pixelGroupMapStk <- stack(apply(outputFiles[objectName == "pixelGroupMap"], MARG
   pixelGroupMap <- readRDS(x["file"])
   names(pixelGroupMap) <- paste0("year", as.numeric(x["saveTime"]), "_rep", as.numeric(x["rep"]))
   pixelGroupMap
-}))
-
-vegTypeMapStk <- stack(apply(outputFiles[objectName == "vegTypeMap"], MARGIN = 1, FUN = function(x) {
-  vegTypeMap <- try(readRDS(x["file"]), silent = TRUE)
-  if (class(vegTypeMap) != "try-error") {
-    names(vegTypeMap) <- paste0("year", as.numeric(x["saveTime"]), "_rep", as.numeric(x["rep"]))
-    vegTypeMap
-  }
 }))
 
 ## load validation layers - they are saved in the outputs once for each rep.
@@ -210,13 +208,6 @@ standCohortData[, B := V2] ## overwrite
 standCohortData[, `:=`(V2 = NULL, age = NULL)]
 standCohortData <- unique(standCohortData)
 
-## calculate stand biomass and spp relative abundances per pixel.
-standCohortData[, standB := asInteger(sum(B, na.rm = TRUE)),
-                .(rep, year, pixelIndex)]
-standCohortData[, relativeAbund := B/standB,
-                by = .(rep, year, pixelIndex, speciesCode)]
-standCohortData[is.nan(relativeAbund), relativeAbund := 0]
-
 ## add validation data to standCohortData
 ## note that some pixelIndex X spp combinations are lacking
 ## because the validation data has spp in some pixels that are not found in the simulation
@@ -226,13 +217,13 @@ standCohortData[is.nan(relativeAbund), relativeAbund := 0]
 ## averages "vary" across reps/years
 combinationsInit <- as.data.table(expand.grid(list(speciesCode = unique(standCohortData$speciesCode),
                                                    pixelIndex = unique(c(validationDataInit$pixelIndex, standCohortData$pixelIndex)),
-                                                   rep = 1:10,
-                                                   year = 1)))
+                                                   rep = reps,
+                                                   year = year1)))
 
 combinationsValid <- as.data.table(expand.grid(list(speciesCode = unique(standCohortData$speciesCode),
                                                     pixelIndex = unique(c(validationData$pixelIndex, standCohortData$pixelIndex)),
-                                                    rep = 1:10,
-                                                    year = 11)))
+                                                    rep = reps,
+                                                    year = year2)))
 validationDataInit <- validationDataInit[combinationsInit,
                                          on = c("pixelIndex", "speciesCode")]
 validationData <- validationData[combinationsValid,
@@ -259,25 +250,16 @@ standCohortData[is.na(B), B := 0]
 standCohortData[is.na(BValid), BValid := 0]  ## just to be sure
 standCohortData[, standAge := max(standAge, na.rm = TRUE), by = .(year, rep, pixelIndex)]
 
-## add vegType
-vegTypeMapStk <- vegTypeMapStk[[names(pixelGroupMapStk)]]  ## make sure order is the same
-vegTypeTable <- rbindlist(fill = TRUE, use.names = TRUE,
-                          l = mapply(FUN = function(pixelGroupMap, vegTypeMap) {
-                            yr <- as.numeric(sub("year", "", sub("_rep.*", "", names(pixelGroupMap))))
-                            rp <- as.numeric(sub(".*_rep", "", names(pixelGroupMap)))
-                            data.table(pixelIndex = 1:ncell(pixelGroupMap),
-                                       vegType = getValues(vegTypeMap),
-                                       year = yr,
-                                       rep = rp)
-                          }, pixelGroupMap = as.list(pixelGroupMapStk),
-                          vegTypeMap = as.list(vegTypeMapStk), SIMPLIFY = FALSE))
-vegTypeTable <- na.omit(vegTypeTable)
-standCohortData <- vegTypeTable[standCohortData, on = c("rep", "year", "pixelIndex")]
+## calculate simulated standAge, standB and relative B now that NAs have been taken care of
+standCohortData[, standB := asInteger(sum(B, na.rm = TRUE)),
+                .(rep, year, pixelIndex)]
+standCohortData[, relativeAbund := B/standB,
+                by = .(rep, year, pixelIndex, speciesCode)]
 
-vegTypeLabels <- as.data.table(levels(vegTypeMapStk[[1]]))
-standCohortData <- vegTypeLabels[, .(ID, VALUE)][standCohortData, on = "ID==vegType"]
-setnames(standCohortData, old = c("ID", "VALUE"),
-         new = c("vegTypeID", "vegType"))
+## reorder column names for
+cols <-  c(grep("Valid", names(standCohortData), value = TRUE, invert = TRUE),
+           grep("Valid", names(standCohortData), value = TRUE))
+standCohortData <- standCohortData[, ..cols]
 
 ## remove disturbed pixels
 if (!compareRaster(rstDisturbedPix, pixelGroupMapStk[[1]])) ## just check rasters match first
@@ -291,21 +273,18 @@ standCohortData[, `:=`(landscapeB = sum(B, na.rm = TRUE),
                 by = .(rep, year)]
 
 ## plot labels
-speciesLabels <- c("Abie_Bal" = "Fir", "Lari_Lar" = "Larch",
-                   "Betu_Pap" = "Birch", "Pice_Gla" = "Wh. spruce",
-                   "Pice_Mar" = "Bl. spruce", "Pinu_Ban" = "Jack pine",
-                   "Popu_Spp" = "Poplar")
-speciesColours <- levels(vegTypeMapStk[[1]])[[1]]$colors
-names(speciesColours) <- levels(vegTypeMapStk[[1]])[[1]]$VALUE
+speciesLabels <- LandR::equivalentName(unique(standCohortData$speciesCode), simListInit$sppEquiv,
+                                       column = "EN_generic_short")
+names(speciesLabels) <- unique(standCohortData$speciesCode)
 
-## TODO: the number of pixels per dominant spp differs between simulated and observed data for year 1..!
-## I don't think these landscape-wide averages are working.
-## because relative abundances won't sum to one, if calculated per pixel.
-# standCohortData[, mean(relativeAbundValid, na.rm = TRUE), by = .(rep, year, speciesCode)] %>%
-#   .[, mean(V1), by = speciesCode] %>%
-#   .[,sum(V1)]
+## TESTS
+## species relative abundances do not sum to 1 across the landscape for year 11
+standCohortData[, mean(relativeAbundValid, na.rm = TRUE), by = .(rep, year, speciesCode)] %>%
+  .[, sum(V1), by = .(rep, year)]
 
-## calculate everything at landscape level
+## but they do for each stand - all good
+standCohortData[, sum(relativeAbundValid, na.rm = TRUE), by = .(rep, year, pixelIndex)] %>%
+  lapply(., unique) %>% .["V1"]
 
 ## MAPS OF OBSERVED CHANGES IN STAND BIOMASS AND STAND AGE -------
 standDeltaBValid <- (rawBiomassMapValidation - rawBiomassMapInit) * 100
@@ -355,10 +334,54 @@ ggplot(standDeltaValidData[standDeltaAgeValid == 10],
        aes(x = standDeltaBValid)) +
   geom_histogram()
 
-## MAPS OF OBSERVED CHANGES IN STAND BIOMASS AFTER ADJUSTMENTS -------
-plotData <- standCohortData[year %in% c(1,11),]
-plotData <- plotData[, list(deltaB = B[which(year == 11)] - B[which(year == 1)],
-                            deltaBValid = BValid[which(year == 11)] - BValid[which(year == 1)]),
+
+## MAPS OF OBSERVED CHANGES IN SPECIES BIOMASS AFTER ADJUSTMENTS -------
+plotData <- standCohortData[year %in% c(year1, year2),]
+plotData <- plotData[, list(standDeltaB = unique(standB[which(year == year2)]) - unique(standB[which(year == year1)]),
+                            standDeltaBValid = unique(standBValid[which(year == year2)]) - unique(standBValid[which(year == year1)]),
+                            standDeltaAge = unique(standAge[which(year == year2)]) - unique(standAge[which(year == year1)]),
+                            standDeltaAgeValid = unique(standAgeValid[which(year == year2)]) - unique(standAgeValid[which(year == year1)])),
+                     , by = .(rep, pixelIndex)]
+
+standDeltaBValidAdj <- pixelGroupMapStk[[1]]
+standDeltaBValidAdj[] <- NA
+standDeltaBValidAdj[unique(plotData[,.(pixelIndex, standDeltaBValid)])[, pixelIndex]] <- unique(plotData[,.(pixelIndex, standDeltaBValid)])[, standDeltaBValid]
+
+standDeltaAgeValidAdj <- pixelGroupMapStk[[1]]
+standDeltaAgeValidAdj[] <- NA
+standDeltaAgeValidAdj[unique(plotData[,.(pixelIndex, standDeltaAgeValid)])[, pixelIndex]] <- unique(plotData[,.(pixelIndex, standDeltaAgeValid)])[, standDeltaAgeValid]
+
+Plot(standDeltaBValidAdj, standDeltaAgeValidAdj)
+
+## what is the relationship between the two? It's even worse than the non-adjusted - presumably due to corrections...
+ggplot(plotData,
+       aes(x = standDeltaAgeValid, y = standDeltaBValid)) +
+  geom_point() +
+  stat_smooth(method = "lm")
+summary(lm(standDeltaBValid ~ standDeltaAgeValid, data = plotData))
+
+ggplot(standDeltaValidData,
+       aes(x = standDeltaBValid)) +
+  geom_histogram()
+ggplot(standDeltaValidData,
+       aes(y = standDeltaBValid)) +
+  geom_boxplot()
+
+ggplot(standDeltaValidData,
+       aes(x = standDeltaAgeValid)) +
+  geom_histogram()
+ggplot(standDeltaValidData,
+       aes(y = standDeltaAgeValid)) +
+  geom_boxplot()
+ggplot(standDeltaValidData[standDeltaAgeValid == 10],
+       aes(x = standDeltaBValid)) +
+  geom_histogram()
+
+
+## MAPS OF OBSERVED CHANGES IN SPECIES BIOMASS AFTER ADJUSTMENTS -------
+plotData <- standCohortData[year %in% c(year1, year2),]
+plotData <- plotData[, list(deltaB = B[which(year == year2)] - B[which(year == year1)],
+                            deltaBValid = BValid[which(year == year2)] - BValid[which(year == year1)]),
                      , by = .(rep, pixelIndex, speciesCode)]
 
 sppDeltaB <- lapply(unique(plotData$speciesCode), FUN = function(sp) {
@@ -391,41 +414,48 @@ sppDeltaBValid <- lapply(unique(plotData$speciesCode), FUN = function(sp) {
 }) %>%
   stack(.)
 
-plot(sppDeltaB)
-plot(sppDeltaBValid)
+Plot(sppDeltaB, sppDeltaBValid)
 
-plot(sppDeltaB$Betu_Pap[] ~ sppDeltaBValid$Betu_Pap[])
 
 ## TESTS:
 ## remove pixels were the aging was too extreme (lower/higher than 25% and 75% quantiles)
-## (this didn't work, no changes)
-tempDT <- unique(standCohortData[, .(year, rep, pixelIndex, standAgeValid)])
-tempDT <- tempDT[, .(standDeltaAgeValid = standAgeValid[year==11] - standAgeValid[year==1]),
-       by = .(rep, pixelIndex)]
-quants <- quantile(tempDT$standDeltaAgeValid, probs = c(0.25, 0.75))
-pixToKeep <- tempDT[standDeltaAgeValid > quants["25%"] |
-                               standDeltaAgeValid < quants["75%"],
-                             pixelIndex]
+# (this didn't work, no changes)
+# tempDT <- unique(standCohortData[, .(year, rep, pixelIndex, standAgeValid)])
+# tempDT <- tempDT[, .(standDeltaAgeValid = standAgeValid[year == year2] - standAgeValid[year == year1]),
+#                  by = .(rep, pixelIndex)]
+# quants <- quantile(tempDT$standDeltaAgeValid, probs = c(0.25, 0.75))
+# pixToKeep <- unique(tempDT[standDeltaAgeValid > quants["25%"] &
+#                       standDeltaAgeValid < quants["75%"],
+#                       pixelIndex])
 ## remove pixels were observed age changes were not 10yrs.
-# pixToKeep <- tempDT[standDeltaAgeValid == 10,
-#                              pixelIndex]
+tempDT <- unique(standCohortData[, .(year, rep, pixelIndex, standAgeValid)])
+tempDT <- tempDT[, .(standDeltaAgeValid = standAgeValid[year == year2] - standAgeValid[year == year1]),
+                 by = .(rep, pixelIndex)]
+pixToKeep <- unique(tempDT[standDeltaAgeValid == 10,
+                    pixelIndex])
 
 ## Remove pixels were stand age or B decreased
 # tempDT <- unique(standCohortData[, .(year, rep, pixelIndex, standAgeValid, standBValid)])
-# tempDT <- tempDT[, .(standDeltaAgeValid = standAgeValid[year==11] - standAgeValid[year==1],
-#                      standDeltaBValid = standBValid[year==11] - standBValid[year==1]),
+# tempDT <- tempDT[, .(standDeltaAgeValid = standAgeValid[year == year2] - standAgeValid[year == year1],
+#                      standDeltaBValid = standBValid[year == year2] - standBValid[year == year1]),
 #                  by = .(rep, pixelIndex)]
-# pixToKeep <- standDeltaValidData[standDeltaBValid > 0 & standDeltaAgeValid > 0,
-#                                  pixelIndex]
+# pixToKeep <- unique(tempDT[standDeltaBValid > 0 & standDeltaAgeValid > 0,
+#                     pixelIndex])
 
-standCohortData <- standCohortData[pixelIndex %in% pixToKeep]
+if (!exists("pixToKeep"))
+  pixToKeep <- unique(standCohortData$pixelIndex)
+
+## Make a general labels for years
+yearLabels <- c("2001", "2011")
+names(yearLabels) <- as.character(c(year1, year2))
 
 ## LANDSCAPE-WIDE COMPARISONS IN A GIVEN YEAR --------------------
 ## relative abundance (biomass) per species
-plotData <- standCohortData[year %in% c(1, 11),
-                            list(landRelativeAbund = sum(B, na.rm = TRUE)/unique(landscapeB),
-                                 landRelativeAbundValid = sum(BValid, na.rm = TRUE)/unique(landscapeBValid)),
-                            by = .(rep, year, speciesCode)]
+plotData <- standCohortData[pixelIndex %in% pixToKeep]
+plotData <- plotData[year %in% c(year1, year2),
+                     list(landRelativeAbund = sum(B, na.rm = TRUE)/unique(landscapeB),
+                          landRelativeAbundValid = sum(BValid, na.rm = TRUE)/unique(landscapeBValid)),
+                     by = .(rep, year, speciesCode)]
 plot1 <- ggplot(data = plotData,
                 aes(x = speciesCode, y = landRelativeAbund)) +
   stat_summary(fun.y = "mean", geom = "bar") +
@@ -434,15 +464,16 @@ plot1 <- ggplot(data = plotData,
                fun.y = "mean", geom = "point", size = 2) +
   scale_x_discrete(labels = speciesLabels) +
   theme_pubr() + theme(axis.text.x = element_text(angle = 45, vjust = 0.5)) +
-  facet_wrap(~ year, labeller = labeller(year = c("1" = "2001", "11" = "2011"))) +
+  facet_wrap(~ year, labeller = labeller(year = yearLabels)) +
   labs(title = "Species relative abundances",
        x = "", y = expression(over("species B", "total B")))
 
 ## no. pixels with a species
-plotData <- standCohortData[year %in% c(1, 11),
-                            list(count = sum(B > 0),
-                                 countValid = sum(BValid > 0)),
-                            by = .(rep, year, speciesCode)]
+plotData <- standCohortData[pixelIndex %in% pixToKeep]
+plotData <- plotData[year %in% c(year1, year2),
+                     list(count = sum(B > 0),
+                          countValid = sum(BValid > 0)),
+                     by = .(rep, year, speciesCode)]
 plotData <- melt(plotData, measure.vars = c("count", "countValid"),
                  variable.name = "dataType", value.name = "count")
 
@@ -455,7 +486,7 @@ plot2 <- ggplot(data = plotData[dataType == "count"],
                fun.y = "mean", geom = "point", size = 2) +
   scale_x_discrete(labels = speciesLabels) +
   theme_pubr() + theme(axis.text.x = element_text(angle = 45, vjust = 0.5)) +
-  facet_wrap(~ year, labeller = labeller(year = c("1" = "2001", "11" = "2011"))) +
+  facet_wrap(~ year, labeller = labeller(year = yearLabels)) +
   labs(title = "Species presences",
        x = "", y = "no. pixels",
        fill = "")
@@ -464,68 +495,74 @@ plot2 <- ggplot(data = plotData[dataType == "count"],
 ## get dominant species - these match with model outputs, I checked
 ## note: don't use melt, because dominant spp differ between valid and simul data.
 ## note2: mixed pixels get a "mixed" type
-tempDT <- standCohortData[year %in% c(1, 11),
-                list(noDoms = sum(relativeAbund == max(relativeAbund, na.rm = TRUE), na.rm = TRUE),
-                     noDomsValid = sum(relativeAbundValid == max(relativeAbundValid, na.rm = TRUE), na.rm = TRUE)),
-                by = .(year, rep, pixelIndex)]
+## calculate the no. of "dominant" species so that pixels with more than one dominant spp are considered "mixed"
+tempDT <- standCohortData[pixelIndex %in% pixToKeep]
+tempDT <- tempDT[year %in% c(year1, year2),
+                 list(noDoms = sum(relativeAbund == max(relativeAbund, na.rm = TRUE), na.rm = TRUE),
+                      noDomsValid = sum(relativeAbundValid == max(relativeAbundValid, na.rm = TRUE), na.rm = TRUE)),
+                 by = .(year, rep, pixelIndex)]
 
-plotData <- unique(standCohortData[year %in% c(1, 11),
-                                   list(vegTypeID2 = speciesCode[which.max(relativeAbund)],
-                                        relativeAbund = max(relativeAbund, na.rm = TRUE),
-                                        vegTypeID2Valid = speciesCode[which.max(relativeAbundValid)],
-                                        relativeAbundValid = max(relativeAbundValid, na.rm = TRUE)),
-                                   by = .(year, rep, pixelIndex)])
+plotData <- standCohortData[pixelIndex %in% pixToKeep]
+plotData <- unique(plotData[year %in% c(year1, year2),
+                            list(vegType = speciesCode[which.max(relativeAbund)],
+                                 relativeAbund = max(relativeAbund, na.rm = TRUE),
+                                 vegTypeValid = speciesCode[which.max(relativeAbundValid)],
+                                 relativeAbundValid = max(relativeAbundValid, na.rm = TRUE)),
+                            by = .(year, rep, pixelIndex)])
 plotData <- tempDT[plotData, on = .(year, rep, pixelIndex)]
 
-plotData1 <- unique(plotData[, .(year, rep, pixelIndex, vegTypeID2, relativeAbund, noDoms)])
+plotData1 <- unique(plotData[, .(year, rep, pixelIndex, vegType, relativeAbund, noDoms)])
 plotData1[, dataType := "relativeAbund"]
-plotData2 <- unique(plotData[, .(year, rep, pixelIndex, vegTypeID2Valid, relativeAbundValid, noDomsValid)])
+plotData2 <- unique(plotData[, .(year, rep, pixelIndex, vegTypeValid, relativeAbundValid, noDomsValid)])
 plotData2[, dataType := "relativeAbundValid"]
-setnames(plotData2, c("vegTypeID2Valid", "relativeAbundValid", "noDomsValid"),
-         c("vegTypeID2", "relativeAbund", "noDoms"))
+setnames(plotData2, c("vegTypeValid", "relativeAbundValid", "noDomsValid"),
+         c("vegType", "relativeAbund", "noDoms"))
 
 plotData <- rbind(plotData1, plotData2)
 rm(plotData1, plotData2)
 
-plotData[noDoms > 1, vegTypeID2 := "Mixed"]
+plotData[noDoms > 1, vegType := "Mixed"]
 
+## calculate landscape average
+plotData1 <- plotData[, relativeAbund := mean(relativeAbund),
+                      by = .(rep, year, dataType, vegType)]
 plot3 <- ggplot(data = plotData[!grepl("Valid", dataType)],
-                aes(x = vegTypeID2, y = relativeAbund)) +
+                aes(x = vegType, y = relativeAbund)) +
   stat_summary(fun.y = "mean", geom = "bar") +
   stat_summary(fun.data = "mean_sd", geom = "linerange", size = 1) +
   stat_summary(data = plotData[grepl("Valid", dataType)],
-               aes(x = vegTypeID2, y = relativeAbund),
+               aes(x = vegType, y = relativeAbund),
                fun.y = "mean", geom = "point", size = 2) +
   scale_x_discrete(labels = speciesLabels) +
   theme_pubr() + theme(axis.text.x = element_text(angle = 45, vjust = 0.5)) +
-  facet_wrap(~ year, labeller = labeller(year = c("1" = "2001", "11" = "2011"))) +
+  facet_wrap(~ year, labeller = labeller(year = yearLabels)) +
   labs(title = "Dominant species' relative abundances",
        x = "", y = expression(atop("relative abundance", over("species B", "total B"))))
 
 ## no. pixels with a certain dominant species
 ## HERE: simualted and observed differ in no. of pixels in year 1... WHY?!
 ## possibly due to Biomass being adjusted?
-plotData <- plotData[, list(count = length(pixelIndex)),
-                     by = .(rep, year, dataType, vegTypeID2)]
-plot4 <- ggplot(data = plotData[!grepl("Valid", dataType)],
-                aes(x = vegTypeID2, y = count)) +
+plotData1 <- plotData[, list(count = length(pixelIndex)),
+                     by = .(rep, year, dataType, vegType)]
+plot4 <- ggplot(data = plotData1[!grepl("Valid", dataType)],
+                aes(x = vegType, y = count)) +
   stat_summary(fun.y = "mean", geom = "bar") +
   stat_summary(fun.data = "mean_sd", geom = "linerange", size = 1) +
-  geom_point(data = plotData[grepl("Valid", dataType)],
-             aes(x = vegTypeID2, y = count), size = 2) +
+  geom_point(data = plotData1[grepl("Valid", dataType)],
+             aes(x = vegType, y = count), size = 2) +
   scale_x_discrete(labels = speciesLabels) +
   theme_pubr() + theme(axis.text.x = element_text(angle = 45, vjust = 0.5)) +
-  facet_wrap(~ year, labeller = labeller(year = c("1" = "2001", "11" = "2011"))) +
+  facet_wrap(~ year, labeller = labeller(year = yearLabels)) +
   labs(title = "Dominant species' presences",
        x = "", y = "no. pixels", fill = "")
 
 ## as previous, but in relative terms
-plot5 <- ggplot(data = plotData, aes(x = dataType, y = count, fill = vegTypeID2)) +
+plot5 <- ggplot(data = plotData, aes(x = dataType, y = count, fill = vegType)) +
   stat_summary(fun.y = "mean", geom = "bar", position = "fill") +
   scale_fill_brewer(palette = "Accent", labels = speciesLabels) +
   theme_pubr() + theme(legend.position = "right",
                        axis.text.x = element_text(angle = 45, vjust = 0.5)) +
-  facet_wrap(~ year, labeller = labeller(year = c("1" = "2001", "11" = "2011"))) +
+  facet_wrap(~ year, labeller = labeller(year = yearLabels)) +
   labs(title = "Dominant species presences", x = "",
        y = "proportion of pixels", fill = "")
 
@@ -535,9 +572,10 @@ grid.arrange(grobs = list(plot1, plot2, plot3, plot4),
 
 ## PIXEL-LEVEL COMPARISONS IN A GIVEN YEAR --------------------
 ## pixel-level relative abundances per species
-plotData <- standCohortData[year %in% c(1, 11),
-                            .(rep, year, pixelIndex, speciesCode,
-                              relativeAbund, relativeAbundValid)]
+plotData <- standCohortData[pixelIndex %in% pixToKeep]
+plotData <- plotData[year %in% c(year1, year2),
+                     .(rep, year, pixelIndex, speciesCode,
+                       relativeAbund, relativeAbundValid)]
 plotData <- melt(plotData,
                  id.vars = c("rep", "year", "pixelIndex", "speciesCode"))
 plot6 <- ggplot(data = plotData,
@@ -547,45 +585,47 @@ plot6 <- ggplot(data = plotData,
   scale_fill_discrete(labels = c("relativeAbund" = "simulated",
                                  "relativeAbundValid" = "observed")) +
   theme_pubr() + theme(axis.text.x = element_text(angle = 45, vjust = 0.5)) +
-  facet_wrap(~ year, labeller = labeller(year = c("1" = "2001", "11" = "2011"))) +
+  facet_wrap(~ year, labeller = labeller(year = yearLabels)) +
   labs(title = "Species relative abundances", fill = "",
        x = "", y = expression(over("species B", "stand B")))
 
 ## pixel-level relative abundance per dominant species
 ## get dominant species (those with maxB) - these match with model outputs, I checked
-tempDT <- standCohortData[year %in% c(1, 11),
-                          list(noDoms = sum(relativeAbund == max(relativeAbund, na.rm = TRUE), na.rm = TRUE),
-                               noDomsValid = sum(relativeAbundValid == max(relativeAbundValid, na.rm = TRUE), na.rm = TRUE)),
-                          by = .(year, rep, pixelIndex)]
+tempDT <- standCohortData[pixelIndex %in% pixToKeep]
+tempDT <- tempDT[year %in% c(year1, year2),
+                 list(noDoms = sum(relativeAbund == max(relativeAbund, na.rm = TRUE), na.rm = TRUE),
+                      noDomsValid = sum(relativeAbundValid == max(relativeAbundValid, na.rm = TRUE), na.rm = TRUE)),
+                 by = .(year, rep, pixelIndex)]
 
-plotData <- unique(standCohortData[year %in% c(1, 11),
-                                   list(vegTypeID2 = speciesCode[which.max(relativeAbund)],
-                                        relativeAbund = max(relativeAbund, na.rm = TRUE),
-                                        vegTypeID2Valid = speciesCode[which.max(relativeAbundValid)],
-                                        relativeAbundValid = max(relativeAbundValid, na.rm = TRUE)),
-                                   by = .(year, rep, pixelIndex)])
+plotData <- standCohortData[pixelIndex %in% pixToKeep]
+plotData <- unique(plotData[year %in% c(year1, year2),
+                            list(vegType = speciesCode[which.max(relativeAbund)],
+                                 relativeAbund = max(relativeAbund, na.rm = TRUE),
+                                 vegTypeValid = speciesCode[which.max(relativeAbundValid)],
+                                 relativeAbundValid = max(relativeAbundValid, na.rm = TRUE)),
+                            by = .(year, rep, pixelIndex)])
 plotData <- tempDT[plotData, on = .(year, rep, pixelIndex)]
 
-plotData1 <- unique(plotData[, .(year, rep, pixelIndex, vegTypeID2, relativeAbund, noDoms)])
+plotData1 <- unique(plotData[, .(year, rep, pixelIndex, vegType, relativeAbund, noDoms)])
 plotData1[, dataType := "relativeAbund"]
-plotData2 <- unique(plotData[, .(year, rep, pixelIndex, vegTypeID2Valid, relativeAbundValid, noDomsValid)])
+plotData2 <- unique(plotData[, .(year, rep, pixelIndex, vegTypeValid, relativeAbundValid, noDomsValid)])
 plotData2[, dataType := "relativeAbundValid"]
-setnames(plotData2, c("vegTypeID2Valid", "relativeAbundValid", "noDomsValid"),
-         c("vegTypeID2", "relativeAbund", "noDoms"))
+setnames(plotData2, c("vegTypeValid", "relativeAbundValid", "noDomsValid"),
+         c("vegType", "relativeAbund", "noDoms"))
 
 plotData <- rbind(plotData1, plotData2)
 rm(plotData1, plotData2)
 
-plotData[noDoms > 1, vegTypeID2 := "Mixed"]
+plotData[noDoms > 1, vegType := "Mixed"]
 
 plot7 <- ggplot(data = plotData,
-                aes(x = vegTypeID2, y = relativeAbund, fill = dataType)) +
+                aes(x = vegType, y = relativeAbund, fill = dataType)) +
   geom_boxplot() +
   scale_fill_discrete(labels = c("relativeAbund" = "simulated",
                                  "relativeAbund" = "observed")) +
   scale_x_discrete(labels = speciesLabels) +
   theme_pubr() + theme(axis.text.x = element_text(angle = 45, vjust = 0.5)) +
-  facet_wrap(~ year, labeller = labeller(year = c("1" = "2001", "11" = "2011"))) +
+  facet_wrap(~ year, labeller = labeller(year = yearLabels)) +
   labs(title = "Dominant species' relative abundances",
        x = "", y = expression(atop("relative abundance", over("species B", "total B"))),
        fill = "")
@@ -596,12 +636,26 @@ grid.arrange(grobs = list(plot6, plot7),
 
 ## COMPARISONS OF DELTA PER PIXEL-------------------
 ## per species
-plotData <- standCohortData[year %in% c(1,11),]
-plotData <- plotData[, list(deltaB = B[which(year == 11)] - B[which(year == 1)],
-                            deltaBValid = BValid[which(year == 11)] - BValid[which(year == 1)]),
+plotData <- standCohortData[pixelIndex %in% pixToKeep]
+plotData <- plotData[year %in% c(year1, year2)]
+plotData <- plotData[, list(deltaB = B[which(year == year2)] - B[which(year == year1)],
+                            deltaBValid = BValid[which(year == year2)] - BValid[which(year == year1)],
+                            standDeltaB = standB[which(year == year2)] - standB[which(year == year1)],
+                            standDeltaBValid = standBValid[which(year == year2)] - standBValid[which(year == year1)]),
                      , by = .(rep, pixelIndex, speciesCode)]
-plotData <- melt(plotData, measure.vars = c("deltaB", "deltaBValid"),
+
+## melt spp and stand delta separately and rbind
+cols <- grep("standDelta", names(plotData), invert = TRUE, value = TRUE)
+plotData1 <- melt(plotData[, ..cols], measure.vars = c("deltaB", "deltaBValid"),
                  variable.name = "dataType", value.name = "deltaB")
+cols <- grep("deltaB", names(plotData), invert = TRUE, value = TRUE)
+plotData2 <- melt(plotData[, ..cols], measure.vars = c("standDeltaB", "standDeltaBValid"),
+                  variable.name = "dataType", value.name = "deltaB")
+plotData2[dataType == "standDeltaB", dataType := "deltaB"]
+plotData2[dataType == "standDeltaBValid", dataType := "deltaBValid"]
+plotData2 <- unique(plotData2[, speciesCode := "stand"])
+
+plotData <- rbind(plotData1, plotData2, use.names = TRUE)
 
 plot8 <-  ggplot(data = plotData[!grepl("Valid", dataType)],
                  aes(x = speciesCode, y = deltaB, group = rep)) +
