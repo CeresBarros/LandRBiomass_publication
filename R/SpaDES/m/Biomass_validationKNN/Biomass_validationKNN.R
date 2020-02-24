@@ -201,14 +201,11 @@ Init <- function(sim) {
   }
 
   if (!suppliedElsewhere("rawBiomassMap", sim) || needRTM) {
-    fileURLs <- getURL(extractURL("rawBiomassMap"), dirlistonly = TRUE)
-    fileNames <- getHTMLLinks(fileURLs)
-    rawBiomassMapFilename <- grep("Biomass_TotalLiveAboveGround.*.tif$", fileNames, value = TRUE)
-    rawBiomassMapURL <- paste0(extractURL("rawBiomassMap"), rawBiomassMapFilename)
+    rawBiomassMapFilename <- "NFI_MODIS250m_2001_kNN_Structure_Biomass_TotalLiveAboveGround_v1.tif"
 
     sim$rawBiomassMap <- Cache(prepInputs,
                                targetFile = rawBiomassMapFilename,
-                               url = rawBiomassMapURL,
+                               url = extractURL("rawBiomassMap"),
                                destinationPath = dPath,
                                studyArea = sim$studyArea,
                                rasterToMatch = if (!needRTM) sim$rasterToMatch else NULL,
@@ -504,15 +501,11 @@ Init <- function(sim) {
 
   ## Biomass layers ----------------------------------------------------
   if (!suppliedElsewhere("rawBiomassMapValidation", sim)) {
-    ## get all online file names
-    fileURLs <- getURL(extractURL("rawBiomassMapValidation"), dirlistonly = TRUE)
-    fileNames <- getHTMLLinks(fileURLs)
-    rawBiomassValFileName <- grep("Biomass_TotalLiveAboveGround.*.tif$", fileNames, value = TRUE)
-    rawBiomassValURL <- paste0(extractURL("rawBiomassMapValidation"), rawBiomassValFileName)
+    rawBiomassValFileName <- "NFI_MODIS250m_2011_kNN_Structure_Biomass_TotalLiveAboveGround_v1.tif"
 
     sim$rawBiomassMapValidation <- Cache(prepInputs,
-                                         targetFile = asPath(rawBiomassValFileName),
-                                         url = rawBiomassValURL,
+                                         targetFile = rawBiomassValFileName,
+                                         url = extractURL("rawBiomassMapValidation"),
                                          destinationPath = asPath(dPath),
                                          fun = "raster::raster",
                                          studyArea = sim$studyArea,
@@ -540,15 +533,11 @@ Init <- function(sim) {
 
   ## Age layer ----------------------------------------------------
   if (!suppliedElsewhere("standAgeMapValidation", sim)) {
-    ## get all online file names
-    fileURLs <- getURL(extractURL("standAgeMapValidation"), dirlistonly = TRUE)
-    fileNames <- getHTMLLinks(fileURLs)
-    standAgeValFileName <- grep("Stand_Age.*.tif$", fileNames, value = TRUE)
-    standAgeValURL <- paste0(extractURL("standAgeMapValidation"), standAgeValFileName)
+    standAgeValFileName <- "NFI_MODIS250m_2011_kNN_Structure_Stand_Age_v1.tif"
 
     sim$standAgeMapValidation <- Cache(prepInputs,
-                                       targetFile = asPath(standAgeValFileName),
-                                       url = standAgeValURL,
+                                       targetFile = standAgeValFileName,
+                                       url = extractURL("standAgeMapValidation"),
                                        destinationPath = asPath(dPath),
                                        fun = "raster::raster",
                                        studyArea = sim$studyArea,
