@@ -46,7 +46,7 @@ simPaths <- list(cachePath = normPath(file.path("R/SpaDES/cache", runName)),
 source("R/SpaDES/1_simObjects.R")
 
 ## simulation params
-simTimes <- list(start = 0, end = 30)
+simTimes <- list(start = 2001, end = 2031)
 vegLeadingProportion <- 0 # indicates what proportion the stand must be in one species group for it to be leading.
 successionTimestep <- 10L  # for dispersal and age reclass.
 
@@ -63,7 +63,10 @@ simParams <- list(
   ),
   Biomass_borealDataPrep = list(
     "sppEquivCol" = sppEquivCol
-    , "forestedLCCClasses" = c(1:15, 34:36)
+    , "forestedLCCClasses" = c(1:15, 34:35)
+    , "LCCClassesToReplaceNN" = c(34:35)
+    , "fitDeciduousCoverDiscount" = TRUE
+    , "exportModels" = "all"
     # next two are used when assigning pixelGroup membership; what resolution for
     #   age and biomass
     , "pixelGroupAgeClass" = successionTimestep
@@ -110,27 +113,30 @@ sppEquivalencies_CA <- sppEquivalencies_CA[Boreal %in% names(simOutSpeciesLayers
 
 ## objects will be saved at the start of the simulation (so they reflect the previous year)
 simOutputs <- data.frame(expand.grid(objectName = c("cohortData"),
-                                     saveTime = c(0:15, seq(20, 100, 5)),
-                                     eventPriority = 1,
+                                     saveTime = unique(sort(c(1, simTimes$end,
+                                                              seq(simTimes$start, simTimes$end, by = 5)))),
+                                     eventPriority = 10,
                                      stringsAsFactors = FALSE))
 simOutputs <- rbind(simOutputs, data.frame(objectName = "pixelGroupMap",
-                                           saveTime = c(0:15, seq(20, 100, 5)),
-                                           eventPriority = 1))
+                                           saveTime = unique(sort(c(1, simTimes$end,
+                                                                    seq(simTimes$start, simTimes$end, by = 5)))),
+                                           eventPriority = 10))
 simOutputs <- rbind(simOutputs, data.frame(objectName = "rstDisturbedPix",
                                            saveTime = c(0),
                                            eventPriority = 1))
 simOutputs <- rbind(simOutputs, data.frame(objectName = "vegTypeMap",
-                                           saveTime = c(0:15, seq(20, 100, 5)),
-                                           eventPriority = 1))
+                                           saveTime = unique(sort(c(1, simTimes$end,
+                                                                    seq(simTimes$start, simTimes$end, by = 5)))),
+                                           eventPriority = 10))
 ## the following objects are only saved once at the end of year 0/beggining of year 1 (they don't change)
 simOutputs <- rbind(simOutputs, data.frame(objectName = "rawBiomassMapValidation",
-                                           saveTime = c(1),
+                                           saveTime = c(simTimes$start),
                                            eventPriority = 1))
 simOutputs <- rbind(simOutputs, data.frame(objectName = "standAgeMapValidation",
-                                           saveTime = c(1),
+                                           saveTime = c(simTimes$start),
                                            eventPriority = 1))
 simOutputs <- rbind(simOutputs, data.frame(objectName = "speciesLayersValidation",
-                                           saveTime = c(1),
+                                           saveTime = c(simTimes$start),
                                            eventPriority = 1))
 
 ## in the first year, objects have to be saved after init events, before mortalityAndGrowth
