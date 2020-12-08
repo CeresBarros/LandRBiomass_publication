@@ -10,9 +10,9 @@
 	path = R/SpaDES/m/Biomass_speciesData
 	url = https://github.com/CeresBarros/Biomass_speciesData.git
 	branch = development
-[submodule "R/SpaDES/m/LandR_speciesParameters"]
-	path = R/SpaDES/m/LandR_speciesParameters
-	url = https://github.com/CeresBarros/LandR_speciesParameters.git
+[submodule "R/SpaDES/m/Biomass_speciesParameters"]
+	path = R/SpaDES/m/Biomass_speciesParameters
+	url = https://github.com/CeresBarros/Biomass_speciesParameters.git
 [submodule "R/SpaDES/m/Biomass_validationKNN"]
 	path = R/SpaDES/m/Biomass_validationKNN
 	url = https://github.com/CeresBarros/Biomass_validationKNN.git
