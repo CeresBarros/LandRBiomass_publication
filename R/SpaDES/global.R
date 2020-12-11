@@ -30,6 +30,7 @@ options("spades.moduleCodeChecks" = FALSE)
 options("reproducible.useCache" = TRUE)
 options("reproducible.inputPaths" = normPath("data"))  ## store everything in data/ so that there are no duplicated files across modules
 options("reproducible.destinationPath" = normPath("data"))
+options("reproducible.useGDAL" = FALSE)
 # runName <- "studyAreaS"
 # runName <- "studyAreaL"
 runName <- "parametriseSALarge"
