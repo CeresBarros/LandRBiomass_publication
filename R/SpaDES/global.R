@@ -114,20 +114,17 @@ sppEquivalencies_CA <- sppEquivalencies_CA[Boreal %in% names(simOutSpeciesLayers
 
 ## objects will be saved at the start of the simulation (so they reflect the previous year)
 simOutputs <- data.frame(expand.grid(objectName = c("cohortData"),
-                                     saveTime = unique(sort(c(1, simTimes$end,
-                                                              seq(simTimes$start, simTimes$end, by = 5)))),
+                                     saveTime = unique(seq(simTimes$start, simTimes$end, by = 5)),
                                      eventPriority = 10,
                                      stringsAsFactors = FALSE))
 simOutputs <- rbind(simOutputs, data.frame(objectName = "pixelGroupMap",
-                                           saveTime = unique(sort(c(1, simTimes$end,
-                                                                    seq(simTimes$start, simTimes$end, by = 5)))),
+                                           saveTime = unique(seq(simTimes$start, simTimes$end, by = 5)),
                                            eventPriority = 10))
 simOutputs <- rbind(simOutputs, data.frame(objectName = "rstDisturbedPix",
-                                           saveTime = c(0),
+                                           saveTime = c(simTimes$start),
                                            eventPriority = 1))
 simOutputs <- rbind(simOutputs, data.frame(objectName = "vegTypeMap",
-                                           saveTime = unique(sort(c(1, simTimes$end,
-                                                                    seq(simTimes$start, simTimes$end, by = 5)))),
+                                           saveTime = unique(seq(simTimes$start, simTimes$end, by = 5)),
                                            eventPriority = 10))
 ## the following objects are only saved once at the end of year 0/beggining of year 1 (they don't change)
 simOutputs <- rbind(simOutputs, data.frame(objectName = "rawBiomassMapValidation",
