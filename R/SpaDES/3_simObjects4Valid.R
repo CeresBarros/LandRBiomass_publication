@@ -25,6 +25,16 @@ rstLCChangeAllbin <- Cache(prepInputs,
                            cacheRepo = simPaths$cachePath,
                            useCache = TRUE)
 
+## make sure the extent matches the study area (it won't if using a smaller study area than RTMLarge)
+rstLCChangeAllbin <- Cache(postProcess,
+                           x = rstLCChangeAllbin,
+                           studyArea = if (grepl("study", runName)) get(runName) else studyAreaS,
+                           useSAcrs = FALSE,
+                           filename2 = file.path(options()$reproducible.inputPaths, "change_2001_2011_postProcess.tiff"),
+                           overwrite = TRUE,
+                           cacheRepo = simPaths$cachePath,
+                           useCache = TRUE)
+
 ## convert to mask
 rstLCChangeAllbin[getValues(rstLCChangeAllbin) != 1] <- NA
 
