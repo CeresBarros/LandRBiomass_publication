@@ -54,11 +54,11 @@ successionTimestep <- 10L  # for dispersal and age reclass.
 simModules <- list("Biomass_borealDataPrep"
                    , "Biomass_core"
                    , "Biomass_validationKNN"
-                   , "LandR_speciesParameters"
+                   , "Biomass_speciesParameters"
 )
 
 simParams <- list(
-  LandR_speciesParameters = list(
+  Biomass_speciesParameters = list(
     "sppEquivCol" = sppEquivCol
     , ".useCache" = eventCaching
   ),
