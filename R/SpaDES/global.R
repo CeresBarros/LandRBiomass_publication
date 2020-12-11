@@ -178,15 +178,15 @@ Biomass_core_testSim <- simInit(times = simTimes
                                 , paths = simPaths)
 
 ## to avoid synonim bug run the spades call once for 1 year.
-end(Biomass_core_testSim) <- 0
-Biomass_core_testSim <- spades(Biomass_core_testSim
-       , debug = TRUE
-       , .plotInitialTime = NA)
-
-saveRDS(Biomass_core_testSim,
-        file.path(simPaths$outputPath, paste0("simList_", runName, ".rds")))
-end(Biomass_core_testSim) <- 30   ## now change back for experiment.
-unlink(file.path(simPaths$outputPath, "figures"), recursive = TRUE) ## remove unnecessary figures
+# end(Biomass_core_testSim) <- simTimes$start
+# Biomass_core_testSim <- spades(Biomass_core_testSim
+#        , debug = TRUE
+#        , .plotInitialTime = NA)
+#
+# saveRDS(Biomass_core_testSim,
+#         file.path(simPaths$outputPath, paste0("simList_", runName, ".rds")))
+# end(Biomass_core_testSim) <- 30   ## now change back for experiment.
+# unlink(file.path(simPaths$outputPath, "figures"), recursive = TRUE) ## remove unnecessary figures
 
 library(future)
 plan("multiprocess", workers = 3)   ## each worker consumming roughly 15Gb.
