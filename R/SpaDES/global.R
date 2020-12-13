@@ -9,12 +9,13 @@ rm(list=ls()); amc::.gc()
 stopifnot(utils::packageVersion("googledrive") == "1.0.0")
 
 ## requires as of June 10th 2019
-# reproducible_1.0.0.9003
-# quickPlot_0.1.6.9000
-# SpaDES.core_0.2.9
-# SpaDES.tools_0.3.4.9000
+# reproducible_1.2.3
+# quickPlot_0.1.7.9001
+# SpaDES.core 1.0.4
+# SpaDES.tools_0.3.6
 # SpaDES.addins_0.1.2
-# LandR_0.0.3.9001
+# SpaDES.experiment 0.0.2.9000
+# LandR_0.0.10
 library(SpaDES)
 library(SpaDES.experiment)
 library(raster)
