@@ -170,28 +170,28 @@ if (runName == "parametriseSALarge") {
 startTime <- date()
 
 # reproducible::clearCache(simPaths$cachePath)
-Biomass_core_testSim <- simInit(times = simTimes
-                                , params = simParams
-                                , modules = simModules
-                                , objects = simObjects
-                                , outputs = simOutputs
-                                , paths = simPaths)
+LandRBiomass_sim <- simInit(times = simTimes
+                            , params = simParams
+                            , modules = simModules
+                            , objects = simObjects
+                            , outputs = simOutputs
+                            , paths = simPaths)
 
 ## to avoid synonim bug run the spades call once for 1 year.
-# end(Biomass_core_testSim) <- simTimes$start
-# Biomass_core_testSim <- spades(Biomass_core_testSim
+# end(LandRBiomass_sim) <- simTimes$start
+# LandRBiomass_sim <- spades(LandRBiomass_sim
 #        , debug = TRUE
 #        , .plotInitialTime = NA)
-#
-# saveRDS(Biomass_core_testSim,
+
+# saveRDS(LandRBiomass_sim,
 #         file.path(simPaths$outputPath, paste0("simList_", runName, ".rds")))
-# end(Biomass_core_testSim) <- 30   ## now change back for experiment.
+# end(LandRBiomass_sim) <- 30   ## now change back for experiment.
 # unlink(file.path(simPaths$outputPath, "figures"), recursive = TRUE) ## remove unnecessary figures
 
 library(future)
-plan("multiprocess", workers = 3)   ## each worker consumming roughly 15Gb.
+plan("multiprocess", workers = 1)   ## each worker consumming roughly 15Gb.
 factorialSimulations <- experiment2(
-  sim1 = Biomass_core_testSim,
+  sim1 = LandRBiomass_sim,
   clearSimEnv = TRUE,
   replicates = 10)
 
