@@ -7,14 +7,14 @@
 ## clean workspace
 rm(list=ls()); amc::.gc()
 
-## requires as of June 10th 2019
-# reproducible_1.2.3
+## requires as of Dec 22 2020
+# reproducible 1.2.3
 # quickPlot_0.1.7.9001
 # SpaDES.core 1.0.4
-# SpaDES.tools_0.3.6
+# SpaDES.tools_0.3.7
 # SpaDES.addins_0.1.2
 # SpaDES.experiment 0.0.2.9000
-# LandR_0.0.10
+# LandR_0.0.10.9001 ## dispersalRcpp branch
 library(SpaDES)
 library(SpaDES.experiment)
 library(raster)
@@ -38,10 +38,11 @@ eventCaching <- c(".inputObjects", "init")
 useParallel <- FALSE
 
 ## paths
-simPaths <- list(cachePath = normPath(file.path("R/SpaDES/cache", runName)),
-                 modulePath = file.path("R/SpaDES/m"),
-                 inputPath = normPath("data"),
-                 outputPath = normPath(file.path("R/SpaDES/outputs", runName)))
+simDirName <- "dec2020Runs"
+simPaths <- list(cachePath = file.path("R/SpaDES/cache", simDirName)
+                 , modulePath = file.path("R/SpaDES/m")
+                 , inputPath = file.path("R/SpaDES/inputs")
+                 , outputPath = file.path("R/SpaDES/outputs", simDirName))
 
 ## Get necessary objects -----------------------
 source("R/SpaDES/1_simObjects.R")
