@@ -178,16 +178,8 @@ LandRBiomass_sim <- simInit(times = simTimes
                             , outputs = simOutputs
                             , paths = simPaths)
 
-## to avoid synonim bug run the spades call once for 1 year.
-# end(LandRBiomass_sim) <- simTimes$start
-# LandRBiomass_sim <- spades(LandRBiomass_sim
-#        , debug = TRUE
-#        , .plotInitialTime = NA)
-
-# saveRDS(LandRBiomass_sim,
-#         file.path(simPaths$outputPath, paste0("simList_", runName, ".rds")))
-# end(LandRBiomass_sim) <- 30   ## now change back for experiment.
-# unlink(file.path(simPaths$outputPath, "figures"), recursive = TRUE) ## remove unnecessary figures
+saveRDS(LandRBiomass_sim,
+        file.path(simPaths$outputPath, paste0("simInitList_", runName, ".rds")))
 
 library(future)
 plan("multiprocess", workers = 1)   ## each worker consumming roughly 15Gb.
@@ -196,6 +188,10 @@ factorialSimulations <- experiment2(
   clearSimEnv = TRUE,
   replicates = 10)
 
-saveRDS(factorialSimulations, file.path(simPaths$outputPath, paste0("simList_factorialSimulations", runName, ".rds")))
+saveRDS(factorialSimulations, file.path(simPaths$outputPath, paste0("simList_factorialSimulations_", runName, ".rds")))
+
+## save outputfiles table. use lapply for backwards compatibility.
+outputFiles <- lapply(factorialSimulations, outputs)
+saveRDS(outputFiles, file.path(simPaths$outputPath, paste0("outputFiles_", runName, ".rds")))
 
 q("no")
