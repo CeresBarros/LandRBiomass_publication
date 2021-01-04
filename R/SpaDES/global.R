@@ -28,8 +28,8 @@ library(LandR)
 options("reproducible.useNewDigestAlgorithm" = TRUE)
 options("spades.moduleCodeChecks" = FALSE)
 options("reproducible.useCache" = TRUE)
-options("reproducible.inputPaths" = normPath("data"))  ## store everything in data/ so that there are no duplicated files across modules
-options("reproducible.destinationPath" = normPath("data"))
+options("reproducible.inputPaths" = file.path("R/SpaDES/inputs"))  ## store everything in data/ so that there are no duplicated files across modules
+options("reproducible.destinationPath" = file.path("R/SpaDES/inputs"))
 options("reproducible.useGDAL" = FALSE)
 # runName <- "studyAreaS"
 # runName <- "studyAreaL"
