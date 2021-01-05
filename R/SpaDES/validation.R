@@ -48,9 +48,9 @@ simListInit <- readRDS(file.path(simPaths$outputPath, paste0("simInitList_", run
 outputFiles <- readRDS(file.path(simPaths$outputPath, paste0("outputFiles_", runName, ".rds")))
 outputFiles <- outputFiles[saveTime %in% c(year1, year2)]
 
-## change directory if not on proj directory
+## change paths to local
 if (all(!grepl(getwd(), outputFiles$file)))
-  outputFiles$file <- sub(remoteProjPath,
+  outputFiles$file <- sub(paste0(".*", basename(getwd())),
                           getwd(), outputFiles$file)
 
 ## load simulation outputs
@@ -70,25 +70,27 @@ pixelGroupMapStk <- stack(apply(outputFiles[objectName == "pixelGroupMap"], MARG
 
 ## LOAD VALIDATION LAYERS - they are saved in the outputs once for each rep.
 ## here the rstDisturbed only has 1s
-sppCodes <- as.character(unique(allCohortData$speciesCode))
-sppCodesStr <- paste(sppCodes, collapse = "|")
-sppFiles <- list.files(simPaths$outputPath, pattern = sppCodesStr, recursive = TRUE, full.names = TRUE)
-sppFiles <- grep("speciesLayers/", sppFiles, invert = TRUE, value = TRUE)
-sppFiles <- grep(".grd", sppFiles, value = TRUE)
+speciesLayersInit <- if (inMemory(simListInit$speciesLayers))
+  simListInit$speciesLayers else {
+    sppCodes <- as.character(unique(allCohortData$speciesCode))
+    sppCodesStr <- paste(sppCodes, collapse = "|")
 
-speciesLayersInit <- lapply(sppCodes, function(x) {
-  fileName <- grep(x, sppFiles, value = TRUE)
-  ## if there are multiple files for the same species, choose the newest
-  if (length(fileName) > 1)
-    fileName <- fileName[which.max(file.mtime(fileName))]
+    speciesLayersInit <- lapply(simListInit$speciesLayers@layers, function(x) {
+      localFileName <- list.files(simPaths$inputPath, basename(x@file@name),
+                                  recursive = TRUE, full.names = TRUE)
+      if (!length(localFileName))
+        localFileName <- list.files(simPaths$outputPath, basename(x@file@name),
+                                    recursive = TRUE, full.names = TRUE)
+      sppLayer <- raster(localFileName)
 
-  sppLayer <- raster(fileName)
-  names(sppLayer) <- x
-  return(sppLayer)
-}
-)
-speciesLayersInit <- stack(speciesLayersInit)
-rm(sppCodes, sppCodesStr, sppFiles)
+      names(sppLayer) <- sub(paste0("(.*)(", sppCodesStr, ")(.*)"), "\\2",
+                             basename(localFileName))
+      return(sppLayer)
+    }
+    )
+    rm(sppCodes, sppCodesStr)
+    stack(speciesLayersInit)
+  }
 
 if (!compareRaster(speciesLayersInit, simListInit$rasterToMatch, stopiffalse = FALSE)) {
   speciesLayersInit <- postProcess(speciesLayersInit, rasterToMatch = simListInit$rasterToMatch)
@@ -96,8 +98,8 @@ if (!compareRaster(speciesLayersInit, simListInit$rasterToMatch, stopiffalse = F
 
 standAgeMapInit <- if (inMemory(simListInit$standAgeMap))
   simListInit$standAgeMap else {
-    localFileName <- sub(remoteProjPath, localProjPath,
-                         simListInit$standAgeMap@file@name)
+    localFileName <- list.files(simPaths$inputPath, basename(simListInit$standAgeMap@file@name),
+                                recursive = TRUE, full.names = TRUE)
     raster(localFileName)
   }
 
@@ -107,8 +109,8 @@ if (!compareRaster(standAgeMapInit, simListInit$rasterToMatch, stopiffalse = FAL
 
 rawBiomassMapInit <- if (inMemory(simListInit$rawBiomassMap))
   simListInit$rawBiomassMap else {
-    localFileName <- sub(remoteProjPath, localProjPath,
-                         simListInit$rawBiomassMap@file@name)
+    localFileName <- list.files(simPaths$inputPath, basename(simListInit$rawBiomassMap@file@name),
+                                recursive = TRUE, full.names = TRUE)
     raster(localFileName)
   }
 
@@ -118,8 +120,8 @@ if (!compareRaster(rawBiomassMapInit, simListInit$rasterToMatch, stopiffalse = F
 
 rstDisturbedPix <- if (inMemory(simListInit$rstLCChange))
   simListInit$rstLCChange else {
-    localFileName <- sub(remoteProjPath, localProjPath,
-                         simListInit$rstLCChange@file@name)
+    localFileName <- list.files(simPaths$inputPath, basename(simListInit$rstLCChange@file@name),
+                                recursive = TRUE, full.names = TRUE)
     raster(localFileName)
   }
 
@@ -133,8 +135,11 @@ speciesLayersValidation <- if (inMemory(simListInit$speciesLayersValidation))
     sppCodesStr <- paste(sppCodes, collapse = "|")
 
     speciesLayersValidation <- lapply(simListInit$speciesLayersValidation@layers, function(x) {
-      localFileName <- sub(remoteProjPath, localProjPath, x@file@name)
-      # localFileName <- file.path(localProjPath, simPaths$inputPath, basename(x@file@name))
+      localFileName <- list.files(simPaths$inputPath, basename(x@file@name),
+                                  recursive = TRUE, full.names = TRUE)
+      if (!length(localFileName))
+        localFileName <- list.files(simPaths$outputPath, basename(x@file@name),
+                                    recursive = TRUE, full.names = TRUE)
       sppLayer <- raster(localFileName)
 
       names(sppLayer) <- sub(paste0("(.*)(", sppCodesStr, ")(.*)"), "\\2",
@@ -151,8 +156,8 @@ if (!compareRaster(speciesLayersValidation, simListInit$rasterToMatch, stopiffal
 
 standAgeMapValidation <- if (inMemory(simListInit$standAgeMapValidation))
   simListInit$standAgeMapValidation else {
-    localFileName <- sub(remoteProjPath, localProjPath,
-                         simListInit$standAgeMapValidation@file@name)
+    localFileName <- list.files(simPaths$inputPath, basename(simListInit$standAgeMapValidation@file@name),
+                                recursive = TRUE, full.names = TRUE)
     raster(localFileName)
   }
 if (!compareRaster(standAgeMapValidation, simListInit$rasterToMatch, stopiffalse = FALSE)) {
@@ -161,8 +166,8 @@ if (!compareRaster(standAgeMapValidation, simListInit$rasterToMatch, stopiffalse
 
 rawBiomassMapValidation <- if (inMemory(simListInit$rawBiomassMapValidation))
   simListInit$rawBiomassMapValidation else {
-    localFileName <- sub(remoteProjPath, localProjPath,
-                         simListInit$rawBiomassMapValidation@file@name)
+    localFileName <- list.files(simPaths$inputPath, basename(simListInit$rawBiomassMapValidation@file@name),
+                                recursive = TRUE, full.names = TRUE)
     raster(localFileName)
   }
 if (!compareRaster(rawBiomassMapValidation, simListInit$rasterToMatch, stopiffalse = FALSE)) {
