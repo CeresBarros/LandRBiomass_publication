@@ -32,10 +32,10 @@ simPaths <- list(cachePath = file.path("R/SpaDES/cache", simDirName)
                  , modulePath = file.path("R/SpaDES/m")
                  , inputPath = file.path("R/SpaDES/inputs")
                  , outputPath = file.path("R/SpaDES/outputs", simDirName))
+figDir <- "R/SpaDES/validation/Figs"
 
-## define local and remote repo paths for file name subs:
-localProjPath <- getwd()
-remoteProjPath <- "/home/cbarros/GitHub/LandRBiomass_publication"
+if (!dir.exists(figDir))
+  dir.create(figDir, recursive = TRUE)
 
 ## init simList
 simListInit <- readRDS(file.path(simPaths$outputPath, paste0("simInitList_", runName, ".rds")))
@@ -717,8 +717,11 @@ plot1_4 <- ggarrange(plot1 + scale_y_continuous(limits = c(0,1)),
                      plot4 + scale_y_continuous(limits = c(0,2000)),
                      common.legend = TRUE, legend = "bottom",
                      nrow = 2, ncol = 2)
+png(file.path(figDir, "LandscapeComparisons_relB_PresAbs.png"), width = 12, height = 7,
+    units = "in", res = 300)
 annotate_figure(plot1_4,
                 top = text_grob("Landscape-averaged comparisons", size = 16))
+graphics.off()
 
 ## PIXEL-LEVEL COMPARISONS IN A GIVEN YEAR --------------------
 ## pixel-level relative abundances per species
@@ -784,9 +787,11 @@ plot6_7 <- ggarrange(plot6,
                      plot7 + labs(y = " \n "),
                      common.legend = TRUE, legend = "bottom",
                      ncol = 2)
+png(file.path(figDir, "StandComparisons_relB.png"), width = 12, height = 6,
+    units = "in", res = 300)
 annotate_figure(plot6_7,
                 top = text_grob("Stand-level comparisons", size = 16))
-
+graphics.off()
 
 ## COMPARISONS OF DELTA PER PIXEL-------------------
 ## per species
