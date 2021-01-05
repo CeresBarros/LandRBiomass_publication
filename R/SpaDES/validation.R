@@ -46,7 +46,11 @@ simListInit <- readRDS(file.path(simPaths$outputPath, paste0("simInitList_", run
 ## cohortData/pixelGroupMap, however, will vary across reps for year 1, because the beginning of year 1 already includes growth/mortality from year 0.
 ## so, using year 2001 and year 2011 (equivalent to 2010)
 outputFiles <- readRDS(file.path(simPaths$outputPath, paste0("outputFiles_", runName, ".rds")))
-outputFiles <- outputFiles[saveTime %in% c(year1, year2)]
+outputFiles <- rbindlist(lapply(seq_along(outputFiles), function(x) {
+  DT <- as.data.table(outputFiles[[x]])
+  DT <- DT[saveTime %in% c(year1, year2)]
+  DT[, rep := x]
+}), use.names = TRUE)
 
 ## change paths to local
 if (all(!grepl(getwd(), outputFiles$file)))
@@ -230,7 +234,7 @@ validationData <- validationData[!is.na(B)]
 
 ## calculate relative B
 validationData[, relativeAbundValid := B/totalBiomass,
-                   by = .(pixelIndex, speciesCode)]
+               by = .(pixelIndex, speciesCode)]
 validationData[totalBiomass == 0, relativeAbundValid := 0]
 
 rm(pixelTable); amc::.gc()
@@ -359,61 +363,78 @@ standDeltaValidData <- na.omit(data.table(pixelIndex = 1:ncell(standDeltaBValid)
 # yrs <- seq(1980, 2011) - 1900
 # pixKeep <- which(getValues(distYears) %in% yrs)
 # standDeltaValidData <- standDeltaValidData[pixelIndex %in% pixKeep]
-
-ggplot(standDeltaValidData,
-       aes(x = standDeltaAgeValid, y = standDeltaBValid)) +
-  geom_point() +
-  stat_smooth(method = "lm")
-
-summary(lm(standDeltaBValid ~ standDeltaAgeValid, data = standDeltaValidData))
-
 plot1 <- ggplot(standDeltaValidData,
-       aes(x = standDeltaBValid)) +
+                aes(x = standDeltaAgeValid, y = standDeltaBValid)) +
+  geom_point() +
+  stat_smooth(method = "lm") +
+  labs(y = expression(paste(Delta, "B")),
+       x = expression(paste(Delta, "age"))) +
+  theme_pubr(base_size = 12, margin = FALSE)
+
+# summary(lm(standDeltaBValid ~ standDeltaAgeValid, data = standDeltaValidData))
+
+plot2 <- ggplot(standDeltaValidData,
+                aes(x = standDeltaBValid)) +
   geom_histogram() +
-  labs(title = expression(paste("observed" ~~ Delta, "B"))) +
+  labs(title = expression(paste("observed" ~~ Delta, "B")),
+       x = expression(paste(Delta, "B"))) +
   theme_pubr(base_size = 12, margin = FALSE) +
   theme(axis.title.y = element_blank())
 
-plot2 <- ggplot(standDeltaValidData,
-       aes(y = standDeltaBValid)) +
+plot3 <- ggplot(standDeltaValidData,
+                aes(y = standDeltaBValid)) +
   geom_boxplot() +
   coord_flip() +
+  labs(title = expression(paste("observed" ~~ Delta, "B")),
+       y = expression(paste(Delta, "B"))) +
   theme_pubr(base_size = 12, margin = FALSE) +
   theme(axis.title.y = element_blank())
-ggarrange(plot1, plot2, ncol = 1, heights = c(1, 0.5))
 
-
-plot1 <- ggplot(standDeltaValidData,
+plot4 <- ggplot(standDeltaValidData,
                 aes(x = standDeltaAgeValid)) +
   geom_histogram() +
-  labs(title = expression(paste("observed" ~~ Delta, "age"))) +
+  labs(title = expression(paste("observed" ~~ Delta, "age")),
+       x = expression(paste(Delta, "age"))) +
   theme_pubr(base_size = 12, margin = FALSE) +
   theme(axis.title.y = element_blank())
 
-plot2 <- ggplot(standDeltaValidData,
+plot5 <- ggplot(standDeltaValidData,
                 aes(y = standDeltaAgeValid)) +
   geom_boxplot() +
   coord_flip() +
+  labs(title = expression(paste("observed" ~~ Delta, "age")),
+       y = expression(paste(Delta, "age"))) +
   theme_pubr(base_size = 12, margin = FALSE) +
   theme(axis.title.y = element_blank())
-ggarrange(plot1, plot2, ncol = 1, heights = c(1, 0.5))
+
+
+png(file.path(figDir, "observedDeltaBDeltaAge_lm.png"),
+    width = 7, height = 5, units = "in", res = 300)
+ggarrange(plot1)
+dev.off()
+
+png(file.path(figDir, "observedDeltaBDeltaAge.png"),
+    width = 7, height = 5, units = "in", res = 300)
+ggarrange(plot2, plot4, plot3, plot5,
+          nrow = 2, ncol = 2, heights = c(1, 0.5))
+dev.off()
 
 ## delta biomass for the "supposed" age increment - all over the place
-plot1 <- ggplot(standDeltaValidData[standDeltaAgeValid == 10],
+plot6 <- ggplot(standDeltaValidData[standDeltaAgeValid == 10],
                 aes(x = standDeltaBValid)) +
   geom_histogram() +
   labs(title = expression(atop(paste("observed" ~~ Delta, "B"),
-                          paste("for" ~~ Delta, "age" == 10)))) +
+                               paste("for" ~~ Delta, "age" == 10)))) +
   theme_pubr(base_size = 12, margin = FALSE) +
   theme(axis.title.y = element_blank())
 
-plot2 <- ggplot(standDeltaValidData[standDeltaAgeValid == 10],
+plot7 <- ggplot(standDeltaValidData[standDeltaAgeValid == 10],
                 aes(y = standDeltaBValid)) +
   geom_boxplot() +
   coord_flip() +
   theme_pubr(base_size = 12, margin = FALSE) +
   theme(axis.title.y = element_blank())
-ggarrange(plot1, plot2, ncol = 1, heights = c(1, 0.5))
+ggarrange(plot6, plot7, ncol = 1, heights = c(1, 0.5))
 
 
 ## MAPS OF OBSERVED CHANGES IN SPECIES BIOMASS AFTER ADJUSTMENTS -------
@@ -437,59 +458,78 @@ Plot(standDeltaBValidAdj, standDeltaAgeValidAdj)
 
 ## what is the relationship between the two?
 ## a little bit better after cleanup/corrections
-ggplot(plotData,
-       aes(x = standDeltaAgeValid, y = standDeltaBValid)) +
+plot8 <- ggplot(plotData,
+                aes(x = standDeltaAgeValid, y = standDeltaBValid)) +
   geom_point() +
-  stat_smooth(method = "lm")
-summary(lm(standDeltaBValid ~ standDeltaAgeValid, data = plotData))
+  stat_smooth(method = "lm") +
+  labs(y = expression(paste(Delta, "B")),
+       x = expression(paste(Delta, "age"))) +
+  theme_pubr(base_size = 12, margin = FALSE)
 
-plot1 <- ggplot(plotData,
+# summary(lm(standDeltaBValid ~ standDeltaAgeValid, data = plotData))
+
+plot9 <- ggplot(plotData,
                 aes(x = standDeltaBValid)) +
   geom_histogram() +
-  labs(title = expression(paste("observed" ~~ Delta, "B" ~~ "(adjusted)"))) +
+  labs(title = expression(paste("observed" ~~ Delta, "B")),
+       x = expression(paste(Delta, "B"))) +
   theme_pubr(base_size = 12, margin = FALSE) +
   theme(axis.title.y = element_blank())
 
-plot2 <- ggplot(plotData,
-                aes(y = standDeltaBValid)) +
+plot10 <- ggplot(plotData,
+                 aes(y = standDeltaBValid)) +
   geom_boxplot() +
   coord_flip() +
+  labs(title = expression(paste("observed" ~~ Delta, "B")),
+       y = expression(paste(Delta, "B"))) +
   theme_pubr(base_size = 12, margin = FALSE) +
   theme(axis.title.y = element_blank())
-ggarrange(plot1, plot2, ncol = 1, heights = c(1, 0.5))
 
-plot1 <- ggplot(plotData,
-                aes(x = standDeltaAgeValid)) +
+plot11 <- ggplot(plotData,
+                 aes(x = standDeltaAgeValid)) +
   geom_histogram() +
-  labs(title = expression(paste("observed" ~~ Delta, "age" ~~ "(adjusted)"))) +
-
+  labs(title = expression(paste("observed" ~~ Delta, "age")),
+       x = expression(paste(Delta, "age"))) +
   theme_pubr(base_size = 12, margin = FALSE) +
   theme(axis.title.y = element_blank())
 
-plot2 <- ggplot(plotData,
-                aes(y = standDeltaAgeValid)) +
+plot12 <- ggplot(plotData,
+                 aes(y = standDeltaAgeValid)) +
   geom_boxplot() +
   coord_flip() +
+  labs(title = expression(paste("observed" ~~ Delta, "age")),
+       y = expression(paste(Delta, "age"))) +
   theme_pubr(base_size = 12, margin = FALSE) +
   theme(axis.title.y = element_blank())
-ggarrange(plot1, plot2, ncol = 1, heights = c(1, 0.5))
+
+
+png(file.path(figDir, "observedDeltaBDeltaAge_lmADJ.png"),
+    width = 7, height = 5, units = "in", res = 300)
+ggarrange(plot8)
+dev.off()
+
+png(file.path(figDir, "observedDeltaBDeltaAgeADJ.png"),
+    width = 7, height = 5, units = "in", res = 300)
+ggarrange(plot9, plot11, plot10, plot12,
+          nrow = 2, ncol = 2, heights = c(1, 0.5))
+dev.off()
 
 ## delta biomass for the "supposed" age increment - all over the place
-plot1 <- ggplot(plotData[standDeltaAgeValid == 10],
-                aes(x = standDeltaBValid)) +
+plot13 <- ggplot(plotData[standDeltaAgeValid == 10],
+                 aes(x = standDeltaBValid)) +
   geom_histogram() +
   labs(title = expression(atop(paste("observed" ~~ Delta, "B" ~~ "(adjusted)"),
                                paste("for" ~~ Delta, "age" == 10)))) +
   theme_pubr(base_size = 12, margin = FALSE) +
   theme(axis.title.y = element_blank())
 
-plot2 <- ggplot(plotData[standDeltaAgeValid == 10],
-                aes(y = standDeltaBValid)) +
+plot14 <- ggplot(plotData[standDeltaAgeValid == 10],
+                 aes(y = standDeltaBValid)) +
   geom_boxplot() +
   coord_flip() +
   theme_pubr(base_size = 12, margin = FALSE) +
   theme(axis.title.y = element_blank())
-ggarrange(plot1, plot2, ncol = 1, heights = c(1, 0.5))
+ggarrange(plot13, plot14, ncol = 1, heights = c(1, 0.5))
 
 
 ## MAPS OF OBSERVED CHANGES IN SPECIES BIOMASS AFTER ADJUSTMENTS -------
@@ -556,7 +596,7 @@ tempDT <- tempDT[, .(standDeltaAgeValid = standAgeValid[year == year2] - standAg
                      standDeltaBValid = standBValid[year == year2] - standBValid[year == year1]),
                  by = .(rep, pixelIndex)]
 pixToKeep <- unique(tempDT[standDeltaBValid > 0 & standDeltaAgeValid > 0,
-                    pixelIndex])
+                           pixelIndex])
 
 if (!exists("pixToKeep"))
   pixToKeep <- unique(standCohortData$pixelIndex)
@@ -567,7 +607,6 @@ names(yearLabels) <- as.character(c(year1, year2))
 
 ## LANDSCAPE-WIDE COMPARISONS IN A GIVEN YEAR --------------------
 ## relative abundance (biomass) per species
-## note that error bars are absent because there is literally no variation among reps at year 2011:
 if (FALSE) {
   test1 <- readRDS("R/SpaDES/outputs/dec2020Runs/sim1_rep01/cohortData_year2011.rds")
   test2 <- readRDS("R/SpaDES/outputs/dec2020Runs/sim1_rep04/cohortData_year2011.rds")
@@ -590,8 +629,8 @@ plotData <- plotData[year %in% c(year1, year2),
                      list(landRelativeAbund = sum(B, na.rm = TRUE)/unique(landscapeB),
                           landRelativeAbundValid = sum(BValid, na.rm = TRUE)/unique(landscapeBValid)),
                      by = .(rep, year, speciesCode)]
-plot1 <- ggplot(data = plotData,
-                aes(x = speciesCode, y = landRelativeAbund)) +
+plot15 <- ggplot(data = plotData,
+                 aes(x = speciesCode, y = landRelativeAbund)) +
   stat_summary(fun = "mean", geom = "bar") +
   stat_summary(fun.data = "mean_sd", geom = "linerange", size = 1) +
   stat_summary(aes(y = landRelativeAbundValid, colour = "observed"),
@@ -614,8 +653,8 @@ plotData <- plotData[year %in% c(year1, year2),
 plotData <- melt(plotData, measure.vars = c("count", "countValid"),
                  variable.name = "dataType", value.name = "count")
 
-plot2 <- ggplot(data = plotData[dataType == "count"],
-                aes(x = speciesCode, y = count)) +
+plot16 <- ggplot(data = plotData[dataType == "count"],
+                 aes(x = speciesCode, y = count)) +
   stat_summary(fun = "mean", geom = "bar") +
   stat_summary(fun.data = "mean_sd", geom = "linerange", size = 1) +
   stat_summary(data = plotData[dataType == "countValid"],
@@ -665,8 +704,8 @@ plotData[noDoms > 1, vegType := "Mixed"]
 ## calculate landscape average
 plotData1 <- plotData[, relativeAbund := mean(relativeAbund),
                       by = .(rep, year, dataType, vegType)]
-plot3 <- ggplot(data = plotData1[!grepl("Valid", dataType)],
-                aes(x = vegType, y = relativeAbund)) +
+plot17 <- ggplot(data = plotData1[!grepl("Valid", dataType)],
+                 aes(x = vegType, y = relativeAbund)) +
   stat_summary(fun = "mean", geom = "bar") +
   stat_summary(fun.data = "mean_sd", geom = "linerange", size = 1) +
   stat_summary(data = plotData1[grepl("Valid", dataType)],
@@ -686,8 +725,8 @@ plot3 <- ggplot(data = plotData1[!grepl("Valid", dataType)],
 ## this is because B is adjusted using a statistical model
 plotData1 <- plotData[, list(count = length(pixelIndex)),
                       by = .(rep, year, dataType, vegType)]
-plot4 <- ggplot(data = plotData1[!grepl("Valid", dataType)],
-                aes(x = vegType, y = count)) +
+plot18 <- ggplot(data = plotData1[!grepl("Valid", dataType)],
+                 aes(x = vegType, y = count)) +
   stat_summary(fun = "mean", geom = "bar") +
   stat_summary(fun.data = "mean_sd", geom = "linerange", size = 1) +
   geom_point(data = plotData1[grepl("Valid", dataType)],
@@ -701,7 +740,7 @@ plot4 <- ggplot(data = plotData1[!grepl("Valid", dataType)],
        x = "", y = "no. pixels", fill = "", colour = "")
 
 ## as previous, but in relative terms
-plot5 <- ggplot(data = plotData1, aes(x = dataType, y = count, fill = vegType)) +
+plot19 <- ggplot(data = plotData1, aes(x = dataType, y = count, fill = vegType)) +
   stat_summary(fun = "mean", geom = "bar", position = "fill") +
   scale_fill_brewer(palette = "Accent", labels = speciesLabels) +
   scale_x_discrete(labels = c("relativeAbund" = "simulated", "relativeAbundValid" = "observed")) +
@@ -711,15 +750,15 @@ plot5 <- ggplot(data = plotData1, aes(x = dataType, y = count, fill = vegType)) 
   labs(title = "Dominant species presences", x = "",
        y = "proportion of pixels", fill = "")
 
-plot1_4 <- ggarrange(plot1 + scale_y_continuous(limits = c(0,1)),
-                     plot2 + scale_y_continuous(limits = c(0,2000)),
-                     plot3 + scale_y_continuous(limits = c(0,1)),
-                     plot4 + scale_y_continuous(limits = c(0,2000)),
-                     common.legend = TRUE, legend = "bottom",
-                     nrow = 2, ncol = 2)
+plot15_19 <- ggarrange(plot15 + scale_y_continuous(limits = c(0,1)),
+                       plot16 + scale_y_continuous(limits = c(0,2000)),
+                       plot17 + scale_y_continuous(limits = c(0,1)),
+                       plot18 + scale_y_continuous(limits = c(0,2000)),
+                       common.legend = TRUE, legend = "bottom",
+                       nrow = 2, ncol = 2)
 png(file.path(figDir, "LandscapeComparisons_relB_PresAbs.png"), width = 12, height = 7,
     units = "in", res = 300)
-annotate_figure(plot1_4,
+annotate_figure(plot15_19,
                 top = text_grob("Landscape-averaged comparisons", size = 16))
 graphics.off()
 
@@ -731,8 +770,8 @@ plotData <- plotData[year %in% c(year1, year2),
                        relativeAbund, relativeAbundValid)]
 plotData <- melt(plotData,
                  id.vars = c("rep", "year", "pixelIndex", "speciesCode"))
-plot6 <- ggplot(data = plotData,
-                aes(x = speciesCode, y = value, fill = variable)) +
+plot20 <- ggplot(data = plotData,
+                 aes(x = speciesCode, y = value, fill = variable)) +
   geom_boxplot() +
   scale_x_discrete(labels = speciesLabels, drop = FALSE) +
   scale_fill_discrete(labels = c("relativeAbund" = "simulated",
@@ -771,8 +810,8 @@ rm(plotData1, plotData2)
 
 plotData[noDoms > 1, vegType := "Mixed"]
 
-plot7 <- ggplot(data = plotData,
-                aes(x = vegType, y = relativeAbund, fill = dataType)) +
+plot21 <- ggplot(data = plotData,
+                 aes(x = vegType, y = relativeAbund, fill = dataType)) +
   geom_boxplot() +
   scale_fill_discrete(labels = c("relativeAbund" = "simulated",
                                  "relativeAbundValid" = "observed")) +
@@ -783,13 +822,13 @@ plot7 <- ggplot(data = plotData,
        x = "", y = expression(over("species B", "total B")),
        fill = "")
 
-plot6_7 <- ggarrange(plot6,
-                     plot7 + labs(y = " \n "),
-                     common.legend = TRUE, legend = "bottom",
-                     ncol = 2)
+plot20_21 <- ggarrange(plot20,
+                       plot21 + labs(y = " \n "),
+                       common.legend = TRUE, legend = "bottom",
+                       ncol = 2)
 png(file.path(figDir, "StandComparisons_relB.png"), width = 12, height = 6,
     units = "in", res = 300)
-annotate_figure(plot6_7,
+annotate_figure(plot20_21,
                 top = text_grob("Stand-level comparisons", size = 16))
 graphics.off()
 
@@ -816,7 +855,7 @@ plotData2 <- unique(plotData2[, speciesCode := "stand"])
 
 plotData <- rbind(plotData1, plotData2, use.names = TRUE)
 
-plot8 <-  ggplot(data = plotData[!grepl("Valid", dataType)],
+plot22 <-  ggplot(data = plotData[!grepl("Valid", dataType)],
                  aes(x = speciesCode, y = deltaB, group = rep)) +
   stat_summary(fun = "mean", geom = "bar") +
   stat_summary(fun.data = "mean_sd", geom = "linerange", size = 1) +
@@ -828,7 +867,7 @@ plot8 <-  ggplot(data = plotData[!grepl("Valid", dataType)],
   labs(title = "Landscape-averaged",
        x = "", y = expression(paste(Delta, "B")))
 
-plot9 <- ggplot(data = plotData,
+plot23 <- ggplot(data = plotData,
                 aes(x = speciesCode, y = deltaB, fill = dataType)) +
   geom_boxplot() +
   scale_x_discrete(labels = speciesLabels) +
@@ -838,11 +877,11 @@ plot9 <- ggplot(data = plotData,
   labs(title = "Pixel-level", fill = "",
        x = "", y = expression(paste(Delta, "B")))
 
-plot8_9 <- ggarrange(plot8, plot9 + labs(y = " \n "),
+plot22_23 <- ggarrange(plot22, plot23 + labs(y = " \n "),
                      common.legend = TRUE, legend = "bottom",
                      ncol = 2)
 png(file.path(figDir, "LandscapeStandComparisons_deltaB.png"), width = 10, height = 6,
     units = "in", res = 300)
-annotate_figure(plot8_9,
+annotate_figure(plot22_23,
                 top = text_grob("Changes in abundance", size = 16))
 graphics.off()
