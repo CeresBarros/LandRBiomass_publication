@@ -596,9 +596,10 @@ plot1 <- ggplot(data = plotData,
   stat_summary(fun.data = "mean_sd", geom = "linerange", size = 1) +
   stat_summary(aes(y = landRelativeAbundValid, colour = "observed"),
                fun = "mean", geom = "point", size = 2) +
-  scale_x_discrete(labels = speciesLabels) +
+  scale_x_discrete(labels = speciesLabels, drop = FALSE) +
   scale_color_manual(values = c("observed" = "black")) +
-  theme_pubr(base_size = 12, margin = FALSE) + theme(axis.text.x = element_text(angle = 45, vjust = 0.5)) +
+  theme_pubr(base_size = 12, margin = FALSE, x.text.angle = 45) +
+  theme(legend.position = "right") +
   facet_wrap(~ year, labeller = labeller(year = yearLabels)) +
   labs(title = "Species relative abundances",
        x = "", y = expression(over("species B", "total B")),
@@ -620,9 +621,10 @@ plot2 <- ggplot(data = plotData[dataType == "count"],
   stat_summary(data = plotData[dataType == "countValid"],
                aes(x = speciesCode, y = count, colour = "observed"),
                fun = "mean", geom = "point", size = 2) +
-  scale_x_discrete(labels = speciesLabels) +
+  scale_x_discrete(labels = speciesLabels, drop = FALSE) +
   scale_color_manual(values = c("observed" = "black")) +
-  theme_pubr(base_size = 12, margin = FALSE) + theme(axis.text.x = element_text(angle = 45, vjust = 0.5)) +
+  theme_pubr(base_size = 12, margin = FALSE, x.text.angle = 45) +
+  theme(legend.position = "right") +
   facet_wrap(~ year, labeller = labeller(year = yearLabels)) +
   labs(title = "Species presences",
        x = "", y = "no. pixels",
@@ -670,9 +672,10 @@ plot3 <- ggplot(data = plotData1[!grepl("Valid", dataType)],
   stat_summary(data = plotData1[grepl("Valid", dataType)],
                aes(x = vegType, y = relativeAbund, colour = "observed"),
                fun = "mean", geom = "point", size = 2) +
-  scale_x_discrete(labels = speciesLabels) +
+  scale_x_discrete(labels = speciesLabels, drop = FALSE) +
   scale_color_manual(values = c("observed" = "black")) +
-  theme_pubr(base_size = 12, margin = FALSE) + theme(axis.text.x = element_text(angle = 45, vjust = 0.5)) +
+  theme_pubr(base_size = 12, margin = FALSE, x.text.angle = 45) +
+  theme(legend.position = "right") +
   facet_wrap(~ year, labeller = labeller(year = yearLabels)) +
   labs(title = "Dominant species' relative abundances",
        x = "", y = expression(over("species B", "total B")),
@@ -689,9 +692,10 @@ plot4 <- ggplot(data = plotData1[!grepl("Valid", dataType)],
   stat_summary(fun.data = "mean_sd", geom = "linerange", size = 1) +
   geom_point(data = plotData1[grepl("Valid", dataType)],
              aes(x = vegType, y = count, colour = "observed"), size = 2) +
-  scale_x_discrete(labels = speciesLabels) +
+  scale_x_discrete(labels = speciesLabels, drop = FALSE) +
   scale_color_manual(values = c("observed" = "black")) +
-  theme_pubr(base_size = 12, margin = FALSE) + theme(axis.text.x = element_text(angle = 45, vjust = 0.5)) +
+  theme_pubr(base_size = 12, margin = FALSE, x.text.angle = 45) +
+  theme(legend.position = "right") +
   facet_wrap(~ year, labeller = labeller(year = yearLabels)) +
   labs(title = "Dominant species' presences",
        x = "", y = "no. pixels", fill = "", colour = "")
@@ -701,8 +705,8 @@ plot5 <- ggplot(data = plotData1, aes(x = dataType, y = count, fill = vegType)) 
   stat_summary(fun = "mean", geom = "bar", position = "fill") +
   scale_fill_brewer(palette = "Accent", labels = speciesLabels) +
   scale_x_discrete(labels = c("relativeAbund" = "simulated", "relativeAbundValid" = "observed")) +
-  theme_pubr(base_size = 12, margin = FALSE) + theme(legend.position = "right",
-                       axis.text.x = element_text(angle = 45, vjust = 0.5)) +
+  theme_pubr(base_size = 12, margin = FALSE, x.text.angle = 45) +
+  theme(legend.position = "right") +
   facet_wrap(~ year, labeller = labeller(year = yearLabels)) +
   labs(title = "Dominant species presences", x = "",
        y = "proportion of pixels", fill = "")
@@ -727,11 +731,10 @@ plotData <- melt(plotData,
 plot6 <- ggplot(data = plotData,
                 aes(x = speciesCode, y = value, fill = variable)) +
   geom_boxplot() +
-  scale_x_discrete(labels = speciesLabels) +
+  scale_x_discrete(labels = speciesLabels, drop = FALSE) +
   scale_fill_discrete(labels = c("relativeAbund" = "simulated",
                                  "relativeAbundValid" = "observed")) +
-  theme_pubr(base_size = 12, margin = FALSE) +
-  theme(axis.text.x = element_text(angle = 45, vjust = 0.5)) +
+  theme_pubr(base_size = 12, margin = FALSE, x.text.angle = 45) +
   facet_wrap(~ year, labeller = labeller(year = yearLabels)) +
   labs(title = "Species relative abundances", fill = "",
        x = "", y = expression(over("species B", "stand B")))
@@ -770,8 +773,8 @@ plot7 <- ggplot(data = plotData,
   geom_boxplot() +
   scale_fill_discrete(labels = c("relativeAbund" = "simulated",
                                  "relativeAbundValid" = "observed")) +
-  scale_x_discrete(labels = speciesLabels) +
-  theme_pubr(base_size = 12, margin = FALSE) + theme(axis.text.x = element_text(angle = 45, vjust = 0.5)) +
+  scale_x_discrete(labels = speciesLabels, drop = FALSE) +
+  theme_pubr(base_size = 12, margin = FALSE, x.text.angle = 45) +
   facet_wrap(~ year, labeller = labeller(year = yearLabels)) +
   labs(title = "Dominant species' relative abundances",
        x = "", y = expression(over("species B", "total B")),
@@ -815,8 +818,8 @@ plot8 <-  ggplot(data = plotData[!grepl("Valid", dataType)],
   stat_summary(data = plotData[grepl("Valid", dataType)],
                aes(x = speciesCode, y = deltaB, group = rep),
                fun = "mean", geom = "point", size = 2) +
-  scale_x_discrete(labels = speciesLabels) +
-  theme_pubr(base_size = 12, margin = FALSE) + theme(axis.text.x = element_text(angle = 45, vjust = 0.5)) +
+  scale_x_discrete(labels = speciesLabels, drop = FALSE) +
+  theme_pubr(base_size = 12, margin = FALSE, x.text.angle = 45) +
   labs(title = "Landscape-averaged",
        x = "", y = expression(paste(Delta, "B")))
 
@@ -826,13 +829,15 @@ plot9 <- ggplot(data = plotData,
   scale_x_discrete(labels = speciesLabels) +
   scale_fill_discrete(labels = c("deltaB" = "simulated",
                                  "deltaBValid" = "observed")) +
-  theme_pubr(base_size = 12, margin = FALSE) + theme(axis.text.x = element_text(angle = 45, vjust = 0.5)) +
+  theme_pubr(base_size = 12, margin = FALSE, x.text.angle = 45) +
   labs(title = "Pixel-level", fill = "",
        x = "", y = expression(paste(Delta, "B")))
 
 plot8_9 <- ggarrange(plot8, plot9 + labs(y = " \n "),
                      common.legend = TRUE, legend = "bottom",
                      ncol = 2)
+png(file.path(figDir, "LandscapeStandComparisons_deltaB.png"), width = 10, height = 6,
+    units = "in", res = 300)
 annotate_figure(plot8_9,
                 top = text_grob("Changes in abundance", size = 16))
-
+graphics.off()
