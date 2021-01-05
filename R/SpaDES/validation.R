@@ -180,7 +180,7 @@ if (!all(names(speciesLayersInit) %in% names(speciesLayersValidation)))
 
 
 ## MAKE VALIDATION PIXEL TABLES
-## need to reproduce some steps in BBDP
+## need to reproduce some steps in Biomass_borealDataPrep
 ## year 2001
 pixelTable <- makePixelTable(speciesLayers = speciesLayersInit,
                              biomassMap = rawBiomassMapInit,
