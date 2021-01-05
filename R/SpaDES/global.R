@@ -168,8 +168,6 @@ if (runName == "parametriseSALarge") {
   simObjects$studyArea <- get(runName)
 }
 
-startTime <- date()
-
 # reproducible::clearCache(simPaths$cachePath)
 LandRBiomass_sim <- simInit(times = simTimes
                             , params = simParams
@@ -181,6 +179,7 @@ LandRBiomass_sim <- simInit(times = simTimes
 saveRDS(LandRBiomass_sim,
         file.path(simPaths$outputPath, paste0("simInitList_", runName, ".rds")))
 
+# options("reproducible.useCache" = "overwrite")
 library(future)
 plan("multiprocess", workers = 1)   ## each worker consumming roughly 15Gb.
 factorialSimulations <- experiment2(
