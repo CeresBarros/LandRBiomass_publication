@@ -16,45 +16,41 @@ library(magick)
 
 ## Set up modelling parameters  ---------------------------
 options('reproducible.useNewDigestAlgorithm' = TRUE)
+options("reproducible.useGDAL" = FALSE)
 # runName <- "studyAreaS"
 # runName <- "studyAreaL"
 runName <- "parametriseSALarge"
 
 ## select simulation reps and years
 reps <- 1:10
-year1 <- 0
-year2 <- 11
+year1 <- 2001
+year2 <- 2011
 
 ## paths
-simPaths <- list(cachePath = file.path("R/SpaDES/cache", runName),
-                 modulePath = file.path("R/SpaDES/m"),
-                 inputPath = file.path("data/"),
-                 outputPath = file.path("R/SpaDES/outputs", runName))
+simDirName <- "dec2020Runs"
+simPaths <- list(cachePath = file.path("R/SpaDES/cache", simDirName)
+                 , modulePath = file.path("R/SpaDES/m")
+                 , inputPath = file.path("R/SpaDES/inputs")
+                 , outputPath = file.path("R/SpaDES/outputs", simDirName))
 
 ## define local and remote repo paths for file name subs:
 localProjPath <- getwd()
-remoteProjPath <- "/mnt/storage/cbarros/LandRBiomass_publication"
+remoteProjPath <- "/home/cbarros/GitHub/LandRBiomass_publication"
 
-## simLists
-factorialSimulations <- readRDS(list.files(simPaths$outputPath, "simList_factorialSimulations",
-                                           full.names = TRUE))
-simListInit <- readRDS(list.files(simPaths$outputPath, paste0("simList_", runName), full.names = TRUE))
+## init simList
+simListInit <- readRDS(file.path(simPaths$outputPath, paste0("simInitList_", runName, ".rds")))
 
 ## get files of validation year per rep
 ## 2001 is the first year (0) and 2011, is year 10,
-## but choose years 0 and 11 because objects were saved at the beginning of the year, they reflect the end of the previous year
-## cohortData/pixelGroupMap, however, will vary across reps for year 0, because the beggining of year 1 already includes growth/mortality from year 0.
-## so, using year 0 and year 11 (equivalent to 10)
-outputFiles <- lapply(factorialSimulations, outputs)
-outputFiles <- rbindlist(lapply(seq_along(outputFiles), FUN = function(x) {
-  DT <- as.data.table(outputFiles[[x]])
-  DT <- DT[saveTime %in% c(year1, year2)]
-  DT[, rep := x]
-}), use.names = TRUE)
+## but choose years 2001 and 2011 because objects were saved at the beginning of the year, they reflect the end of the previous year
+## cohortData/pixelGroupMap, however, will vary across reps for year 1, because the beginning of year 1 already includes growth/mortality from year 0.
+## so, using year 2001 and year 2011 (equivalent to 2010)
+outputFiles <- readRDS(file.path(simPaths$outputPath, paste0("outputFiles_", runName, ".rds")))
+outputFiles <- outputFiles[saveTime %in% c(year1, year2)]
 
 ## change directory if not on proj directory
 if (all(!grepl(getwd(), outputFiles$file)))
-  outputFiles$file <- sub("/mnt/storage/cbarros/LandRBiomass_publication",
+  outputFiles$file <- sub(remoteProjPath,
                           getwd(), outputFiles$file)
 
 ## load simulation outputs
@@ -72,25 +68,31 @@ pixelGroupMapStk <- stack(apply(outputFiles[objectName == "pixelGroupMap"], MARG
   pixelGroupMap
 }))
 
-## load validation layers - they are saved in the outputs once for each rep.
+## LOAD VALIDATION LAYERS - they are saved in the outputs once for each rep.
 ## here the rstDisturbed only has 1s
-speciesLayersInit <- if (inMemory(simListInit$speciesLayers))
-  simListInit$speciesLayers else {
-    sppCodes <- as.character(unique(allCohortData$speciesCode))
-    sppCodesStr <- paste(sppCodes, collapse = "|")
+sppCodes <- as.character(unique(allCohortData$speciesCode))
+sppCodesStr <- paste(sppCodes, collapse = "|")
+sppFiles <- list.files(simPaths$outputPath, pattern = sppCodesStr, recursive = TRUE, full.names = TRUE)
+sppFiles <- grep("speciesLayers/", sppFiles, invert = TRUE, value = TRUE)
+sppFiles <- grep(".grd", sppFiles, value = TRUE)
 
-    speciesLayersInit <- lapply(simListInit$speciesLayers@layers, function(x) {
-      localFileName <- sub(remoteProjPath, localProjPath, x@file@name)
-      sppLayer <- raster(localFileName)
+speciesLayersInit <- lapply(sppCodes, function(x) {
+  fileName <- grep(x, sppFiles, value = TRUE)
+  ## if there are multiple files for the same species, choose the newest
+  if (length(fileName) > 1)
+    fileName <- fileName[which.max(file.mtime(fileName))]
 
-      names(sppLayer) <- sub(paste0("(.*)(", sppCodesStr, ")(.*)"), "\\2",
-                             basename(localFileName))
-      return(sppLayer)
-    }
-    )
-    rm(sppCodes, sppCodesStr)
-    stack(speciesLayersInit)
-  }
+  sppLayer <- raster(fileName)
+  names(sppLayer) <- x
+  return(sppLayer)
+}
+)
+speciesLayersInit <- stack(speciesLayersInit)
+rm(sppCodes, sppCodesStr, sppFiles)
+
+if (!compareRaster(speciesLayersInit, simListInit$rasterToMatch, stopiffalse = FALSE)) {
+  speciesLayersInit <- postProcess(speciesLayersInit, rasterToMatch = simListInit$rasterToMatch)
+}
 
 standAgeMapInit <- if (inMemory(simListInit$standAgeMap))
   simListInit$standAgeMap else {
@@ -99,12 +101,20 @@ standAgeMapInit <- if (inMemory(simListInit$standAgeMap))
     raster(localFileName)
   }
 
+if (!compareRaster(standAgeMapInit, simListInit$rasterToMatch, stopiffalse = FALSE)) {
+  standAgeMapInit <- postProcess(standAgeMapInit, rasterToMatch = simListInit$rasterToMatch)
+}
+
 rawBiomassMapInit <- if (inMemory(simListInit$rawBiomassMap))
   simListInit$rawBiomassMap else {
     localFileName <- sub(remoteProjPath, localProjPath,
                          simListInit$rawBiomassMap@file@name)
     raster(localFileName)
   }
+
+if (!compareRaster(rawBiomassMapInit, simListInit$rasterToMatch, stopiffalse = FALSE)) {
+  rawBiomassMapInit <- postProcess(rawBiomassMapInit, rasterToMatch = simListInit$rasterToMatch)
+}
 
 rstDisturbedPix <- if (inMemory(simListInit$rstLCChange))
   simListInit$rstLCChange else {
@@ -113,6 +123,10 @@ rstDisturbedPix <- if (inMemory(simListInit$rstLCChange))
     raster(localFileName)
   }
 
+if (!compareRaster(rstDisturbedPix, simListInit$rasterToMatch, stopiffalse = FALSE)) {
+  rstDisturbedPix <- postProcess(rstDisturbedPix, rasterToMatch = simListInit$rasterToMatch)
+}
+
 speciesLayersValidation <- if (inMemory(simListInit$speciesLayersValidation))
   simListInit$speciesLayersValidation else {
     sppCodes <- as.character(unique(allCohortData$speciesCode))
@@ -120,6 +134,7 @@ speciesLayersValidation <- if (inMemory(simListInit$speciesLayersValidation))
 
     speciesLayersValidation <- lapply(simListInit$speciesLayersValidation@layers, function(x) {
       localFileName <- sub(remoteProjPath, localProjPath, x@file@name)
+      # localFileName <- file.path(localProjPath, simPaths$inputPath, basename(x@file@name))
       sppLayer <- raster(localFileName)
 
       names(sppLayer) <- sub(paste0("(.*)(", sppCodesStr, ")(.*)"), "\\2",
@@ -130,6 +145,9 @@ speciesLayersValidation <- if (inMemory(simListInit$speciesLayersValidation))
     rm(sppCodes, sppCodesStr)
     stack(speciesLayersValidation)
   }
+if (!compareRaster(speciesLayersValidation, simListInit$rasterToMatch, stopiffalse = FALSE)) {
+  speciesLayersValidation <- postProcess(speciesLayersValidation, rasterToMatch = simListInit$rasterToMatch)
+}
 
 standAgeMapValidation <- if (inMemory(simListInit$standAgeMapValidation))
   simListInit$standAgeMapValidation else {
@@ -137,6 +155,9 @@ standAgeMapValidation <- if (inMemory(simListInit$standAgeMapValidation))
                          simListInit$standAgeMapValidation@file@name)
     raster(localFileName)
   }
+if (!compareRaster(standAgeMapValidation, simListInit$rasterToMatch, stopiffalse = FALSE)) {
+  standAgeMapValidation <- postProcess(standAgeMapValidation, rasterToMatch = simListInit$rasterToMatch)
+}
 
 rawBiomassMapValidation <- if (inMemory(simListInit$rawBiomassMapValidation))
   simListInit$rawBiomassMapValidation else {
@@ -144,12 +165,17 @@ rawBiomassMapValidation <- if (inMemory(simListInit$rawBiomassMapValidation))
                          simListInit$rawBiomassMapValidation@file@name)
     raster(localFileName)
   }
+if (!compareRaster(rawBiomassMapValidation, simListInit$rasterToMatch, stopiffalse = FALSE)) {
+  rawBiomassMapValidation <- postProcess(rawBiomassMapValidation, rasterToMatch = simListInit$rasterToMatch)
+}
 
 ## check names of species layers match
 if (!all(names(speciesLayersInit) %in% names(speciesLayersValidation)))
   stop("validation species layers names do not match!")
 
 
+## MAKE VALIDATION PIXEL TABLES
+## need to reproduce some steps in BBDP
 ## year 2001
 pixelTable <- makePixelTable(speciesLayers = speciesLayersInit,
                              biomassMap = rawBiomassMapInit,
@@ -157,34 +183,52 @@ pixelTable <- makePixelTable(speciesLayers = speciesLayersInit,
                              rasterToMatch = simListInit$rasterToMatch)
 pixelTable[, initialEcoregionCode := NULL]
 pixelTable <- unique(pixelTable)
-Bclass <- P(simListInit)$Biomass_borealDataPrep$pixelGroupBiomassClass
+
+minCoverThreshold <- P(simListInit)$Biomass_borealDataPrep$minCoverThreshold
+deciduousCoverDiscount <- P(simListInit)$Biomass_borealDataPrep$deciduousCoverDiscount
+pixelGroupBiomassClass <- P(simListInit)$Biomass_borealDataPrep$pixelGroupBiomassClass
 validationDataInit <- LandR:::.createCohortData(pixelTable, rescale = TRUE,
-                                                pixelGroupBiomassClass = Bclass,
-                                                doAssertion = FALSE)
-validationDataInit[cover > 0 & age == 0, B := 0L]
-validationDataInit[, totalBiomass := asInteger(sum(B)), by = "pixelIndex"]
+                                                minCoverThreshold = minCoverThreshold)
+validationDataInit <- simListInit$.mods$Biomass_borealDataPrep$partitionBiomass(x = deciduousCoverDiscount, validationDataInit)
+set(validationDataInit, NULL, "B", asInteger(validationDataInit$B/pixelGroupBiomassClass) * pixelGroupBiomassClass)
+set(validationDataInit, NULL, c("decid", "cover2", "logAge"), NULL)
+set(validationDataInit, NULL, "cover", asInteger(validationDataInit$cover))
+
+## remove pixels with missing data
+validationDataInit <- validationDataInit[!is.na(B)]
+
+## calculate relative B
 validationDataInit[, relativeAbundValid := B/totalBiomass,
                    by = .(pixelIndex, speciesCode)]
-validationDataInit[, logAge := NULL]
+validationDataInit[totalBiomass == 0, relativeAbundValid := 0]
+
+rm(pixelTable); amc::.gc()
 
 ## year 2011
 pixelTable <- makePixelTable(speciesLayers = speciesLayersValidation,
                              biomassMap = rawBiomassMapValidation,
                              standAgeMap = standAgeMapValidation,
                              rasterToMatch = simListInit$rasterToMatch)
+
 pixelTable[, initialEcoregionCode := NULL]
 pixelTable <- unique(pixelTable)
-Bclass <- P(factorialSimulations$sim1_rep1)$Biomass_borealDataPrep$pixelGroupBiomassClass
-validationData <- LandR:::.createCohortData(pixelTable, rescale = TRUE,
-                                            pixelGroupBiomassClass = Bclass,
-                                            doAssertion = FALSE)
-validationData[cover > 0 & age == 0, B := 0L]
-validationData[, totalBiomass := asInteger(sum(B)), by = "pixelIndex"]
-validationData[, relativeAbundValid := B/totalBiomass,
-               by = .(pixelIndex, speciesCode)]
-validationData[is.nan(relativeAbundValid), relativeAbundValid := 0]
-validationData[, logAge := NULL]
 
+validationData <- LandR:::.createCohortData(pixelTable, rescale = TRUE,
+                                            minCoverThreshold = minCoverThreshold)
+validationData <- simListInit$.mods$Biomass_borealDataPrep$partitionBiomass(x = deciduousCoverDiscount, validationData)
+set(validationData, NULL, "B", asInteger(validationData$B/pixelGroupBiomassClass) * pixelGroupBiomassClass)
+set(validationData, NULL, c("decid", "cover2", "logAge"), NULL)
+set(validationData, NULL, "cover", asInteger(validationData$cover))
+
+## remove pixels with missing data
+validationData <- validationData[!is.na(B)]
+
+## calculate relative B
+validationData[, relativeAbundValid := B/totalBiomass,
+                   by = .(pixelIndex, speciesCode)]
+validationData[totalBiomass == 0, relativeAbundValid := 0]
+
+rm(pixelTable); amc::.gc()
 
 ## expand cohortData
 allCohortData <- rbindlist(fill = TRUE, use.names = TRUE,
@@ -231,23 +275,24 @@ validationData <- validationData[combinationsValid,
 validationData <- rbindlist(list(validationDataInit, validationData),
                             use.names = TRUE)
 
-# ## exclude pixels that are not simulated
+## exclude pixels that are not simulated
 validationData <- validationData[pixelIndex %in% standCohortData$pixelIndex]
 
 ## clean up
 rm(combinationsInit, combinationsValid, validationDataInit)
 
 ## change names before joining.
+## exclude simulated data that has no match on validation data
 setnames(validationData, c("cover", "age", "B", "totalBiomass"),
          c("coverValid", "standAgeValid", "BValid", "standBValid"))
 cols <- c("rep", "year", "pixelIndex", "speciesCode", "coverValid",
           "standAgeValid", "BValid", "standBValid", "relativeAbundValid")
 standCohortData <- standCohortData[validationData[, ..cols],
-                                   on = c("rep", "year", "pixelIndex", "speciesCode")]
+                                   on = c("rep", "year", "pixelIndex", "speciesCode"),
+                                   nomatch = 0]
 
-## some NAs added on simutated data for year 2011
-standCohortData[is.na(B), B := 0]
-standCohortData[is.na(BValid), BValid := 0]  ## just to be sure
+## some NAs added on simulated data for year 2011
+# standCohortData[is.na(BValid), BValid := 0]  ## just to be sure
 standCohortData[, standAge := max(standAge, na.rm = TRUE), by = .(year, rep, pixelIndex)]
 
 ## calculate simulated standAge, standB and relative B now that NAs have been taken care of
@@ -256,7 +301,7 @@ standCohortData[, standB := asInteger(sum(B, na.rm = TRUE)),
 standCohortData[, relativeAbund := B/standB,
                 by = .(rep, year, pixelIndex, speciesCode)]
 
-## reorder column names for
+## reorder column names
 cols <-  c(grep("Valid", names(standCohortData), value = TRUE, invert = TRUE),
            grep("Valid", names(standCohortData), value = TRUE))
 standCohortData <- standCohortData[, ..cols]
@@ -282,7 +327,7 @@ names(speciesLabels) <- unique(standCohortData$speciesCode)
 standCohortData[, mean(relativeAbundValid, na.rm = TRUE), by = .(rep, year, speciesCode)] %>%
   .[, sum(V1), by = .(rep, year)]
 
-## but they do for each stand - all good
+## nor for each stand (but they are close) - probably due to deciduous/conifer cover adjustments
 standCohortData[, sum(relativeAbundValid, na.rm = TRUE), by = .(rep, year, pixelIndex)] %>%
   lapply(., unique) %>% .["V1"]
 
@@ -317,25 +362,57 @@ ggplot(standDeltaValidData,
 
 summary(lm(standDeltaBValid ~ standDeltaAgeValid, data = standDeltaValidData))
 
-ggplot(standDeltaValidData,
+plot1 <- ggplot(standDeltaValidData,
        aes(x = standDeltaBValid)) +
-  geom_histogram()
-ggplot(standDeltaValidData,
-       aes(y = standDeltaBValid)) +
-  geom_boxplot()
+  geom_histogram() +
+  labs(title = expression(paste("observed" ~~ Delta, "B"))) +
+  theme_pubr(base_size = 12, margin = FALSE) +
+  theme(axis.title.y = element_blank())
 
-ggplot(standDeltaValidData,
-       aes(x = standDeltaAgeValid)) +
-  geom_histogram()
-ggplot(standDeltaValidData,
-       aes(y = standDeltaAgeValid)) +
-  geom_boxplot()
-ggplot(standDeltaValidData[standDeltaAgeValid == 10],
-       aes(x = standDeltaBValid)) +
-  geom_histogram()
+plot2 <- ggplot(standDeltaValidData,
+       aes(y = standDeltaBValid)) +
+  geom_boxplot() +
+  coord_flip() +
+  theme_pubr(base_size = 12, margin = FALSE) +
+  theme(axis.title.y = element_blank())
+ggarrange(plot1, plot2, ncol = 1, heights = c(1, 0.5))
+
+
+plot1 <- ggplot(standDeltaValidData,
+                aes(x = standDeltaAgeValid)) +
+  geom_histogram() +
+  labs(title = expression(paste("observed" ~~ Delta, "age"))) +
+  theme_pubr(base_size = 12, margin = FALSE) +
+  theme(axis.title.y = element_blank())
+
+plot2 <- ggplot(standDeltaValidData,
+                aes(y = standDeltaAgeValid)) +
+  geom_boxplot() +
+  coord_flip() +
+  theme_pubr(base_size = 12, margin = FALSE) +
+  theme(axis.title.y = element_blank())
+ggarrange(plot1, plot2, ncol = 1, heights = c(1, 0.5))
+
+## delta biomass for the "supposed" age increment - all over the place
+plot1 <- ggplot(standDeltaValidData[standDeltaAgeValid == 10],
+                aes(x = standDeltaBValid)) +
+  geom_histogram() +
+  labs(title = expression(atop(paste("observed" ~~ Delta, "B"),
+                          paste("for" ~~ Delta, "age" == 10)))) +
+  theme_pubr(base_size = 12, margin = FALSE) +
+  theme(axis.title.y = element_blank())
+
+plot2 <- ggplot(standDeltaValidData[standDeltaAgeValid == 10],
+                aes(y = standDeltaBValid)) +
+  geom_boxplot() +
+  coord_flip() +
+  theme_pubr(base_size = 12, margin = FALSE) +
+  theme(axis.title.y = element_blank())
+ggarrange(plot1, plot2, ncol = 1, heights = c(1, 0.5))
 
 
 ## MAPS OF OBSERVED CHANGES IN SPECIES BIOMASS AFTER ADJUSTMENTS -------
+## by adjustments we mean, the data cleanup by BBDP
 plotData <- standCohortData[year %in% c(year1, year2),]
 plotData <- plotData[, list(standDeltaB = unique(standB[which(year == year2)]) - unique(standB[which(year == year1)]),
                             standDeltaBValid = unique(standBValid[which(year == year2)]) - unique(standBValid[which(year == year1)]),
@@ -353,29 +430,61 @@ standDeltaAgeValidAdj[unique(plotData[,.(pixelIndex, standDeltaAgeValid)])[, pix
 
 Plot(standDeltaBValidAdj, standDeltaAgeValidAdj)
 
-## what is the relationship between the two? It's even worse than the non-adjusted - presumably due to corrections...
+## what is the relationship between the two?
+## a little bit better after cleanup/corrections
 ggplot(plotData,
        aes(x = standDeltaAgeValid, y = standDeltaBValid)) +
   geom_point() +
   stat_smooth(method = "lm")
 summary(lm(standDeltaBValid ~ standDeltaAgeValid, data = plotData))
 
-ggplot(standDeltaValidData,
-       aes(x = standDeltaBValid)) +
-  geom_histogram()
-ggplot(standDeltaValidData,
-       aes(y = standDeltaBValid)) +
-  geom_boxplot()
+plot1 <- ggplot(plotData,
+                aes(x = standDeltaBValid)) +
+  geom_histogram() +
+  labs(title = expression(paste("observed" ~~ Delta, "B" ~~ "(adjusted)"))) +
+  theme_pubr(base_size = 12, margin = FALSE) +
+  theme(axis.title.y = element_blank())
 
-ggplot(standDeltaValidData,
-       aes(x = standDeltaAgeValid)) +
-  geom_histogram()
-ggplot(standDeltaValidData,
-       aes(y = standDeltaAgeValid)) +
-  geom_boxplot()
-ggplot(standDeltaValidData[standDeltaAgeValid == 10],
-       aes(x = standDeltaBValid)) +
-  geom_histogram()
+plot2 <- ggplot(plotData,
+                aes(y = standDeltaBValid)) +
+  geom_boxplot() +
+  coord_flip() +
+  theme_pubr(base_size = 12, margin = FALSE) +
+  theme(axis.title.y = element_blank())
+ggarrange(plot1, plot2, ncol = 1, heights = c(1, 0.5))
+
+plot1 <- ggplot(plotData,
+                aes(x = standDeltaAgeValid)) +
+  geom_histogram() +
+  labs(title = expression(paste("observed" ~~ Delta, "age" ~~ "(adjusted)"))) +
+
+  theme_pubr(base_size = 12, margin = FALSE) +
+  theme(axis.title.y = element_blank())
+
+plot2 <- ggplot(plotData,
+                aes(y = standDeltaAgeValid)) +
+  geom_boxplot() +
+  coord_flip() +
+  theme_pubr(base_size = 12, margin = FALSE) +
+  theme(axis.title.y = element_blank())
+ggarrange(plot1, plot2, ncol = 1, heights = c(1, 0.5))
+
+## delta biomass for the "supposed" age increment - all over the place
+plot1 <- ggplot(plotData[standDeltaAgeValid == 10],
+                aes(x = standDeltaBValid)) +
+  geom_histogram() +
+  labs(title = expression(atop(paste("observed" ~~ Delta, "B" ~~ "(adjusted)"),
+                               paste("for" ~~ Delta, "age" == 10)))) +
+  theme_pubr(base_size = 12, margin = FALSE) +
+  theme(axis.title.y = element_blank())
+
+plot2 <- ggplot(plotData[standDeltaAgeValid == 10],
+                aes(y = standDeltaBValid)) +
+  geom_boxplot() +
+  coord_flip() +
+  theme_pubr(base_size = 12, margin = FALSE) +
+  theme(axis.title.y = element_blank())
+ggarrange(plot1, plot2, ncol = 1, heights = c(1, 0.5))
 
 
 ## MAPS OF OBSERVED CHANGES IN SPECIES BIOMASS AFTER ADJUSTMENTS -------
@@ -428,19 +537,21 @@ Plot(sppDeltaB, sppDeltaBValid)
 #                       standDeltaAgeValid < quants["75%"],
 #                       pixelIndex])
 ## remove pixels were observed age changes were not 10yrs.
-tempDT <- unique(standCohortData[, .(year, rep, pixelIndex, standAgeValid)])
-tempDT <- tempDT[, .(standDeltaAgeValid = standAgeValid[year == year2] - standAgeValid[year == year1]),
-                 by = .(rep, pixelIndex)]
-pixToKeep <- unique(tempDT[standDeltaAgeValid == 10,
-                    pixelIndex])
-
-## Remove pixels were stand age or B decreased
-# tempDT <- unique(standCohortData[, .(year, rep, pixelIndex, standAgeValid, standBValid)])
-# tempDT <- tempDT[, .(standDeltaAgeValid = standAgeValid[year == year2] - standAgeValid[year == year1],
-#                      standDeltaBValid = standBValid[year == year2] - standBValid[year == year1]),
+## this yields only 63 pixels...
+# tempDT <- unique(standCohortData[, .(year, rep, pixelIndex, standAgeValid)])
+# tempDT <- tempDT[, .(standDeltaAgeValid = standAgeValid[year == year2] - standAgeValid[year == year1]),
 #                  by = .(rep, pixelIndex)]
-# pixToKeep <- unique(tempDT[standDeltaBValid > 0 & standDeltaAgeValid > 0,
-#                     pixelIndex])
+# pixToKeep <- unique(tempDT[standDeltaAgeValid == 10,
+#                            pixelIndex])
+
+## Remove pixels were stand age or B decreased, as we cannot account for disturbances that may not have been captured from sat data
+## or measurement errors that yielded too high B in 2001
+tempDT <- unique(standCohortData[, .(year, rep, pixelIndex, standAgeValid, standBValid)])
+tempDT <- tempDT[, .(standDeltaAgeValid = standAgeValid[year == year2] - standAgeValid[year == year1],
+                     standDeltaBValid = standBValid[year == year2] - standBValid[year == year1]),
+                 by = .(rep, pixelIndex)]
+pixToKeep <- unique(tempDT[standDeltaBValid > 0 & standDeltaAgeValid > 0,
+                    pixelIndex])
 
 if (!exists("pixToKeep"))
   pixToKeep <- unique(standCohortData$pixelIndex)
@@ -451,6 +562,24 @@ names(yearLabels) <- as.character(c(year1, year2))
 
 ## LANDSCAPE-WIDE COMPARISONS IN A GIVEN YEAR --------------------
 ## relative abundance (biomass) per species
+## note that error bars are absent because there is literally no variation among reps at year 2011:
+if (FALSE) {
+  test1 <- readRDS("R/SpaDES/outputs/dec2020Runs/sim1_rep01/cohortData_year2011.rds")
+  test2 <- readRDS("R/SpaDES/outputs/dec2020Runs/sim1_rep04/cohortData_year2011.rds")
+  identical(test1, test2)
+
+  test3 <- readRDS("R/SpaDES/outputs/dec2020Runs/sim1_rep01/cohortData_year2016.rds")
+  test4 <- readRDS("R/SpaDES/outputs/dec2020Runs/sim1_rep04/cohortData_year2016.rds")
+  identical(test3, test4)
+
+  ## still no variation even at the end of the 30 yrs of simulation
+  test5 <- readRDS("R/SpaDES/outputs/dec2020Runs/sim1_rep01/cohortData_year2031.rds")
+  test6 <- readRDS("R/SpaDES/outputs/dec2020Runs/sim1_rep04/cohortData_year2031.rds")
+  identical(test5, test6)
+
+  rm(test1, test2, test3, test4, test5, test6)
+}
+
 plotData <- standCohortData[pixelIndex %in% pixToKeep]
 plotData <- plotData[year %in% c(year1, year2),
                      list(landRelativeAbund = sum(B, na.rm = TRUE)/unique(landscapeB),
@@ -458,38 +587,41 @@ plotData <- plotData[year %in% c(year1, year2),
                      by = .(rep, year, speciesCode)]
 plot1 <- ggplot(data = plotData,
                 aes(x = speciesCode, y = landRelativeAbund)) +
-  stat_summary(fun.y = "mean", geom = "bar") +
+  stat_summary(fun = "mean", geom = "bar") +
   stat_summary(fun.data = "mean_sd", geom = "linerange", size = 1) +
-  stat_summary(aes(y = landRelativeAbundValid),
-               fun.y = "mean", geom = "point", size = 2) +
+  stat_summary(aes(y = landRelativeAbundValid, colour = "observed"),
+               fun = "mean", geom = "point", size = 2) +
   scale_x_discrete(labels = speciesLabels) +
-  theme_pubr() + theme(axis.text.x = element_text(angle = 45, vjust = 0.5)) +
+  scale_color_manual(values = c("observed" = "black")) +
+  theme_pubr(base_size = 12, margin = FALSE) + theme(axis.text.x = element_text(angle = 45, vjust = 0.5)) +
   facet_wrap(~ year, labeller = labeller(year = yearLabels)) +
   labs(title = "Species relative abundances",
-       x = "", y = expression(over("species B", "total B")))
+       x = "", y = expression(over("species B", "total B")),
+       colour = "")
 
 ## no. pixels with a species
 plotData <- standCohortData[pixelIndex %in% pixToKeep]
 plotData <- plotData[year %in% c(year1, year2),
-                     list(count = sum(B > 0),
-                          countValid = sum(BValid > 0)),
+                     list(count = sum(B > 0, na.rm = TRUE),
+                          countValid = sum(BValid > 0, na.rm = TRUE)),
                      by = .(rep, year, speciesCode)]
 plotData <- melt(plotData, measure.vars = c("count", "countValid"),
                  variable.name = "dataType", value.name = "count")
 
 plot2 <- ggplot(data = plotData[dataType == "count"],
                 aes(x = speciesCode, y = count)) +
-  stat_summary(fun.y = "mean", geom = "bar") +
+  stat_summary(fun = "mean", geom = "bar") +
   stat_summary(fun.data = "mean_sd", geom = "linerange", size = 1) +
   stat_summary(data = plotData[dataType == "countValid"],
-               aes(x = speciesCode, y = count),
-               fun.y = "mean", geom = "point", size = 2) +
+               aes(x = speciesCode, y = count, colour = "observed"),
+               fun = "mean", geom = "point", size = 2) +
   scale_x_discrete(labels = speciesLabels) +
-  theme_pubr() + theme(axis.text.x = element_text(angle = 45, vjust = 0.5)) +
+  scale_color_manual(values = c("observed" = "black")) +
+  theme_pubr(base_size = 12, margin = FALSE) + theme(axis.text.x = element_text(angle = 45, vjust = 0.5)) +
   facet_wrap(~ year, labeller = labeller(year = yearLabels)) +
   labs(title = "Species presences",
        x = "", y = "no. pixels",
-       fill = "")
+       colour = "", fill = "")
 
 ## landscape-wide relative abundance per dominant species
 ## get dominant species - these match with model outputs, I checked
@@ -526,49 +658,58 @@ plotData[noDoms > 1, vegType := "Mixed"]
 ## calculate landscape average
 plotData1 <- plotData[, relativeAbund := mean(relativeAbund),
                       by = .(rep, year, dataType, vegType)]
-plot3 <- ggplot(data = plotData[!grepl("Valid", dataType)],
+plot3 <- ggplot(data = plotData1[!grepl("Valid", dataType)],
                 aes(x = vegType, y = relativeAbund)) +
-  stat_summary(fun.y = "mean", geom = "bar") +
+  stat_summary(fun = "mean", geom = "bar") +
   stat_summary(fun.data = "mean_sd", geom = "linerange", size = 1) +
-  stat_summary(data = plotData[grepl("Valid", dataType)],
-               aes(x = vegType, y = relativeAbund),
-               fun.y = "mean", geom = "point", size = 2) +
+  stat_summary(data = plotData1[grepl("Valid", dataType)],
+               aes(x = vegType, y = relativeAbund, colour = "observed"),
+               fun = "mean", geom = "point", size = 2) +
   scale_x_discrete(labels = speciesLabels) +
-  theme_pubr() + theme(axis.text.x = element_text(angle = 45, vjust = 0.5)) +
+  scale_color_manual(values = c("observed" = "black")) +
+  theme_pubr(base_size = 12, margin = FALSE) + theme(axis.text.x = element_text(angle = 45, vjust = 0.5)) +
   facet_wrap(~ year, labeller = labeller(year = yearLabels)) +
   labs(title = "Dominant species' relative abundances",
-       x = "", y = expression(atop("relative abundance", over("species B", "total B"))))
+       x = "", y = expression(over("species B", "total B")),
+       colour = "")
 
 ## no. pixels with a certain dominant species
-## HERE: simualted and observed differ in no. of pixels in year 1... WHY?!
-## possibly due to Biomass being adjusted?
+## HERE: simulated and observed differ in no. of pixels in year 1...
+## this is because B is adjusted using a statistical model
 plotData1 <- plotData[, list(count = length(pixelIndex)),
-                     by = .(rep, year, dataType, vegType)]
+                      by = .(rep, year, dataType, vegType)]
 plot4 <- ggplot(data = plotData1[!grepl("Valid", dataType)],
                 aes(x = vegType, y = count)) +
-  stat_summary(fun.y = "mean", geom = "bar") +
+  stat_summary(fun = "mean", geom = "bar") +
   stat_summary(fun.data = "mean_sd", geom = "linerange", size = 1) +
   geom_point(data = plotData1[grepl("Valid", dataType)],
-             aes(x = vegType, y = count), size = 2) +
+             aes(x = vegType, y = count, colour = "observed"), size = 2) +
   scale_x_discrete(labels = speciesLabels) +
-  theme_pubr() + theme(axis.text.x = element_text(angle = 45, vjust = 0.5)) +
+  scale_color_manual(values = c("observed" = "black")) +
+  theme_pubr(base_size = 12, margin = FALSE) + theme(axis.text.x = element_text(angle = 45, vjust = 0.5)) +
   facet_wrap(~ year, labeller = labeller(year = yearLabels)) +
   labs(title = "Dominant species' presences",
-       x = "", y = "no. pixels", fill = "")
+       x = "", y = "no. pixels", fill = "", colour = "")
 
 ## as previous, but in relative terms
-plot5 <- ggplot(data = plotData, aes(x = dataType, y = count, fill = vegType)) +
-  stat_summary(fun.y = "mean", geom = "bar", position = "fill") +
+plot5 <- ggplot(data = plotData1, aes(x = dataType, y = count, fill = vegType)) +
+  stat_summary(fun = "mean", geom = "bar", position = "fill") +
   scale_fill_brewer(palette = "Accent", labels = speciesLabels) +
-  theme_pubr() + theme(legend.position = "right",
+  scale_x_discrete(labels = c("relativeAbund" = "simulated", "relativeAbundValid" = "observed")) +
+  theme_pubr(base_size = 12, margin = FALSE) + theme(legend.position = "right",
                        axis.text.x = element_text(angle = 45, vjust = 0.5)) +
   facet_wrap(~ year, labeller = labeller(year = yearLabels)) +
   labs(title = "Dominant species presences", x = "",
        y = "proportion of pixels", fill = "")
 
-grid.arrange(grobs = list(plot1, plot2, plot3, plot4),
-             top = "Landscape-averaged comparisons",
-             nrow = 2, ncol = 2)
+plot1_4 <- ggarrange(plot1 + scale_y_continuous(limits = c(0,1)),
+                     plot2 + scale_y_continuous(limits = c(0,2000)),
+                     plot3 + scale_y_continuous(limits = c(0,1)),
+                     plot4 + scale_y_continuous(limits = c(0,2000)),
+                     common.legend = TRUE, legend = "bottom",
+                     nrow = 2, ncol = 2)
+annotate_figure(plot1_4,
+                top = text_grob("Landscape-averaged comparisons", size = 16))
 
 ## PIXEL-LEVEL COMPARISONS IN A GIVEN YEAR --------------------
 ## pixel-level relative abundances per species
@@ -584,7 +725,8 @@ plot6 <- ggplot(data = plotData,
   scale_x_discrete(labels = speciesLabels) +
   scale_fill_discrete(labels = c("relativeAbund" = "simulated",
                                  "relativeAbundValid" = "observed")) +
-  theme_pubr() + theme(axis.text.x = element_text(angle = 45, vjust = 0.5)) +
+  theme_pubr(base_size = 12, margin = FALSE) +
+  theme(axis.text.x = element_text(angle = 45, vjust = 0.5)) +
   facet_wrap(~ year, labeller = labeller(year = yearLabels)) +
   labs(title = "Species relative abundances", fill = "",
        x = "", y = expression(over("species B", "stand B")))
@@ -622,17 +764,21 @@ plot7 <- ggplot(data = plotData,
                 aes(x = vegType, y = relativeAbund, fill = dataType)) +
   geom_boxplot() +
   scale_fill_discrete(labels = c("relativeAbund" = "simulated",
-                                 "relativeAbund" = "observed")) +
+                                 "relativeAbundValid" = "observed")) +
   scale_x_discrete(labels = speciesLabels) +
-  theme_pubr() + theme(axis.text.x = element_text(angle = 45, vjust = 0.5)) +
+  theme_pubr(base_size = 12, margin = FALSE) + theme(axis.text.x = element_text(angle = 45, vjust = 0.5)) +
   facet_wrap(~ year, labeller = labeller(year = yearLabels)) +
   labs(title = "Dominant species' relative abundances",
-       x = "", y = expression(atop("relative abundance", over("species B", "total B"))),
+       x = "", y = expression(over("species B", "total B")),
        fill = "")
 
-grid.arrange(grobs = list(plot6, plot7),
-             top = "Pixel-level comparisons",
-             ncol = 2)
+plot6_7 <- ggarrange(plot6,
+                     plot7 + labs(y = " \n "),
+                     common.legend = TRUE, legend = "bottom",
+                     ncol = 2)
+annotate_figure(plot6_7,
+                top = text_grob("Stand-level comparisons", size = 16))
+
 
 ## COMPARISONS OF DELTA PER PIXEL-------------------
 ## per species
@@ -647,7 +793,7 @@ plotData <- plotData[, list(deltaB = B[which(year == year2)] - B[which(year == y
 ## melt spp and stand delta separately and rbind
 cols <- grep("standDelta", names(plotData), invert = TRUE, value = TRUE)
 plotData1 <- melt(plotData[, ..cols], measure.vars = c("deltaB", "deltaBValid"),
-                 variable.name = "dataType", value.name = "deltaB")
+                  variable.name = "dataType", value.name = "deltaB")
 cols <- grep("deltaB", names(plotData), invert = TRUE, value = TRUE)
 plotData2 <- melt(plotData[, ..cols], measure.vars = c("standDeltaB", "standDeltaBValid"),
                   variable.name = "dataType", value.name = "deltaB")
@@ -659,14 +805,14 @@ plotData <- rbind(plotData1, plotData2, use.names = TRUE)
 
 plot8 <-  ggplot(data = plotData[!grepl("Valid", dataType)],
                  aes(x = speciesCode, y = deltaB, group = rep)) +
-  stat_summary(fun.y = "mean", geom = "bar") +
+  stat_summary(fun = "mean", geom = "bar") +
   stat_summary(fun.data = "mean_sd", geom = "linerange", size = 1) +
   stat_summary(data = plotData[grepl("Valid", dataType)],
                aes(x = speciesCode, y = deltaB, group = rep),
-               fun.y = "mean", geom = "point", size = 2) +
+               fun = "mean", geom = "point", size = 2) +
   scale_x_discrete(labels = speciesLabels) +
-  theme_pubr() + theme(axis.text.x = element_text(angle = 45, vjust = 0.5)) +
-  labs(title = "Landscape-averaged changes in abundance",
+  theme_pubr(base_size = 12, margin = FALSE) + theme(axis.text.x = element_text(angle = 45, vjust = 0.5)) +
+  labs(title = "Landscape-averaged",
        x = "", y = expression(paste(Delta, "B")))
 
 plot9 <- ggplot(data = plotData,
@@ -675,10 +821,13 @@ plot9 <- ggplot(data = plotData,
   scale_x_discrete(labels = speciesLabels) +
   scale_fill_discrete(labels = c("deltaB" = "simulated",
                                  "deltaBValid" = "observed")) +
-  theme_pubr() + theme(axis.text.x = element_text(angle = 45, vjust = 0.5)) +
-  labs(title = "Pixel-level changes in abundance", fill = "",
+  theme_pubr(base_size = 12, margin = FALSE) + theme(axis.text.x = element_text(angle = 45, vjust = 0.5)) +
+  labs(title = "Pixel-level", fill = "",
        x = "", y = expression(paste(Delta, "B")))
 
-grid.arrange(plot8, plot9,
-             ncol = 2)
+plot8_9 <- ggarrange(plot8, plot9 + labs(y = " \n "),
+                     common.legend = TRUE, legend = "bottom",
+                     ncol = 2)
+annotate_figure(plot8_9,
+                top = text_grob("Changes in abundance", size = 16))
 
