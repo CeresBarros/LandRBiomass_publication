@@ -4,6 +4,8 @@ cache
 outputs/*
 outputs
 inputs/*
+validation
+validation/*
 .httr-oath
 m/*/data
 m/*/cache
