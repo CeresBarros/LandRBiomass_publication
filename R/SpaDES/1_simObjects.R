@@ -46,6 +46,7 @@ sppEquivalencies_CA[grep("Betu_pap", LandR), `:=`(EN_generic_short = "Birch",
 sppEquivalencies_CA[grep("Popu_", LandR), `:=`(EN_generic_short = "Poplar",
                                                EN_generic_full = "Poplar",
                                                Leading = "Poplar leading")]
+sppEquivalencies_CA[grep("Popu_", LandR), Boreal := "Popu_Spp"]
 
 ## define spp column to use for model
 sppEquivCol <- "Boreal"
