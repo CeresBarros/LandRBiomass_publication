@@ -7,14 +7,14 @@
 ## clean workspace
 rm(list=ls()); amc::.gc()
 
-## requires as of Dec 22 2020
-# reproducible 1.2.3
+## requires as of Jan 22 2020
+# reproducible 1.2.5.9000
 # quickPlot_0.1.7.9001
-# SpaDES.core 1.0.4
+# SpaDES.core 1.0.5
 # SpaDES.tools_0.3.7
 # SpaDES.addins_0.1.2
 # SpaDES.experiment 0.0.2.9000
-# LandR_0.0.10.9001 ## dispersalRcpp branch
+# LandR_0.0.11.9005 ## development branch
 library(SpaDES)
 library(SpaDES.experiment)
 library(raster)
