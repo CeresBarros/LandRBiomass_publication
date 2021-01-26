@@ -52,6 +52,17 @@ simTimes <- list(start = 2001, end = 2031)
 vegLeadingProportion <- 0 # indicates what proportion the stand must be in one species group for it to be leading.
 successionTimestep <- 10L  # for dispersal and age reclass.
 
+speciesParams <- list(
+  "shadetolerance" = list(
+    Betu_Pap = 1.5,
+    Lari_Lar = 1.5,
+    Pice_Gla = 2,
+    Pice_Mar = 3,
+    Pinu_Ban = 1,
+    Popu_Spp = 1
+  )
+)
+
 simModules <- list("Biomass_borealDataPrep"
                    , "Biomass_core"
                    , "Biomass_validationKNN"
@@ -69,6 +80,9 @@ simParams <- list(
     , "LCCClassesToReplaceNN" = c(34:35)
     , "fitDeciduousCoverDiscount" = TRUE
     , "exportModels" = "all"
+    ,"speciesUpdateFunction" = list(
+      quote(LandR::speciesTableUpdate(sim$species, sim$speciesTable, sim$sppEquiv, P(sim)$sppEquivCol)),
+      quote(LandR::updateSpeciesTable(speciesTable = sim$species, params = sim$speciesParams)))
     # next two are used when assigning pixelGroup membership; what resolution for
     #   age and biomass
     , "pixelGroupAgeClass" = successionTimestep
@@ -152,6 +166,7 @@ simObjects <- list(
   "sppEquiv" = sppEquivalencies_CA
   , "sppColorVect" = sppColorVect
   , "speciesLayers" = simOutSpeciesLayers$speciesLayers
+  , "speciesParams" = speciesParams
   , "treed" = simOutSpeciesLayers$treed
   , "numTreed" = simOutSpeciesLayers$numTreed
   , "nonZeroCover" = simOutSpeciesLayers$nonZeroCover
