@@ -14,7 +14,7 @@ rm(list=ls()); amc::.gc()
 # SpaDES.tools_0.3.7
 # SpaDES.addins_0.1.2
 # SpaDES.experiment 0.0.2.9000
-# LandR_0.0.11.9005 ## development branch
+# LandR_0.0.11.9008 ## development branch
 library(SpaDES)
 library(SpaDES.experiment)
 library(raster)
@@ -110,6 +110,9 @@ simParams <- list(
 )
 
 ## Run Biomass_speciesData to get species layers
+## running this separately from other modules makes switching
+## between using a large and a smaller study area easier when the smaller SA is within the large one,
+## as it keeps the data in separate folders that can be used across simulations/scenarios
 source("R/SpaDES/2_speciesLayers.R")
 
 ## check species layers:
@@ -171,6 +174,10 @@ LandRBiomass_sim <- simInit(times = simTimes
 saveRDS(LandRBiomass_sim,
         file.path(simPaths$outputPath, paste0("simInitList_", runName, ".rds")))
 
+## just one rep - test sim
+# LandRBiomass_simTest <- spades(LandRBiomass_sim, .plotInitialTime = simTimes$start)
+
+## SIMULATION WITH 10 REPS
 # options("reproducible.useCache" = "overwrite")
 library(future)
 plan("multiprocess", workers = 1)   ## each worker consumming roughly 15Gb.
