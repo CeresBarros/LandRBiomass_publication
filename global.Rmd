@@ -1,0 +1,187 @@
+---
+title: "LandR Publication Simulations"
+author: "CeresBarros"
+date: "22/01/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(SpaDES)
+library(SpaDES.experiment)
+library(raster)
+library(LandR)
+
+options("reproducible.useNewDigestAlgorithm" = TRUE)
+options("spades.moduleCodeChecks" = FALSE)
+options("reproducible.useCache" = TRUE)
+options("reproducible.inputPaths" = file.path("R/SpaDES/inputs"))  ## store everything in data/ so that there are no duplicated files across modules
+options("reproducible.destinationPath" = file.path("R/SpaDES/inputs"))
+options("reproducible.useGDAL" = FALSE)
+
+## set run name and paths
+runName <- "parametriseSALarge"
+eventCaching <- c(".inputObjects", "init")
+useParallel <- FALSE
+
+## paths
+simDirName <- "dec2020Runs"
+simPaths <- list(cachePath = file.path("R/SpaDES/cache", simDirName)
+                 , modulePath = file.path("R/SpaDES/m")
+                 , inputPath = file.path("R/SpaDES/inputs")
+                 , outputPath = file.path("R/SpaDES/outputs", simDirName))
+
+```
+
+## Simulation setup - part 1 
+## Get study area and other necessary objects 
+```{r simulationSetup}
+## Get necessary objects -----------------------
+source("R/SpaDES/1_simObjects.R")
+```
+
+## Simulation setup - part 2 - species layers
+```{r simulationSetup2}
+## Run Biomass_speciesData to get species layers
+## running this separately from other modules makes switching
+## between using a large and a smaller study area easier when the smaller SA is within the large one,
+## as it keeps the data in separate folders thatn can be used across simulations/scenarios
+source("R/SpaDES/2_speciesLayers.R")
+
+## check species layers:
+# plot(simOutSpeciesLayers$speciesLayers)
+## Populus grandidentata shouldn't be in SK (and has v. few pixels in the layer) and will be excluded "manually"
+toRm <- which(names(simOutSpeciesLayers$speciesLayers) %in% c("Popu_Gra"))
+simOutSpeciesLayers$speciesLayers <- dropLayer(simOutSpeciesLayers$speciesLayers, i = toRm)
+rm(toRm)
+```
+
+
+## Simulation setup - part 3 - module parameters and outputs
+```{r simulationSetup3}
+## simulation params
+simTimes <- list(start = 2001, end = 2031)
+vegLeadingProportion <- 0 # indicates what proportion the stand must be in one species group for it to be leading.
+successionTimestep <- 10L  # for dispersal and age reclass.
+
+speciesParams <- list(
+  "shadetolerance" = list(
+    Betu_Pap = 1.5,
+    Lari_Lar = 1.5,
+    Pice_Gla = 2,
+    Pice_Mar = 3,
+    Pinu_Ban = 1,
+    Popu_Spp = 1
+  )
+)
+
+simModules <- list("Biomass_borealDataPrep"
+                   , "Biomass_core"
+                   , "Biomass_speciesParameters"
+)
+
+simParams <- list(
+  Biomass_speciesParameters = list(
+    "sppEquivCol" = sppEquivCol
+    , ".useCache" = eventCaching
+  ),
+  Biomass_borealDataPrep = list(
+    "sppEquivCol" = sppEquivCol
+    , "forestedLCCClasses" = c(1:15, 34:35)
+    , "LCCClassesToReplaceNN" = c(34:35)
+    , "fitDeciduousCoverDiscount" = TRUE
+    , "exportModels" = "all"
+    ,"speciesUpdateFunction" = list(
+      quote(LandR::speciesTableUpdate(sim$species, sim$speciesTable, sim$sppEquiv, P(sim)$sppEquivCol)),
+      quote(LandR::updateSpeciesTable(speciesTable = sim$species, params = sim$speciesParams)))
+    # next two are used when assigning pixelGroup membership; what resolution for
+    #   age and biomass
+    , "pixelGroupAgeClass" = successionTimestep
+    , "pixelGroupBiomassClass" = 100
+    , "useCloudCacheForStats" = FALSE
+    , "cloudFolderID" = NA
+    , ".useCache" = eventCaching
+  )
+  , Biomass_core = list(
+    "calcSummaryBGM" = c("start")
+    , "initialBiomassSource" = "cohortData" # can be 'biomassMap' or "spinup" too
+    , ".plotInitialTime" = simTimes$start
+    , "plotOverstory" = TRUE
+    , "seedingAlgorithm" = "wardDispersal"
+    , "sppEquivCol" = sppEquivCol
+    , "successionTimestep" = successionTimestep
+    , "vegLeadingProportion" = vegLeadingProportion
+    , ".plotInterval" = 1
+    , ".plotMaps" = TRUE
+    , ".saveInitialTime" = NA
+    , ".useCache" = eventCaching[1] 
+    , ".useParallel" = useParallel
+  )
+)
+
+## subset sppEquivalencies
+sppEquivalencies_CA <- sppEquivalencies_CA[Boreal %in% names(simOutSpeciesLayers$speciesLayers)]
+
+## objects will be saved at the start of the simulation (so they reflect the previous year)
+simOutputs <- data.frame(expand.grid(objectName = c("cohortData"),
+                                     saveTime = unique(seq(simTimes$start, simTimes$end, by = 5)),
+                                     eventPriority = 10,
+                                     stringsAsFactors = FALSE))
+simOutputs <- rbind(simOutputs, data.frame(objectName = "pixelGroupMap",
+                                           saveTime = unique(seq(simTimes$start, simTimes$end, by = 5)),
+                                           eventPriority = 10))
+simOutputs <- rbind(simOutputs, data.frame(objectName = "vegTypeMap",
+                                           saveTime = unique(seq(simTimes$start, simTimes$end, by = 5)),
+                                           eventPriority = 10))
+
+## in the first year, objects have to be saved after init events, before mortalityAndGrowth
+## note that vegTypeMap won't be saved at yr 0, because it doens't exist at priority 5.5
+## and save is not scheduled twice (even if we changed the priority)
+## (not doing this now and simply acknowledging that cohortData will show variation across reps in year 1)
+# simOutputs[simOutputs$saveTime == 0, "eventPriority"] <- 5.5
+
+simObjects <- list(
+  "sppEquiv" = sppEquivalencies_CA
+  , "sppColorVect" = sppColorVect
+  , "speciesLayers" = simOutSpeciesLayers$speciesLayers
+  , "speciesParams" = speciesParams
+  , "treed" = simOutSpeciesLayers$treed
+  , "numTreed" = simOutSpeciesLayers$numTreed
+  , "nonZeroCover" = simOutSpeciesLayers$nonZeroCover
+  , "PSPgis" = PSPgis
+  , "PSPmeasure" = PSPmeasure
+  , "PSPplot" = PSPplot
+)
+
+if (runName == "parametriseSALarge") {
+  simObjects$studyArea <- studyAreaS
+  simObjects$studyAreaLarge <- studyAreaL
+} else {
+  simObjects$studyArea <- get(runName)
+}
+
+LandRBiomass_sim <- simInit(times = simTimes
+                            , params = simParams
+                            , modules = simModules
+                            , objects = simObjects
+                            , outputs = simOutputs
+                            , paths = simPaths)
+```
+
+
+## Run simulation
+```{r}
+## just one rep - test sim
+LandRBiomass_simTest <- spades(LandRBiomass_sim, .plotInitialTime = simTimes$start)
+```
+
+
+## VALIDATION
+```{r}
+## get the  land-cover change map (needed to have an RTM first.)
+source("R/SpaDES/3_simObjects4Valid.R")
+```
+
+
+
