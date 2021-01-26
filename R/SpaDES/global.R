@@ -65,7 +65,6 @@ speciesParams <- list(
 
 simModules <- list("Biomass_borealDataPrep"
                    , "Biomass_core"
-                   , "Biomass_validationKNN"
                    , "Biomass_speciesParameters"
 )
 
@@ -108,10 +107,6 @@ simParams <- list(
     , ".useCache" = eventCaching[1] # experiment doesn't like when init is cached
     , ".useParallel" = useParallel
   )
-  , Biomass_validationKNN = list(
-    "sppEquivCol" = sppEquivCol
-    , ".useCache" = eventCaching
-  )
 )
 
 ## Run Biomass_speciesData to get species layers
@@ -135,22 +130,9 @@ simOutputs <- data.frame(expand.grid(objectName = c("cohortData"),
 simOutputs <- rbind(simOutputs, data.frame(objectName = "pixelGroupMap",
                                            saveTime = unique(seq(simTimes$start, simTimes$end, by = 5)),
                                            eventPriority = 10))
-simOutputs <- rbind(simOutputs, data.frame(objectName = "rstDisturbedPix",
-                                           saveTime = c(simTimes$start),
-                                           eventPriority = 1))
 simOutputs <- rbind(simOutputs, data.frame(objectName = "vegTypeMap",
                                            saveTime = unique(seq(simTimes$start, simTimes$end, by = 5)),
                                            eventPriority = 10))
-## the following objects are only saved once at the end of year 0/beggining of year 1 (they don't change)
-simOutputs <- rbind(simOutputs, data.frame(objectName = "rawBiomassMapValidation",
-                                           saveTime = c(simTimes$start),
-                                           eventPriority = 1))
-simOutputs <- rbind(simOutputs, data.frame(objectName = "standAgeMapValidation",
-                                           saveTime = c(simTimes$start),
-                                           eventPriority = 1))
-simOutputs <- rbind(simOutputs, data.frame(objectName = "speciesLayersValidation",
-                                           saveTime = c(simTimes$start),
-                                           eventPriority = 1))
 
 ## in the first year, objects have to be saved after init events, before mortalityAndGrowth
 ## note that vegTypeMap won't be saved at yr 0, because it doens't exist at priority 5.5
@@ -158,11 +140,7 @@ simOutputs <- rbind(simOutputs, data.frame(objectName = "speciesLayersValidation
 ## (not doing this now and simply acknowledging that cohortData will show variation across reps in year 1)
 # simOutputs[simOutputs$saveTime == 0, "eventPriority"] <- 5.5
 
-## get the  land-cover change map (needed to have an RTM first.)
-source("R/SpaDES/3_simObjects4Valid.R")
-
 simObjects <- list(
-  # "sppNamesVect" = names(simOutSpeciesLayers$speciesLayers)
   "sppEquiv" = sppEquivalencies_CA
   , "sppColorVect" = sppColorVect
   , "speciesLayers" = simOutSpeciesLayers$speciesLayers
@@ -173,7 +151,6 @@ simObjects <- list(
   , "PSPgis" = PSPgis
   , "PSPmeasure" = PSPmeasure
   , "PSPplot" = PSPplot
-  , "rstLCChange" = rstLCChangeAllbin
 )
 
 if (runName == "parametriseSALarge") {
@@ -204,8 +181,33 @@ factorialSimulations <- experiment2(
 
 saveRDS(factorialSimulations, file.path(simPaths$outputPath, paste0("simList_factorialSimulations_", runName, ".rds")))
 
-## save outputfiles table. use lapply for backwards compatibility.
-outputFiles <- lapply(factorialSimulations, outputs)
-saveRDS(outputFiles, file.path(simPaths$outputPath, paste0("outputFiles_", runName, ".rds")))
+# ## save outputfiles table. use lapply for backwards compatibility.
+# outputFiles <- lapply(factorialSimulations, outputs)
+# saveRDS(outputFiles, file.path(simPaths$outputPath, paste0("outputFiles_", runName, ".rds")))
+#
+# ## VALIDATION
+# ## get the  land-cover change map (needed to have an RTM first.)
+# source("R/SpaDES/3_simObjects4Valid.R")
+#
+# simObjects <- list(
+#   "rstLCChange" = rstLCChangeAllbin
+# )
+#
+# , Biomass_validationKNN = list(
+#   "sppEquivCol" = sppEquivCol
+#   , ".useCache" = eventCaching
+# )
+#
+# ## the following objects are only saved once at the end of year 0/beggining of year 1 (they don't change)
+# simOutputs <- rbind(simOutputs, data.frame(objectName = "rawBiomassMapValidation",
+#                                            saveTime = c(simTimes$start),
+#                                            eventPriority = 1))
+# simOutputs <- rbind(simOutputs, data.frame(objectName = "standAgeMapValidation",
+#                                            saveTime = c(simTimes$start),
+#                                            eventPriority = 1))
+# simOutputs <- rbind(simOutputs, data.frame(objectName = "speciesLayersValidation",
+#                                            saveTime = c(simTimes$start),
+#                                            eventPriority = 1))
+#
+# q("no")
 
-q("no")
