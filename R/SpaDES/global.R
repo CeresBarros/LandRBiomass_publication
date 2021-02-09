@@ -136,6 +136,10 @@ simOutputs <- rbind(simOutputs, data.frame(objectName = "pixelGroupMap",
 simOutputs <- rbind(simOutputs, data.frame(objectName = "vegTypeMap",
                                            saveTime = unique(seq(simTimes$start, simTimes$end, by = 5)),
                                            eventPriority = 10))
+## other outputs needed to run validation:
+simOutputs <- rbind(simOutputs, data.frame(objectName = "biomassMap",
+                                           saveTime = simTimes$start,
+                                           eventPriority = 1))
 
 ## in the first year, objects have to be saved after init events, before mortalityAndGrowth
 ## note that vegTypeMap won't be saved at yr 0, because it doens't exist at priority 5.5
