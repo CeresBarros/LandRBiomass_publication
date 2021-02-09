@@ -187,34 +187,82 @@ factorialSimulations <- experiment2(
   replicates = 10)
 
 saveRDS(factorialSimulations, file.path(simPaths$outputPath, paste0("simList_factorialSimulations_", runName, ".rds")))
+## VALIDATION
+## get the  land-cover change map (needed to have an RTM first, so get it from the simInitList)
+## /!\ it is assumed that the filename of the raster in the simList corresponds to the raster found in disk.
+## this may not be the case if the simulations were run in another machine and saved rasters were not imported.
 
-# ## save outputfiles table. use lapply for backwards compatibility.
-# outputFiles <- lapply(factorialSimulations, outputs)
-# saveRDS(outputFiles, file.path(simPaths$outputPath, paste0("outputFiles_", runName, ".rds")))
-#
-# ## VALIDATION
-# ## get the  land-cover change map (needed to have an RTM first.)
-# source("R/SpaDES/3_simObjects4Valid.R")
-#
-# simObjects <- list(
-#   "rstLCChange" = rstLCChangeAllbin
-# )
-#
-# , Biomass_validationKNN = list(
-#   "sppEquivCol" = sppEquivCol
-#   , ".useCache" = eventCaching
-# )
-#
-# ## the following objects are only saved once at the end of year 0/beggining of year 1 (they don't change)
-# simOutputs <- rbind(simOutputs, data.frame(objectName = "rawBiomassMapValidation",
-#                                            saveTime = c(simTimes$start),
-#                                            eventPriority = 1))
-# simOutputs <- rbind(simOutputs, data.frame(objectName = "standAgeMapValidation",
-#                                            saveTime = c(simTimes$start),
-#                                            eventPriority = 1))
-# simOutputs <- rbind(simOutputs, data.frame(objectName = "speciesLayersValidation",
-#                                            saveTime = c(simTimes$start),
-#                                            eventPriority = 1))
-#
-# q("no")
+## make objects again in case only this part of the script is being run:
+if (!exists("simDirName"))
+  simDirName <- "dec2020Runs"
+
+if (!exists("simPaths"))
+  simPaths <- list(cachePath = file.path("R/SpaDES/cache", simDirName)
+                   , modulePath = file.path("R/SpaDES/m")
+                   , inputPath = file.path("R/SpaDES/inputs")
+                   , outputPath = file.path("R/SpaDES/outputs", simDirName))
+
+validationPaths <- list(cachePath = file.path("R/SpaDES/cache", simDirName)
+                        , modulePath = file.path("R/SpaDES/m")
+                        , inputPath = file.path("R/SpaDES/inputs")
+                        , outputPath = file.path("R/SpaDES/validation", simDirName))
+
+source("R/SpaDES/3_simObjects4Valid.R")
+
+## PARAMETERS FOR VALIDATION MODULE
+## in this case all reps have the same parameters, so we can use the first rep to get the values
+validationTimes <- list(start = 1, end = 1)
+validationParams <- list(
+  Biomass_validationKNN = list(
+    "minCoverThreshold" = params(factorialSimulations$sim1_rep01)$Biomass_borealDataPrep$minCoverThreshold
+    , "pixelGroupBiomassClass" = params(factorialSimulations$sim1_rep01)$Biomass_borealDataPrep$pixelGroupBiomassClass
+    , "deciduousCoverDiscount" = params(factorialSimulations$sim1_rep01)$Biomass_borealDataPrep$deciduousCoverDiscount
+    , "sppEquivCol" = params(factorialSimulations$sim1_rep01)$Biomass_borealDataPrep$sppEquivCol
+    , "validationReps" = as.integer(1:10)  ## or length of simLists
+    , "validationYears" = as.integer(c(simTimes$start, 2011))
+    , ".useCache" = eventCaching
+  )
+)
+
+validationObjects <- list(
+  "biomassMap" = rawBiomassMap  ## to change when outputs are ready
+  , "rasterToMatch" = rasterToMatch  ## it's retrieved from LandRBiomass_sim in the sourced script
+  , "rawBiomassMapStart" = rawBiomassMap
+  , "rstLCChange" = rstLCChangeAllbin
+  , "simulationOutputs" = simulationOutputs
+  , "speciesLayersStart" = speciesLayers
+  , "sppColorVect" = LandRBiomass_sim$sppColorVect
+  , "sppEquiv" = LandRBiomass_sim$sppEquiv
+  , "standAgeMapStart" = standAgeMap
+  , "studyArea" = LandRBiomass_sim$studyArea
+)
+## the following objects are only saved once at the end of year 0/beggining of year 1 (they don't change)
+validationOutputs <- data.frame(expand.grid(objectName = c("rawBiomassMapStart"),
+                                     saveTime = c(validationTimes$start),
+                                     eventPriority = 1),
+                                     stringsAsFactors = FALSE)
+validationOutputs <- rbind(validationOutputs, data.frame(objectName = "rawBiomassMapEnd",
+                                                         saveTime = c(validationTimes$start),
+                                                         eventPriority = 1))
+validationOutputs <- rbind(validationOutputs, data.frame(objectName = "standAgeMapStart",
+                                                         saveTime = c(validationTimes$start),
+                                                         eventPriority = 1))
+validationOutputs <- rbind(validationOutputs, data.frame(objectName = "standAgeMapEnd",
+                                           saveTime = c(validationTimes$start),
+                                           eventPriority = 1))
+validationOutputs <- rbind(validationOutputs, data.frame(objectName = "speciesLayersStart",
+                                           saveTime = c(validationTimes$start),
+                                           eventPriority = 1))
+validationOutputs <- rbind(validationOutputs, data.frame(objectName = "speciesLayersEnd",
+                                                         saveTime = c(validationTimes$start),
+                                                         eventPriority = 1))
+devtools::load_all("../LandR/")
+LandRBiomass_sim <- simInitAndSpades(times = validationTimes
+                                     , params = validationParams
+                                     , modules = "Biomass_validationKNN"
+                                     , objects = validationObjects
+                                     , outputs = validationOutputs
+                                     , paths = )   ## note that simPaths must respect the simulation outputPath
+
+q("no")
 

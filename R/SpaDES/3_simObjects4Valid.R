@@ -1,12 +1,56 @@
-RTM <- postProcess(simOutSpeciesLayers$rasterToMatchLarge,
-                   studyArea = if (grepl("study", runName)) get(runName) else studyAreaS,
-                   rasterToMatch = simOutSpeciesLayers$rasterToMatchLarge,
-                   useSAcrs = FALSE,
-                   maskWithRTM = FALSE,
-                   useCache = FALSE,
-                   method = "bilinear",
-                   filename2 = NULL)
-RTM[!is.na(RTM)] <- 1
+## load simList from simInit()
+if (!exists("LandRBiomass_sim"))
+  LandRBiomass_sim <- loadSimList(file.path(simPaths$outputPath, paste0("simInitList_", runName)))
+
+## load the experiment simLists object
+if (!exists("factorialSimulations"))
+  factorialSimulations <- qs::qread(file.path(simPaths$outputPath, paste0("simList_factorialSimulations_", runName)))
+
+## get necessary rasters from simList (only rasters aren't kept in memory)
+if (!inMemory(LandRBiomass_sim$rawBiomassMap)) {
+  rasFilename <- raster::filename(LandRBiomass_sim$rawBiomassMap)
+  rasFilename <- sub(inputPath(LandRBiomass_sim), simPaths$inputPath, rasFilename)
+
+  rawBiomassMap <- raster(rasFilename)
+} else {
+  rawBiomassMap <- LandRBiomass_sim$rawBiomassMap
+}
+
+if (!inMemory(LandRBiomass_sim$standAgeMap)) {
+  rasFilename <- raster::filename(LandRBiomass_sim$standAgeMap)
+  rasFilename <- sub(inputPath(LandRBiomass_sim), simPaths$inputPath, rasFilename)
+
+  standAgeMap <- raster(rasFilename)
+} else {
+  standAgeMap <- LandRBiomass_sim$standAgeMap
+}
+
+if (!inMemory(LandRBiomass_sim$speciesLayers)) {
+  speciesLayers <- lapply(unstack(LandRBiomass_sim$speciesLayers), function(x) {
+    rasFilename <- raster::filename(x)
+    rasFilename <- sub(inputPath(LandRBiomass_sim), simPaths$inputPath, rasFilename)
+    layerName <- names(x)
+    sppLayer <- raster(rasFilename)
+
+    names(sppLayer) <- layerName
+    return(sppLayer)
+  })
+  speciesLayers <- stack(speciesLayers)
+} else {
+  speciesLayers <- LandRBiomass_sim$speciesLayers
+}
+
+
+if (!inMemory(LandRBiomass_sim$rasterToMatch)) {
+  rasFilename <- raster::filename(LandRBiomass_sim$rasterToMatch)
+  rasFilename <- sub(inputPath(LandRBiomass_sim), simPaths$inputPath, rasFilename)
+
+  standAgeMap <- raster(rasterToMatch)
+} else {
+  rasterToMatch <- LandRBiomass_sim$rasterToMatch
+}
+
+rasterToMatch[!is.na(rasterToMatch)] <- 1
 
 rstLCChangeAllbin <- Cache(prepInputs,
                            targetFile = "change_2001_2011.dat",
@@ -15,8 +59,8 @@ rstLCChangeAllbin <- Cache(prepInputs,
                            alsoExtract = "similar",
                            fun = "raster::raster",
                            destinationPath = options()$reproducible.inputPaths,
-                           studyArea = if (grepl("study", runName)) get(runName) else studyAreaS,
-                           rasterToMatch = RTM,
+                           studyArea = LandRBiomass_sim$studyArea,
+                           rasterToMatch = rasterToMatch,
                            useSAcrs = FALSE,
                            maskWithRTM = TRUE,
                            method = "ngb",
@@ -28,7 +72,7 @@ rstLCChangeAllbin <- Cache(prepInputs,
 ## make sure the extent matches the study area (it won't if using a smaller study area than RTMLarge)
 rstLCChangeAllbin <- Cache(postProcess,
                            x = rstLCChangeAllbin,
-                           studyArea = if (grepl("study", runName)) get(runName) else studyAreaS,
+                           studyArea = LandRBiomass_sim$studyArea,
                            useSAcrs = FALSE,
                            filename2 = file.path(options()$reproducible.inputPaths, "change_2001_2011_postProcess.tiff"),
                            overwrite = TRUE,
@@ -38,5 +82,15 @@ rstLCChangeAllbin <- Cache(postProcess,
 ## convert to mask
 rstLCChangeAllbin[getValues(rstLCChangeAllbin) != 1] <- NA
 
-rm(RTM); amc::.gc()
+## compile all simulation output tables and replace output paths
+simulationOutputs <- lapply(factorialSimulations, FUN = function(x, localSimPaths) {
+  oldPath <- dirname(outputPath(x)) ## exclude sim*_rep* folder
+  DT <- as.data.table(outputs(x))
+  DT[, file := sub(oldPath, localSimPaths$outputPath, file)]
+  DT
+  }, localSimPaths = simPaths)
+simulationOutputs <- rbindlist(simulationOutputs)
+
+## get biomassMap (should be the same across all reps)
+
 
