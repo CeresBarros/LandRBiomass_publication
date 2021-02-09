@@ -19,6 +19,8 @@ library(SpaDES)
 library(SpaDES.experiment)
 library(raster)
 library(LandR)
+library(dplyr)
+library(data.table)
 
 ## -----------------------------------------------
 ## SIMULATION SETUP
