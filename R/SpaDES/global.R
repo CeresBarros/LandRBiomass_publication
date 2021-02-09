@@ -177,8 +177,7 @@ LandRBiomass_sim <- simInit(times = simTimes
                             , outputs = simOutputs
                             , paths = simPaths)
 
-saveRDS(LandRBiomass_sim,
-        file.path(simPaths$outputPath, paste0("simInitList_", runName, ".rds")))
+saveSimList(LandRBiomass_sim, file.path(simPaths$outputPath, paste0("simInitList_", runName)))
 
 ## just one rep - test sim
 # LandRBiomass_simTest <- spades(LandRBiomass_sim, .plotInitialTime = simTimes$start)
@@ -192,7 +191,14 @@ factorialSimulations <- experiment2(
   clearSimEnv = TRUE,
   replicates = 10)
 
-saveRDS(factorialSimulations, file.path(simPaths$outputPath, paste0("simList_factorialSimulations_", runName, ".rds")))
+## workaround, clean simLists before saving
+for (i in names(factorialSimulations)) {
+ tryCatch(rm(".mods", envir = factorialSimulations[[i]]), error = NULL)
+}
+
+## save simLists object.
+qs::qsave(factorialSimulations, file.path(simPaths$outputPath, paste0("simList_factorialSimulations_", runName)))
+
 ## VALIDATION
 ## get the  land-cover change map (needed to have an RTM first, so get it from the simInitList)
 ## /!\ it is assumed that the filename of the raster in the simList corresponds to the raster found in disk.
