@@ -92,5 +92,5 @@ simulationOutputs <- lapply(factorialSimulations, FUN = function(x, localSimPath
 simulationOutputs <- rbindlist(simulationOutputs)
 
 ## get biomassMap (should be the same across all reps)
-
+biomassMap <- readRDS(simulationOutputs[objectName == "biomassMap", file][1])
 
