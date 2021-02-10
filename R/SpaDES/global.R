@@ -135,9 +135,6 @@ simOutputs <- data.frame(expand.grid(objectName = c("cohortData"),
 simOutputs <- rbind(simOutputs, data.frame(objectName = "pixelGroupMap",
                                            saveTime = unique(seq(simTimes$start, simTimes$end, by = 5)),
                                            eventPriority = 10))
-simOutputs <- rbind(simOutputs, data.frame(objectName = "vegTypeMap",
-                                           saveTime = unique(seq(simTimes$start, simTimes$end, by = 5)),
-                                           eventPriority = 10))
 ## other outputs needed to run validation:
 simOutputs <- rbind(simOutputs, data.frame(objectName = "biomassMap",
                                            saveTime = simTimes$start,
