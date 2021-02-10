@@ -14,7 +14,7 @@ rm(list=ls()); amc::.gc()
 # SpaDES.tools_0.3.7
 # SpaDES.addins_0.1.2
 # SpaDES.experiment 0.0.2.9000
-# LandR_0.0.11.9008 ## development branch
+# LandR_0.0.12 ## development branch
 library(SpaDES)
 library(SpaDES.experiment)
 library(raster)
