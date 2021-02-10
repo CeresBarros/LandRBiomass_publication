@@ -193,7 +193,7 @@ factorialSimulations <- experiment2(
 
 ## workaround, clean simLists before saving
 for (i in names(factorialSimulations)) {
- tryCatch(rm(".mods", envir = factorialSimulations[[i]]), error = NULL)
+  tryCatch(rm(".mods", envir = factorialSimulations[[i]]), error = NULL)
 }
 
 ## save simLists object.
@@ -250,9 +250,9 @@ validationObjects <- list(
 )
 ## the following objects are only saved once at the end of year 0/beggining of year 1 (they don't change)
 validationOutputs <- data.frame(expand.grid(objectName = c("rawBiomassMapStart"),
-                                     saveTime = c(validationTimes$start),
-                                     eventPriority = 1),
-                                     stringsAsFactors = FALSE)
+                                            saveTime = c(validationTimes$start),
+                                            eventPriority = 1),
+                                stringsAsFactors = FALSE)
 validationOutputs <- rbind(validationOutputs, data.frame(objectName = "rawBiomassMapEnd",
                                                          saveTime = c(validationTimes$start),
                                                          eventPriority = 1))
@@ -260,21 +260,22 @@ validationOutputs <- rbind(validationOutputs, data.frame(objectName = "standAgeM
                                                          saveTime = c(validationTimes$start),
                                                          eventPriority = 1))
 validationOutputs <- rbind(validationOutputs, data.frame(objectName = "standAgeMapEnd",
-                                           saveTime = c(validationTimes$start),
-                                           eventPriority = 1))
+                                                         saveTime = c(validationTimes$start),
+                                                         eventPriority = 1))
 validationOutputs <- rbind(validationOutputs, data.frame(objectName = "speciesLayersStart",
-                                           saveTime = c(validationTimes$start),
-                                           eventPriority = 1))
+                                                         saveTime = c(validationTimes$start),
+                                                         eventPriority = 1))
 validationOutputs <- rbind(validationOutputs, data.frame(objectName = "speciesLayersEnd",
                                                          saveTime = c(validationTimes$start),
                                                          eventPriority = 1))
-devtools::load_all("../LandR/")
-LandRBiomass_sim <- simInitAndSpades(times = validationTimes
-                                     , params = validationParams
-                                     , modules = "Biomass_validationKNN"
-                                     , objects = validationObjects
-                                     , outputs = validationOutputs
-                                     , paths = )   ## note that simPaths must respect the simulation outputPath
+
+LandRBiomass_validation <- simInitAndSpades(times = validationTimes
+                                            , params = validationParams
+                                            , modules = "Biomass_validationKNN"
+                                            , objects = validationObjects
+                                            , outputs = validationOutputs
+                                            , paths = validationPaths
+                                            , .plotInitialTime = NA)   ## note that simPaths must respect the simulation outputPath
 
 q("no")
 
