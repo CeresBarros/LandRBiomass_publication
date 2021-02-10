@@ -129,7 +129,7 @@ sppEquivalencies_CA <- sppEquivalencies_CA[Boreal %in% names(simOutSpeciesLayers
 
 ## objects will be saved at the start of the simulation (so they reflect the previous year)
 
-simOutputs <- data.frame(expand.grid(objectName = c("cohortData"),
+simOutputs <- data.frame(expand.grid(objectName = "cohortData",
                                      saveTime = unique(seq(simTimes$start, simTimes$end, by = 1)),
                                      eventPriority = 1,
                                      stringsAsFactors = FALSE))
@@ -139,6 +139,9 @@ simOutputs <- rbind(simOutputs, data.frame(objectName = "pixelGroupMap",
 simOutputs <- rbind(simOutputs, data.frame(objectName = "biomassMap",
                                            saveTime = simTimes$start,
                                            eventPriority = 1))
+
+## in the first year, eventPriorities need to be set to AFTER the init event (which has priority 1)
+simOutputs$eventPriority[simOutputs$saveTime == simTimes$start] <- 1.5
 
 ## in the first year, objects have to be saved after init events, before mortalityAndGrowth
 ## note that vegTypeMap won't be saved at yr 0, because it doens't exist at priority 5.5
