@@ -237,8 +237,8 @@ validationParams <- list(
 )
 
 validationObjects <- list(
-  "biomassMap" = rawBiomassMap  ## to change when outputs are ready
-  , "rasterToMatch" = rasterToMatch  ## it's retrieved from LandRBiomass_sim in the sourced script
+  "biomassMap" = biomassMap  ## to change when outputs are ready
+  , "rasterToMatch" = rasterToMatch
   , "rawBiomassMapStart" = rawBiomassMap
   , "rstLCChange" = rstLCChangeAllbin
   , "simulationOutputs" = simulationOutputs
