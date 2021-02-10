@@ -128,14 +128,14 @@ rm(toRm)
 sppEquivalencies_CA <- sppEquivalencies_CA[Boreal %in% names(simOutSpeciesLayers$speciesLayers)]
 
 ## objects will be saved at the start of the simulation (so they reflect the previous year)
+
 simOutputs <- data.frame(expand.grid(objectName = c("cohortData"),
-                                     saveTime = unique(seq(simTimes$start, simTimes$end, by = 5)),
-                                     eventPriority = 10,
+                                     saveTime = unique(seq(simTimes$start, simTimes$end, by = 1)),
+                                     eventPriority = 1,
                                      stringsAsFactors = FALSE))
 simOutputs <- rbind(simOutputs, data.frame(objectName = "pixelGroupMap",
-                                           saveTime = unique(seq(simTimes$start, simTimes$end, by = 5)),
-                                           eventPriority = 10))
-## other outputs needed to run validation:
+                                           saveTime = unique(seq(simTimes$start, simTimes$end, by = 1)),
+                                           eventPriority = 1))
 simOutputs <- rbind(simOutputs, data.frame(objectName = "biomassMap",
                                            saveTime = simTimes$start,
                                            eventPriority = 1))
