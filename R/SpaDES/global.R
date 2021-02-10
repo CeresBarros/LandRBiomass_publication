@@ -231,7 +231,7 @@ validationParams <- list(
     , "deciduousCoverDiscount" = params(factorialSimulations$sim1_rep01)$Biomass_borealDataPrep$deciduousCoverDiscount
     , "sppEquivCol" = params(factorialSimulations$sim1_rep01)$Biomass_borealDataPrep$sppEquivCol
     , "validationReps" = as.integer(1:10)  ## or length of simLists
-    , "validationYears" = as.integer(c(simTimes$start, 2011))
+    , "validationYears" = as.integer(c(2001, 2011))
     , ".useCache" = eventCaching
   )
 )
