@@ -161,19 +161,21 @@ if (runName == "parametriseSALarge") {
   simObjects$studyArea <- get(runName)
 }
 
-LandRBiomass_sim <- simInit(times = simTimes
+LandRBiomass_simInit <- simInit(times = simTimes
                             , params = simParams
                             , modules = simModules
                             , objects = simObjects
                             , outputs = simOutputs
                             , paths = simPaths)
+
+## save the simList
+saveSimList(LandRBiomass_simInit, file.path(simPaths$outputPath, paste0("simInitList_", runName)))
 ```
 
 
 ## Run simulation
 ```{r runSimulation}
-## just one rep - test sim
-LandRBiomass_simTest <- spades(LandRBiomass_sim, .plotInitialTime = simTimes$start)
+LandRBiomass_sim <- spades(LandRBiomass_simInit, .plotInitialTime = simTimes$start)
 ```
 
 

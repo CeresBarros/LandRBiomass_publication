@@ -170,34 +170,34 @@ if (runName == "parametriseSALarge") {
 }
 
 # reproducible::clearCache(simPaths$cachePath)
-LandRBiomass_sim <- simInit(times = simTimes
+LandRBiomass_simInit <- simInit(times = simTimes
                             , params = simParams
                             , modules = simModules
                             , objects = simObjects
                             , outputs = simOutputs
                             , paths = simPaths)
 
-saveSimList(LandRBiomass_sim, file.path(simPaths$outputPath, paste0("simInitList_", runName)))
+saveSimList(LandRBiomass_simInit, file.path(simPaths$outputPath, paste0("simInitList_", runName)))
 
 ## just one rep - test sim
-# LandRBiomass_simTest <- spades(LandRBiomass_sim, .plotInitialTime = simTimes$start)
+# LandRBiomass_sim <- spades(LandRBiomass_simInit, .plotInitialTime = simTimes$start)
 
 ## SIMULATION WITH 10 REPS
 # options("reproducible.useCache" = "overwrite")
 library(future)
-plan("multiprocess", workers = 10)   ## each worker consumming roughly 15Gb.
-factorialSimulations <- experiment2(
-  sim1 = LandRBiomass_sim,
+plan("multiprocess", workers = 2)   ## each worker consuming roughly 16Gb
+LandRBiomass_sim <- experiment2(
+  sim1 = LandRBiomass_simInit,
   clearSimEnv = TRUE,
   replicates = 10)
 
 ## workaround, clean simLists before saving
-for (i in names(factorialSimulations)) {
-  tryCatch(rm(".mods", envir = factorialSimulations[[i]]), error = NULL)
+for (i in names(LandRBiomass_sim)) {
+  tryCatch(rm(".mods", envir = LandRBiomass_sim[[i]]), error = NULL)
 }
 
 ## save simLists object.
-qs::qsave(factorialSimulations, file.path(simPaths$outputPath, paste0("simList_factorialSimulations_", runName)))
+qs::qsave(LandRBiomass_sim, file.path(simPaths$outputPath, paste0("simList_LandRBiomass_sim_", runName)))
 
 ## VALIDATION
 ## get the  land-cover change map (needed to have an RTM first, so get it from the simInitList)
@@ -226,10 +226,10 @@ source("R/SpaDES/3_simObjects4Valid.R")
 validationTimes <- list(start = 1, end = 1)
 validationParams <- list(
   Biomass_validationKNN = list(
-    "minCoverThreshold" = params(factorialSimulations$sim1_rep01)$Biomass_borealDataPrep$minCoverThreshold
-    , "pixelGroupBiomassClass" = params(factorialSimulations$sim1_rep01)$Biomass_borealDataPrep$pixelGroupBiomassClass
-    , "deciduousCoverDiscount" = params(factorialSimulations$sim1_rep01)$Biomass_borealDataPrep$deciduousCoverDiscount
-    , "sppEquivCol" = params(factorialSimulations$sim1_rep01)$Biomass_borealDataPrep$sppEquivCol
+    "minCoverThreshold" = params(LandRBiomass_sim$sim1_rep01)$Biomass_borealDataPrep$minCoverThreshold
+    , "pixelGroupBiomassClass" = params(LandRBiomass_sim$sim1_rep01)$Biomass_borealDataPrep$pixelGroupBiomassClass
+    , "deciduousCoverDiscount" = params(LandRBiomass_sim$sim1_rep01)$Biomass_borealDataPrep$deciduousCoverDiscount
+    , "sppEquivCol" = params(LandRBiomass_sim$sim1_rep01)$Biomass_borealDataPrep$sppEquivCol
     , "validationReps" = as.integer(1:10)  ## or length of simLists
     , "validationYears" = as.integer(c(2001, 2011))
     , ".useCache" = eventCaching
@@ -243,10 +243,10 @@ validationObjects <- list(
   , "rstLCChange" = rstLCChangeAllbin
   , "simulationOutputs" = simulationOutputs
   , "speciesLayersStart" = speciesLayers
-  , "sppColorVect" = LandRBiomass_sim$sppColorVect
-  , "sppEquiv" = LandRBiomass_sim$sppEquiv
+  , "sppColorVect" = LandRBiomass_simInit$sppColorVect
+  , "sppEquiv" = LandRBiomass_simInit$sppEquiv
   , "standAgeMapStart" = standAgeMap
-  , "studyArea" = LandRBiomass_sim$studyArea
+  , "studyArea" = LandRBiomass_simInit$studyArea
 )
 ## the following objects are only saved once at the end of year 0/beggining of year 1 (they don't change)
 validationOutputs <- data.frame(expand.grid(objectName = c("rawBiomassMapStart"),
