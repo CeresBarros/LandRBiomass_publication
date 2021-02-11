@@ -66,15 +66,11 @@ speciesParams <- list(
 )
 
 simModules <- list("Biomass_borealDataPrep"
-                   , "Biomass_core"
                    , "Biomass_speciesParameters"
+                   , "Biomass_core"
 )
 
 simParams <- list(
-  Biomass_speciesParameters = list(
-    "sppEquivCol" = sppEquivCol
-    , ".useCache" = eventCaching
-  ),
   Biomass_borealDataPrep = list(
     "sppEquivCol" = sppEquivCol
     , "forestedLCCClasses" = c(1:15, 34:35)
@@ -90,7 +86,11 @@ simParams <- list(
     , "pixelGroupBiomassClass" = 100
     , "useCloudCacheForStats" = FALSE
     , "cloudFolderID" = NA
-    , ".useCache" = eventCaching
+    , ".useCache" = eventCaching[1]
+  )
+  , Biomass_speciesParameters = list(
+    "sppEquivCol" = sppEquivCol
+    , ".useCache" = eventCaching[1]
   )
   , Biomass_core = list(
     "calcSummaryBGM" = c("start")
