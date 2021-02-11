@@ -178,7 +178,7 @@ saveSimList(LandRBiomass_simInit, file.path(simPaths$outputPath, paste0("simInit
 ## SIMULATION WITH 10 REPS
 # options("reproducible.useCache" = "overwrite")
 library(future)
-plan("multiprocess", workers = 2)   ## each worker consuming roughly 16Gb
+plan("multiprocess", workers = 10)   ## each worker consuming roughly 16Gb
 LandRBiomass_sim <- experiment2(
   sim1 = LandRBiomass_simInit,
   clearSimEnv = TRUE,
