@@ -30,7 +30,7 @@ library(data.table)
 options("reproducible.useNewDigestAlgorithm" = TRUE)
 options("spades.moduleCodeChecks" = FALSE)
 options("reproducible.useCache" = TRUE)
-options("reproducible.inputPaths" = file.path("R/SpaDES/inputs"))  ## store everything in data/ so that there are no duplicated files across modules
+options("reproducible.inputPaths" = file.path("R/SpaDES/inputs"))  ## store everything in inputs/ so that there are no duplicated files across modules
 options("reproducible.destinationPath" = file.path("R/SpaDES/inputs"))
 options("reproducible.useGDAL" = FALSE)
 # runName <- "studyAreaS"
@@ -128,7 +128,6 @@ rm(toRm)
 sppEquivalencies_CA <- sppEquivalencies_CA[Boreal %in% names(simOutSpeciesLayers$speciesLayers)]
 
 ## objects will be saved at the start of the simulation (so they reflect the previous year)
-
 simOutputs <- data.frame(expand.grid(objectName = "cohortData",
                                      saveTime = unique(seq(simTimes$start, simTimes$end, by = 1)),
                                      eventPriority = 1,
@@ -142,12 +141,6 @@ simOutputs <- rbind(simOutputs, data.frame(objectName = "biomassMap",
 
 ## in the first year, eventPriorities need to be set to AFTER the init event (which has priority 1)
 simOutputs$eventPriority[simOutputs$saveTime == simTimes$start] <- 1.5
-
-## in the first year, objects have to be saved after init events, before mortalityAndGrowth
-## note that vegTypeMap won't be saved at yr 0, because it doens't exist at priority 5.5
-## and save is not scheduled twice (even if we changed the priority)
-## (not doing this now and simply acknowledging that cohortData will show variation across reps in year 1)
-# simOutputs[simOutputs$saveTime == 0, "eventPriority"] <- 5.5
 
 simObjects <- list(
   "sppEquiv" = sppEquivalencies_CA
