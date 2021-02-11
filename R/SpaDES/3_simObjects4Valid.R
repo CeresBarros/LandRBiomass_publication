@@ -83,13 +83,20 @@ rstLCChangeAllbin <- Cache(postProcess,
 rstLCChangeAllbin[getValues(rstLCChangeAllbin) != 1] <- NA
 
 ## compile all simulation output tables and replace output paths
-simulationOutputs <- lapply(factorialSimulations, FUN = function(x, localSimPaths) {
+if (class(LandRBiomass_sim) == "simLists") {
+simulationOutputs <- lapply(LandRBiomass_sim, FUN = function(x, localSimPaths) {
   oldPath <- dirname(outputPath(x)) ## exclude sim*_rep* folder
   DT <- as.data.table(outputs(x))
   DT[, file := sub(oldPath, localSimPaths$outputPath, file)]
   DT
   }, localSimPaths = simPaths)
 simulationOutputs <- rbindlist(simulationOutputs)
+} else {
+  oldPath <- outputPath(LandRBiomass_sim) ## exclude sim*_rep* folder
+  simulationOutputs <- as.data.table(outputs(LandRBiomass_sim))
+  simulationOutputs[, file := sub(oldPath, simPaths$outputPath, file)]
+  rm(oldPath)
+}
 
 ## get biomassMap (should be the same across all reps)
 biomassMap <- readRDS(simulationOutputs[objectName == "biomassMap", file][1])
