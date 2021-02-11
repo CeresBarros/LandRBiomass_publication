@@ -12,11 +12,13 @@ library(SpaDES)
 library(SpaDES.experiment)
 library(raster)
 library(LandR)
+library(dplyr)
+library(data.table)
 
 options("reproducible.useNewDigestAlgorithm" = TRUE)
 options("spades.moduleCodeChecks" = FALSE)
 options("reproducible.useCache" = TRUE)
-options("reproducible.inputPaths" = file.path("R/SpaDES/inputs"))  ## store everything in data/ so that there are no duplicated files across modules
+options("reproducible.inputPaths" = file.path("R/SpaDES/inputs"))
 options("reproducible.destinationPath" = file.path("R/SpaDES/inputs"))
 options("reproducible.useGDAL" = FALSE)
 
@@ -59,11 +61,14 @@ rm(toRm)
 
 
 ## Simulation setup - part 3 - module parameters and outputs
+* `vegLeadingProportion` indicates what proportion the stand must be in one species group for it to be leading. If 0, then there is never a notion of "mixed" vegetation types and a species is a leading species if it has the highest relative biomass in the pixel.
+* `successionTimestep` defines the frequency at which dispersal and age reclassification occurs - every 10 years is the default LANDIS behaviour. 
+
 ```{r simulationSetup3}
 ## simulation params
 simTimes <- list(start = 2001, end = 2031)
-vegLeadingProportion <- 0 # indicates what proportion the stand must be in one species group for it to be leading.
-successionTimestep <- 10L  # for dispersal and age reclass.
+vegLeadingProportion <- 0 
+successionTimestep <- 10L  
 
 speciesParams <- list(
   "shadetolerance" = list(
@@ -105,7 +110,7 @@ simParams <- list(
   )
   , Biomass_core = list(
     "calcSummaryBGM" = c("start")
-    , "initialBiomassSource" = "cohortData" # can be 'biomassMap' or "spinup" too
+    , "initialBiomassSource" = "cohortData" 
     , ".plotInitialTime" = simTimes$start
     , "plotOverstory" = TRUE
     , "seedingAlgorithm" = "wardDispersal"
@@ -124,22 +129,19 @@ simParams <- list(
 sppEquivalencies_CA <- sppEquivalencies_CA[Boreal %in% names(simOutSpeciesLayers$speciesLayers)]
 
 ## objects will be saved at the start of the simulation (so they reflect the previous year)
-simOutputs <- data.frame(expand.grid(objectName = c("cohortData"),
-                                     saveTime = unique(seq(simTimes$start, simTimes$end, by = 5)),
-                                     eventPriority = 10,
+simOutputs <- data.frame(expand.grid(objectName = "cohortData",
+                                     saveTime = unique(seq(simTimes$start, simTimes$end, by = 1)),
+                                     eventPriority = 1,
                                      stringsAsFactors = FALSE))
 simOutputs <- rbind(simOutputs, data.frame(objectName = "pixelGroupMap",
-                                           saveTime = unique(seq(simTimes$start, simTimes$end, by = 5)),
-                                           eventPriority = 10))
-simOutputs <- rbind(simOutputs, data.frame(objectName = "vegTypeMap",
-                                           saveTime = unique(seq(simTimes$start, simTimes$end, by = 5)),
-                                           eventPriority = 10))
+                                           saveTime = unique(seq(simTimes$start, simTimes$end, by = 1)),
+                                           eventPriority = 1))
+simOutputs <- rbind(simOutputs, data.frame(objectName = "biomassMap",
+                                           saveTime = simTimes$start,
+                                           eventPriority = 1))
 
-## in the first year, objects have to be saved after init events, before mortalityAndGrowth
-## note that vegTypeMap won't be saved at yr 0, because it doens't exist at priority 5.5
-## and save is not scheduled twice (even if we changed the priority)
-## (not doing this now and simply acknowledging that cohortData will show variation across reps in year 1)
-# simOutputs[simOutputs$saveTime == 0, "eventPriority"] <- 5.5
+## in the first year, eventPriorities need to be set to AFTER the init event (which has priority 1)
+simOutputs$eventPriority[simOutputs$saveTime == simTimes$start] <- 1.5
 
 simObjects <- list(
   "sppEquiv" = sppEquivalencies_CA
@@ -174,16 +176,107 @@ saveSimList(LandRBiomass_simInit, file.path(simPaths$outputPath, paste0("simInit
 
 
 ## Run simulation
+Here we run just one repetition
 ```{r runSimulation}
 LandRBiomass_sim <- spades(LandRBiomass_simInit, .plotInitialTime = simTimes$start)
 ```
 
+If we were to run several repetitions, this would be how:
+```{r runSimulation, eval = FALSE}
+library(future)
+plan("multiprocess", workers = 1)   ## each worker consumes roughly 16Gb
+LandRBiomass_sim <- experiment2(
+  sim1 = LandRBiomass_sim,
+  clearSimEnv = TRUE,
+  replicates = 10)
+```
 
 ## VALIDATION
-```{r}
-## get the  land-cover change map (needed to have an RTM first.)
+Here we run the validation on the outputs of just one repetition.
+
+We begin by preparing all the inputs necessary for the `Biomass_validationKNN` module
+```{r validationPrep}
+## get the  land-cover change map (needed to have an RTM first, so get it from the simInitList)
+## /!\ it is assumed that the filename of the raster in the simList corresponds to the raster found in disk.
+## this may not be the case if the simulations were run in another machine and saved rasters were not imported.
+
+## make objects again in case only this part of the script is being run:
+if (!exists("simDirName"))
+  simDirName <- "dec2020Runs"
+
+if (!exists("simPaths"))
+  simPaths <- list(cachePath = file.path("R/SpaDES/cache", simDirName)
+                   , modulePath = file.path("R/SpaDES/m")
+                   , inputPath = file.path("R/SpaDES/inputs")
+                   , outputPath = file.path("R/SpaDES/outputs", simDirName))
+
+validationPaths <- list(cachePath = file.path("R/SpaDES/cache", simDirName)
+                        , modulePath = file.path("R/SpaDES/m")
+                        , inputPath = file.path("R/SpaDES/inputs")
+                        , outputPath = file.path("R/SpaDES/validation", simDirName))
+
 source("R/SpaDES/3_simObjects4Valid.R")
+
+## PARAMETERS FOR VALIDATION MODULE
+## in this case all reps have the same parameters, so we can use the first rep to get the values
+validationTimes <- list(start = 1, end = 1)
+validationParams <- list(
+  Biomass_validationKNN = list(
+    "minCoverThreshold" = params(LandRBiomass_sim)$Biomass_borealDataPrep$minCoverThreshold
+    , "pixelGroupBiomassClass" = params(LandRBiomass_sim)$Biomass_borealDataPrep$pixelGroupBiomassClass
+    , "deciduousCoverDiscount" = params(LandRBiomass_sim)$Biomass_borealDataPrep$deciduousCoverDiscount
+    , "sppEquivCol" = params(LandRBiomass_sim)$Biomass_borealDataPrep$sppEquivCol
+    , "validationReps" = NA
+    , "validationYears" = as.integer(c(2001, 2011))
+    , ".useCache" = eventCaching
+  )
+)
+
+validationObjects <- list(
+  "biomassMap" = biomassMap  ## to change when outputs are ready
+  , "rasterToMatch" = rasterToMatch
+  , "rawBiomassMapStart" = rawBiomassMap
+  , "rstLCChange" = rstLCChangeAllbin
+  , "simulationOutputs" = simulationOutputs
+  , "speciesLayersStart" = speciesLayers
+  , "sppColorVect" = LandRBiomass_sim$sppColorVect
+  , "sppEquiv" = LandRBiomass_sim$sppEquiv
+  , "standAgeMapStart" = standAgeMap
+  , "studyArea" = LandRBiomass_sim$studyArea
+)
+## the following objects are only saved once at the end of year 0/beggining of year 1 (they don't change)
+validationOutputs <- data.frame(expand.grid(objectName = c("rawBiomassMapStart"),
+                                            saveTime = c(validationTimes$start),
+                                            eventPriority = 1),
+                                stringsAsFactors = FALSE)
+validationOutputs <- rbind(validationOutputs, data.frame(objectName = "rawBiomassMapEnd",
+                                                         saveTime = c(validationTimes$start),
+                                                         eventPriority = 1))
+validationOutputs <- rbind(validationOutputs, data.frame(objectName = "standAgeMapStart",
+                                                         saveTime = c(validationTimes$start),
+                                                         eventPriority = 1))
+validationOutputs <- rbind(validationOutputs, data.frame(objectName = "standAgeMapEnd",
+                                                         saveTime = c(validationTimes$start),
+                                                         eventPriority = 1))
+validationOutputs <- rbind(validationOutputs, data.frame(objectName = "speciesLayersStart",
+                                                         saveTime = c(validationTimes$start),
+                                                         eventPriority = 1))
+validationOutputs <- rbind(validationOutputs, data.frame(objectName = "speciesLayersEnd",
+                                                         saveTime = c(validationTimes$start),
+                                                         eventPriority = 1))
 ```
+
+We can now run the validation
+```{r validationRun}
+LandRBiomass_validation <- simInitAndSpades(times = validationTimes
+                                            , params = validationParams
+                                            , modules = "Biomass_validationKNN"
+                                            , objects = validationObjects
+                                            , outputs = validationOutputs
+                                            , paths = validationPaths
+                                            , .plotInitialTime = validationTimes$start) 
+```
+
 
 
 
