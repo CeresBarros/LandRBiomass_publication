@@ -40,7 +40,7 @@ eventCaching <- c(".inputObjects", "init")
 useParallel <- FALSE
 
 ## paths
-simDirName <- "dec2020Runs"
+simDirName <- "feb2021Runs"
 simPaths <- list(cachePath = file.path("R/SpaDES/cache", simDirName)
                  , modulePath = file.path("R/SpaDES/m")
                  , inputPath = file.path("R/SpaDES/inputs")
