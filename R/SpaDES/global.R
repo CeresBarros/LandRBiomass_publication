@@ -76,7 +76,10 @@ simParams <- list(
     , "forestedLCCClasses" = c(1:15, 34:35)
     , "LCCClassesToReplaceNN" = c(34:35)
     , "fitDeciduousCoverDiscount" = TRUE
+    , "biomassModel" =  quote(lme4::lmer(logB ~ logAge * speciesCode + cover * speciesCode +
+                                           (logAge + cover | ecoregionGroup)))
     , "exportModels" = "all"
+    , "fixModelBiomass" = TRUE
     ,"speciesUpdateFunction" = list(
       quote(LandR::speciesTableUpdate(sim$species, sim$speciesTable, sim$sppEquiv, P(sim)$sppEquivCol)),
       quote(LandR::updateSpeciesTable(speciesTable = sim$species, params = sim$speciesParams)))
