@@ -40,7 +40,7 @@ eventCaching <- c(".inputObjects", "init")
 useParallel <- FALSE
 
 ## paths
-simDirName <- "feb2021Runs"
+simDirName <- "feb2021Runs_fixedmodelB"
 simPaths <- list(cachePath = file.path("R/SpaDES/cache", simDirName)
                  , modulePath = file.path("R/SpaDES/m")
                  , inputPath = file.path("R/SpaDES/inputs")
@@ -167,19 +167,29 @@ if (runName == "parametriseSALarge") {
 
 # reproducible::clearCache(simPaths$cachePath)
 LandRBiomass_simInit <- simInit(times = simTimes
-                            , params = simParams
-                            , modules = simModules
-                            , objects = simObjects
-                            , outputs = simOutputs
-                            , paths = simPaths)
+                                , params = simParams
+                                , modules = simModules
+                                , objects = simObjects
+                                , outputs = simOutputs
+                                , paths = simPaths)
 
 saveSimList(LandRBiomass_simInit, file.path(simPaths$outputPath, paste0("simInitList_", runName)))
 
 ## just one rep - test sim
-# LandRBiomass_sim <- spades(LandRBiomass_simInit, .plotInitialTime = simTimes$start)
+# end(LandRBiomass_simInit) <- 2002
+# LandRBiomass_sim <- spades(LandRBiomass_simInit)
+# , .plotInitialTime = simTimes$start)
+# devtools::load_all("../LandR")
+# simInitAndSpades(times = list(start = simTimes$start, end = 2002)
+#                  , params = simParams
+#                  , modules = simModules
+#                  , objects = simObjects
+#                  , outputs = simOutputs
+#                  , paths = simPaths)
 
 ## SIMULATION WITH 10 REPS
 # options("reproducible.useCache" = "overwrite")
+amc::.gc()  ## clean ws
 library(future)
 plan("multiprocess", workers = 10)   ## each worker consuming roughly 16Gb
 LandRBiomass_sim <- experiment2(
