@@ -89,11 +89,11 @@ simParams <- list(
     , "pixelGroupBiomassClass" = 100
     , "useCloudCacheForStats" = FALSE
     , "cloudFolderID" = NA
-    , ".useCache" = eventCaching[1]
+    , ".useCache" = eventCaching
   )
   , Biomass_speciesParameters = list(
     "sppEquivCol" = sppEquivCol
-    , ".useCache" = eventCaching[1]
+    , ".useCache" = eventCaching
   )
   , Biomass_core = list(
     "calcSummaryBGM" = c("start")
@@ -186,11 +186,6 @@ LandRBiomass_sim <- experiment2(
   sim1 = LandRBiomass_simInit,
   clearSimEnv = TRUE,
   replicates = 10)
-
-## workaround, clean simLists before saving
-for (i in names(LandRBiomass_sim)) {
-  tryCatch(rm(".mods", envir = LandRBiomass_sim[[i]]), error = NULL)
-}
 
 ## save simLists object.
 qs::qsave(LandRBiomass_sim, file.path(simPaths$outputPath, paste0("simList_LandRBiomass_sim_", runName)))
