@@ -165,7 +165,7 @@ if (runName == "parametriseSALarge") {
   simObjects$studyArea <- get(runName)
 }
 
-# reproducible::clearCache(simPaths$cachePath)
+
 LandRBiomass_simInit <- simInit(times = simTimes
                                 , params = simParams
                                 , modules = simModules
@@ -207,7 +207,7 @@ qs::qsave(LandRBiomass_sim, file.path(simPaths$outputPath, paste0("simList_LandR
 
 ## make objects again in case only this part of the script is being run:
 if (!exists("simDirName"))
-  simDirName <- "dec2020Runs"
+  simDirName <- "feb2021Runs_fixedmodelB"
 
 if (!exists("simPaths"))
   simPaths <- list(cachePath = file.path("R/SpaDES/cache", simDirName)
