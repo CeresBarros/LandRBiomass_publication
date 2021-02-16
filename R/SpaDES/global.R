@@ -165,7 +165,7 @@ if (runName == "parametriseSALarge") {
   simObjects$studyArea <- get(runName)
 }
 
-# reproducible::clearCache(simPaths$cachePath)
+
 LandRBiomass_simInit <- simInit(times = simTimes
                                 , params = simParams
                                 , modules = simModules
