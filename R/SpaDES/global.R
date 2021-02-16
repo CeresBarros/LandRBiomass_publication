@@ -71,7 +71,7 @@ simModules <- list("Biomass_speciesParameters"
 )
 
 simParams <- list(
-  , Biomass_speciesParameters = list(
+  Biomass_speciesParameters = list(
     "sppEquivCol" = sppEquivCol
     , ".useCache" = eventCaching
   )
