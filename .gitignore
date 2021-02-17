@@ -6,7 +6,7 @@
 
 Rplots.pdf
 logR.txt
-log.Rout
+*.Rout
 *.sh.save
 
 data/
