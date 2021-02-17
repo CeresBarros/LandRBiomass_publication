@@ -40,7 +40,8 @@ eventCaching <- c(".inputObjects", "init")
 useParallel <- FALSE
 
 ## paths
-simDirName <- "feb2021Runs_fixedmodelB"
+simDirName <- "feb2021Runs"
+# simDirName <- "feb2021Runs_fixedmodelB"
 simPaths <- list(cachePath = file.path("R/SpaDES/cache", simDirName)
                  , modulePath = file.path("R/SpaDES/m")
                  , inputPath = file.path("R/SpaDES/inputs")
@@ -80,7 +81,9 @@ simParams <- list(
     , "forestedLCCClasses" = c(1:15, 34:35)
     , "LCCClassesToReplaceNN" = c(34:35)
     , "fitDeciduousCoverDiscount" = TRUE
-    , "biomassModel" =  quote(lme4::lmer(logB ~ logAge * speciesCode + cover * speciesCode +
+    # , "biomassModel" =  quote(lme4::lmer(logB ~ logAge * speciesCode + cover * speciesCode +
+    #                                        (logAge + cover | ecoregionGroup)))
+    , "biomassModel" =  quote(lme4::lmer(B ~ logAge * speciesCode + cover * speciesCode +
                                            (logAge + cover | ecoregionGroup)))
     , "exportModels" = "all"
     , "fixModelBiomass" = TRUE
@@ -207,7 +210,7 @@ qs::qsave(LandRBiomass_sim, file.path(simPaths$outputPath, paste0("simList_LandR
 
 ## make objects again in case only this part of the script is being run:
 if (!exists("simDirName"))
-  simDirName <- "feb2021Runs_fixedmodelB"
+  simDirName <- "feb2021Runs"
 
 if (!exists("simPaths"))
   simPaths <- list(cachePath = file.path("R/SpaDES/cache", simDirName)
@@ -238,7 +241,7 @@ validationParams <- list(
 )
 
 validationObjects <- list(
-  "biomassMap" = biomassMap  ## to change when outputs are ready
+  "biomassMap" = biomassMap
   , "rasterToMatch" = rasterToMatch
   , "rawBiomassMapStart" = rawBiomassMap
   , "rstLCChange" = rstLCChangeAllbin
@@ -249,6 +252,7 @@ validationObjects <- list(
   , "standAgeMapStart" = standAgeMap
   , "studyArea" = LandRBiomass_simInit$studyArea
 )
+
 ## the following objects are only saved once at the end of year 0/beggining of year 1 (they don't change)
 validationOutputs <- data.frame(expand.grid(objectName = c("rawBiomassMapStart"),
                                             saveTime = c(validationTimes$start),
