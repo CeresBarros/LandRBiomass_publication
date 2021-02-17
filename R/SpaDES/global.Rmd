@@ -28,7 +28,7 @@ eventCaching <- c(".inputObjects", "init")
 useParallel <- FALSE
 
 ## paths
-simDirName <- "dec2020Runs"
+simDirName <- "test"
 simPaths <- list(cachePath = file.path("R/SpaDES/cache", simDirName)
                  , modulePath = file.path("R/SpaDES/m")
                  , inputPath = file.path("R/SpaDES/inputs")
@@ -81,18 +81,25 @@ speciesParams <- list(
   )
 )
 
-simModules <- list("Biomass_borealDataPrep"
-                   , "Biomass_speciesParameters"
+simModules <- list("Biomass_speciesParameters"
+                   , "Biomass_borealDataPrep"
                    , "Biomass_core"
 )
 
 simParams <- list(
-  Biomass_borealDataPrep = list(
+  Biomass_speciesParameters = list(
+    "sppEquivCol" = sppEquivCol
+    , ".useCache" = eventCaching
+  )
+   , Biomass_borealDataPrep = list(
     "sppEquivCol" = sppEquivCol
     , "forestedLCCClasses" = c(1:15, 34:35)
     , "LCCClassesToReplaceNN" = c(34:35)
     , "fitDeciduousCoverDiscount" = TRUE
+    , "biomassModel" =  quote(lme4::lmer(logB ~ logAge * speciesCode + cover * speciesCode +
+                                           (logAge + cover | ecoregionGroup)))
     , "exportModels" = "all"
+    , "fixModelBiomass" = TRUE
     ,"speciesUpdateFunction" = list(
       quote(LandR::speciesTableUpdate(sim$species, sim$speciesTable, sim$sppEquiv, P(sim)$sppEquivCol)),
       quote(LandR::updateSpeciesTable(speciesTable = sim$species, params = sim$speciesParams)))
@@ -102,12 +109,8 @@ simParams <- list(
     , "pixelGroupBiomassClass" = 100
     , "useCloudCacheForStats" = FALSE
     , "cloudFolderID" = NA
-    , ".useCache" = eventCaching[1]
-  )
-  , Biomass_speciesParameters = list(
-    "sppEquivCol" = sppEquivCol
-    , ".useCache" = eventCaching[1]
-  )
+    , ".useCache" = eventCaching
+  ) 
   , Biomass_core = list(
     "calcSummaryBGM" = c("start")
     , "initialBiomassSource" = "cohortData" 
@@ -164,11 +167,11 @@ if (runName == "parametriseSALarge") {
 }
 
 LandRBiomass_simInit <- simInit(times = simTimes
-                            , params = simParams
-                            , modules = simModules
-                            , objects = simObjects
-                            , outputs = simOutputs
-                            , paths = simPaths)
+                                , params = simParams
+                                , modules = simModules
+                                , objects = simObjects
+                                , outputs = simOutputs
+                                , paths = simPaths)
 
 ## save the simList
 saveSimList(LandRBiomass_simInit, file.path(simPaths$outputPath, paste0("simInitList_", runName)))
@@ -184,7 +187,7 @@ LandRBiomass_sim <- spades(LandRBiomass_simInit, .plotInitialTime = simTimes$sta
 If we were to run several repetitions, this would be how:
 ```{r runSimulation, eval = FALSE}
 library(future)
-plan("multiprocess", workers = 1)   ## each worker consumes roughly 16Gb
+plan("multiprocess", workers = 1)   ## each worker consumes roughly 10Gb
 LandRBiomass_sim <- experiment2(
   sim1 = LandRBiomass_sim,
   clearSimEnv = TRUE,
@@ -202,7 +205,7 @@ We begin by preparing all the inputs necessary for the `Biomass_validationKNN` m
 
 ## make objects again in case only this part of the script is being run:
 if (!exists("simDirName"))
-  simDirName <- "dec2020Runs"
+  simDirName <- "test"
 
 if (!exists("simPaths"))
   simPaths <- list(cachePath = file.path("R/SpaDES/cache", simDirName)
@@ -222,28 +225,29 @@ source("R/SpaDES/3_simObjects4Valid.R")
 validationTimes <- list(start = 1, end = 1)
 validationParams <- list(
   Biomass_validationKNN = list(
-    "minCoverThreshold" = params(LandRBiomass_sim)$Biomass_borealDataPrep$minCoverThreshold
-    , "pixelGroupBiomassClass" = params(LandRBiomass_sim)$Biomass_borealDataPrep$pixelGroupBiomassClass
-    , "deciduousCoverDiscount" = params(LandRBiomass_sim)$Biomass_borealDataPrep$deciduousCoverDiscount
-    , "sppEquivCol" = params(LandRBiomass_sim)$Biomass_borealDataPrep$sppEquivCol
-    , "validationReps" = NA
+    "minCoverThreshold" = params(LandRBiomass_sim$sim1_rep01)$Biomass_borealDataPrep$minCoverThreshold
+    , "pixelGroupBiomassClass" = params(LandRBiomass_sim$sim1_rep01)$Biomass_borealDataPrep$pixelGroupBiomassClass
+    , "deciduousCoverDiscount" = params(LandRBiomass_sim$sim1_rep01)$Biomass_borealDataPrep$deciduousCoverDiscount
+    , "sppEquivCol" = params(LandRBiomass_sim$sim1_rep01)$Biomass_borealDataPrep$sppEquivCol
+    , "validationReps" = as.integer(1:10)  ## or length of simLists
     , "validationYears" = as.integer(c(2001, 2011))
     , ".useCache" = eventCaching
   )
 )
 
 validationObjects <- list(
-  "biomassMap" = biomassMap  ## to change when outputs are ready
+  "biomassMap" = biomassMap 
   , "rasterToMatch" = rasterToMatch
   , "rawBiomassMapStart" = rawBiomassMap
   , "rstLCChange" = rstLCChangeAllbin
   , "simulationOutputs" = simulationOutputs
   , "speciesLayersStart" = speciesLayers
-  , "sppColorVect" = LandRBiomass_sim$sppColorVect
-  , "sppEquiv" = LandRBiomass_sim$sppEquiv
+  , "sppColorVect" = LandRBiomass_simInit$sppColorVect
+  , "sppEquiv" = LandRBiomass_simInit$sppEquiv
   , "standAgeMapStart" = standAgeMap
-  , "studyArea" = LandRBiomass_sim$studyArea
+  , "studyArea" = LandRBiomass_simInit$studyArea
 )
+
 ## the following objects are only saved once at the end of year 0/beggining of year 1 (they don't change)
 validationOutputs <- data.frame(expand.grid(objectName = c("rawBiomassMapStart"),
                                             saveTime = c(validationTimes$start),
