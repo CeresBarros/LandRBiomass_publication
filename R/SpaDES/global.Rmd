@@ -15,7 +15,7 @@ library(LandR)
 library(dplyr)
 library(data.table)
 
-options("reproducible.useNewDigestAlgorithm" = TRUE)
+options("reproducible.useNewDigestAlgorith" = 2)
 options("spades.moduleCodeChecks" = FALSE)
 options("reproducible.useCache" = TRUE)
 options("reproducible.inputPaths" = file.path("R/SpaDES/inputs"))
