@@ -41,7 +41,6 @@ useParallel <- FALSE
 
 ## paths
 simDirName <- "feb2021Runs"
-# simDirName <- "feb2021Runs_fixedmodelB"
 simPaths <- list(cachePath = file.path("R/SpaDES/cache", simDirName)
                  , modulePath = file.path("R/SpaDES/m")
                  , inputPath = file.path("R/SpaDES/inputs")
