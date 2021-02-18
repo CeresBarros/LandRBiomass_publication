@@ -27,7 +27,7 @@ library(data.table)
 ## -----------------------------------------------
 
 ## Set up modelling parameters  ---------------------------
-options("reproducible.useNewDigestAlgorithm" = TRUE)
+options("reproducible.useNewDigestAlgorithm" = 2)
 options("spades.moduleCodeChecks" = FALSE)
 options("reproducible.useCache" = TRUE)
 options("reproducible.inputPaths" = file.path("R/SpaDES/inputs"))  ## store everything in inputs/ so that there are no duplicated files across modules
