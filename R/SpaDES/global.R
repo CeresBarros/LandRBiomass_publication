@@ -143,6 +143,12 @@ simOutputs <- rbind(simOutputs, data.frame(objectName = "pixelGroupMap",
 simOutputs <- rbind(simOutputs, data.frame(objectName = "biomassMap",
                                            saveTime = simTimes$start,
                                            eventPriority = 1))
+simOutputs <- rbind(simOutputs, data.frame(objectName = "speciesEcoregion",
+                                           saveTime = simTimes$start,
+                                           eventPriority = 1))
+simOutputs <- rbind(simOutputs, data.frame(objectName = "species",
+                                           saveTime = simTimes$start,
+                                           eventPriority = 1))
 
 ## in the first year, eventPriorities need to be set to AFTER the init event (which has priority 1)
 simOutputs$eventPriority[simOutputs$saveTime == simTimes$start] <- 1.5
