@@ -81,17 +81,13 @@ speciesParams <- list(
   )
 )
 
-simModules <- list("Biomass_speciesParameters"
-                   , "Biomass_borealDataPrep"
+simModules <- list("Biomass_borealDataPrep"
+                   , "Biomass_speciesParameters"
                    , "Biomass_core"
 )
 
 simParams <- list(
-  Biomass_speciesParameters = list(
-    "sppEquivCol" = sppEquivCol
-    , ".useCache" = eventCaching
-  )
-   , Biomass_borealDataPrep = list(
+  Biomass_borealDataPrep = list(
     "sppEquivCol" = sppEquivCol
     , "forestedLCCClasses" = c(1:15, 34:35)
     , "LCCClassesToReplaceNN" = c(34:35)
@@ -110,11 +106,16 @@ simParams <- list(
     , "useCloudCacheForStats" = FALSE
     , "cloudFolderID" = NA
     , ".useCache" = eventCaching
-  ) 
+  )
+  , Biomass_speciesParameters = list(
+    "sppEquivCol" = sppEquivCol
+    , ".useCache" = eventCaching
+  )
   , Biomass_core = list(
     "calcSummaryBGM" = c("start")
-    , "initialBiomassSource" = "cohortData" 
-    , ".plotInitialTime" = simTimes$start
+    , "initialBiomassSource" = "cohortData" # can be 'biomassMap' or "spinup" too
+    # , ".plotInitialTime" = simTimes$start
+    , ".plotInitialTime" = NA ## for experiment
     , "plotOverstory" = TRUE
     , "seedingAlgorithm" = "wardDispersal"
     , "sppEquivCol" = sppEquivCol
@@ -123,7 +124,8 @@ simParams <- list(
     , ".plotInterval" = 1
     , ".plotMaps" = TRUE
     , ".saveInitialTime" = NA
-    , ".useCache" = eventCaching[1] 
+    # , ".useCache" = eventCaching
+    , ".useCache" = eventCaching[1] # experiment doesn't like when init is cached
     , ".useParallel" = useParallel
   )
 )
