@@ -160,7 +160,6 @@ LandRBiomass_preSim <- Cache(simInitAndSpades
                              , modules = simModules[1:2]
                              , paths = simPaths
                              , objects = simObjects
-                             , outputs = simOutputs
                              , .plotInitialTime = NA
                              , cacheRepo = simPaths$cachePath
                              , userTags = "preSim"
