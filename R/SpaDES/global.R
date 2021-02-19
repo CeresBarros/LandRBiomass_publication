@@ -132,27 +132,6 @@ rm(toRm)
 ## subset sppEquivalencies
 sppEquivalencies_CA <- sppEquivalencies_CA[Boreal %in% names(simOutSpeciesLayers$speciesLayers)]
 
-## objects will be saved at the start of the simulation (so they reflect the previous year)
-simOutputs <- data.frame(expand.grid(objectName = "cohortData",
-                                     saveTime = unique(seq(simTimes$start, simTimes$end, by = 1)),
-                                     eventPriority = 1,
-                                     stringsAsFactors = FALSE))
-simOutputs <- rbind(simOutputs, data.frame(objectName = "pixelGroupMap",
-                                           saveTime = unique(seq(simTimes$start, simTimes$end, by = 1)),
-                                           eventPriority = 1))
-simOutputs <- rbind(simOutputs, data.frame(objectName = "biomassMap",
-                                           saveTime = simTimes$start,
-                                           eventPriority = 1))
-simOutputs <- rbind(simOutputs, data.frame(objectName = "speciesEcoregion",
-                                           saveTime = simTimes$start,
-                                           eventPriority = 1))
-simOutputs <- rbind(simOutputs, data.frame(objectName = "species",
-                                           saveTime = simTimes$start,
-                                           eventPriority = 1))
-
-## in the first year, eventPriorities need to be set to AFTER the init event (which has priority 1)
-simOutputs$eventPriority[simOutputs$saveTime == simTimes$start] <- 1.5
-
 simObjects <- list(
   "sppEquiv" = sppEquivalencies_CA
   , "sppColorVect" = sppColorVect
@@ -196,6 +175,27 @@ simObjects <- lapply(ls(LandRBiomass_preSim@.xData), FUN = function(x) {
 })
 
 names(simObjects) <- ls(LandRBiomass_preSim@.xData)
+
+## objects will be saved at the start of the simulation (so they reflect the previous year)
+simOutputs <- data.frame(expand.grid(objectName = "cohortData",
+                                     saveTime = unique(seq(simTimes$start, simTimes$end, by = 1)),
+                                     eventPriority = 1,
+                                     stringsAsFactors = FALSE))
+simOutputs <- rbind(simOutputs, data.frame(objectName = "pixelGroupMap",
+                                           saveTime = unique(seq(simTimes$start, simTimes$end, by = 1)),
+                                           eventPriority = 1))
+simOutputs <- rbind(simOutputs, data.frame(objectName = "biomassMap",
+                                           saveTime = simTimes$start,
+                                           eventPriority = 1))
+simOutputs <- rbind(simOutputs, data.frame(objectName = "speciesEcoregion",
+                                           saveTime = simTimes$start,
+                                           eventPriority = 1))
+simOutputs <- rbind(simOutputs, data.frame(objectName = "species",
+                                           saveTime = simTimes$start,
+                                           eventPriority = 1))
+
+## in the first year, eventPriorities need to be set to AFTER the init event (which has priority 1)
+simOutputs$eventPriority[simOutputs$saveTime == simTimes$start] <- 1.5
 
 ## make a simInit from the pre-sim
 LandRBiomass_simInit <- simInit(times = simTimes
