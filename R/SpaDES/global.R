@@ -242,10 +242,10 @@ source("R/SpaDES/3_simObjects4Valid.R")
 validationTimes <- list(start = 1, end = 1)
 validationParams <- list(
   Biomass_validationKNN = list(
-    "minCoverThreshold" = params(LandRBiomass_sim$sim1_rep01)$Biomass_borealDataPrep$minCoverThreshold
-    , "pixelGroupBiomassClass" = params(LandRBiomass_sim$sim1_rep01)$Biomass_borealDataPrep$pixelGroupBiomassClass
-    , "deciduousCoverDiscount" = params(LandRBiomass_sim$sim1_rep01)$Biomass_borealDataPrep$deciduousCoverDiscount
-    , "sppEquivCol" = params(LandRBiomass_sim$sim1_rep01)$Biomass_borealDataPrep$sppEquivCol
+    "minCoverThreshold" = params(LandRBiomass_preSim)$Biomass_borealDataPrep$minCoverThreshold
+    , "pixelGroupBiomassClass" = params(LandRBiomass_preSim)$Biomass_borealDataPrep$pixelGroupBiomassClass
+    , "deciduousCoverDiscount" = params(LandRBiomass_preSim)$Biomass_borealDataPrep$deciduousCoverDiscount
+    , "sppEquivCol" = params(LandRBiomass_preSim)$Biomass_borealDataPrep$sppEquivCol
     , "validationReps" = as.integer(1:10)  ## or length of simLists
     , "validationYears" = as.integer(c(2001, 2011))
     , ".useCache" = eventCaching
