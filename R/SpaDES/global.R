@@ -56,11 +56,11 @@ successionTimestep <- 10L  # for dispersal and age reclass.
 
 speciesParams <- list(
   "shadetolerance" = list(
-    Betu_Pap = 1.5,
-    Lari_Lar = 1.5,
+    Betu_Pap = 1,
+    Lari_Lar = 1,
     Pice_Gla = 2,
     Pice_Mar = 3,
-    Pinu_Ban = 1,
+    Pinu_Ban = 1.5,
     Popu_Spp = 1
   )
 )
