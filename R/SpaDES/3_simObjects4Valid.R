@@ -1,34 +1,34 @@
 ## load simList from simInit()
-if (!exists("LandRBiomass_simInit"))
-  LandRBiomass_simInit <- loadSimList(file.path(simPaths$outputPath, paste0("simInitList_", runName)))
+if (!exists("LandRBiomass_preSim"))
+  LandRBiomass_preSim <- loadSimList(file.path(simPaths$outputPath, paste0("preSimList_", runName)))
 
 ## load the experiment simLists object
 if (!exists("LandRBiomass_sim"))
   LandRBiomass_sim <- qs::qread(file.path(simPaths$outputPath, paste0("simList_LandRBiomass_sim_", runName)))
 
 ## get necessary rasters from simList (only rasters aren't kept in memory)
-if (!inMemory(LandRBiomass_simInit$rawBiomassMap)) {
-  rasFilename <- raster::filename(LandRBiomass_simInit$rawBiomassMap)
-  rasFilename <- sub(inputPath(LandRBiomass_simInit), simPaths$inputPath, rasFilename)
+if (!inMemory(LandRBiomass_preSim$rawBiomassMap)) {
+  rasFilename <- raster::filename(LandRBiomass_preSim$rawBiomassMap)
+  rasFilename <- sub(inputPath(LandRBiomass_preSim), simPaths$inputPath, rasFilename)
 
   rawBiomassMap <- raster(rasFilename)
 } else {
-  rawBiomassMap <- LandRBiomass_simInit$rawBiomassMap
+  rawBiomassMap <- LandRBiomass_preSim$rawBiomassMap
 }
 
-if (!inMemory(LandRBiomass_simInit$standAgeMap)) {
-  rasFilename <- raster::filename(LandRBiomass_simInit$standAgeMap)
-  rasFilename <- sub(inputPath(LandRBiomass_simInit), simPaths$inputPath, rasFilename)
+if (!inMemory(LandRBiomass_preSim$standAgeMap)) {
+  rasFilename <- raster::filename(LandRBiomass_preSim$standAgeMap)
+  rasFilename <- sub(inputPath(LandRBiomass_preSim), simPaths$inputPath, rasFilename)
 
   standAgeMap <- raster(rasFilename)
 } else {
-  standAgeMap <- LandRBiomass_simInit$standAgeMap
+  standAgeMap <- LandRBiomass_preSim$standAgeMap
 }
 
-if (!inMemory(LandRBiomass_simInit$speciesLayers)) {
-  speciesLayers <- lapply(unstack(LandRBiomass_simInit$speciesLayers), function(x) {
+if (!inMemory(LandRBiomass_preSim$speciesLayers)) {
+  speciesLayers <- lapply(unstack(LandRBiomass_preSim$speciesLayers), function(x) {
     rasFilename <- raster::filename(x)
-    rasFilename <- sub(inputPath(LandRBiomass_simInit), simPaths$inputPath, rasFilename)
+    rasFilename <- sub(outputPath(LandRBiomass_preSim), simPaths$outputPath, rasFilename)
     layerName <- names(x)
     sppLayer <- raster(rasFilename)
 
@@ -37,17 +37,17 @@ if (!inMemory(LandRBiomass_simInit$speciesLayers)) {
   })
   speciesLayers <- stack(speciesLayers)
 } else {
-  speciesLayers <- LandRBiomass_simInit$speciesLayers
+  speciesLayers <- LandRBiomass_preSim$speciesLayers
 }
 
 
-if (!inMemory(LandRBiomass_simInit$rasterToMatch)) {
-  rasFilename <- raster::filename(LandRBiomass_simInit$rasterToMatch)
-  rasFilename <- sub(inputPath(LandRBiomass_simInit), simPaths$inputPath, rasFilename)
+if (!inMemory(LandRBiomass_preSim$rasterToMatch)) {
+  rasFilename <- raster::filename(LandRBiomass_preSim$rasterToMatch)
+  rasFilename <- sub(inputPath(LandRBiomass_preSim), simPaths$inputPath, rasFilename)
 
   standAgeMap <- raster(rasterToMatch)
 } else {
-  rasterToMatch <- LandRBiomass_simInit$rasterToMatch
+  rasterToMatch <- LandRBiomass_preSim$rasterToMatch
 }
 
 rasterToMatch[!is.na(rasterToMatch)] <- 1
@@ -59,7 +59,7 @@ rstLCChangeAllbin <- Cache(prepInputs,
                            alsoExtract = "similar",
                            fun = "raster::raster",
                            destinationPath = options()$reproducible.inputPaths,
-                           studyArea = LandRBiomass_simInit$studyArea,
+                           studyArea = LandRBiomass_preSim$studyArea,
                            rasterToMatch = rasterToMatch,
                            useSAcrs = FALSE,
                            maskWithRTM = TRUE,
@@ -72,7 +72,7 @@ rstLCChangeAllbin <- Cache(prepInputs,
 ## make sure the extent matches the study area (it won't if using a smaller study area than RTMLarge)
 rstLCChangeAllbin <- Cache(postProcess,
                            x = rstLCChangeAllbin,
-                           studyArea = LandRBiomass_simInit$studyArea,
+                           studyArea = LandRBiomass_preSim$studyArea,
                            useSAcrs = FALSE,
                            filename2 = file.path(options()$reproducible.inputPaths, "change_2001_2011_postProcess.tiff"),
                            overwrite = TRUE,

@@ -260,10 +260,10 @@ validationObjects <- list(
   , "rstLCChange" = rstLCChangeAllbin
   , "simulationOutputs" = simulationOutputs
   , "speciesLayersStart" = speciesLayers
-  , "sppColorVect" = LandRBiomass_simInit$sppColorVect
-  , "sppEquiv" = LandRBiomass_simInit$sppEquiv
+  , "sppColorVect" = LandRBiomass_preSim$sppColorVect
+  , "sppEquiv" = LandRBiomass_preSim$sppEquiv
   , "standAgeMapStart" = standAgeMap
-  , "studyArea" = LandRBiomass_simInit$studyArea
+  , "studyArea" = LandRBiomass_preSim$studyArea
 )
 
 ## the following objects are only saved once at the end of year 0/beggining of year 1 (they don't change)
