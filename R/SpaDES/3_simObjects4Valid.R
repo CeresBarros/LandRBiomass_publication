@@ -25,12 +25,14 @@ if (!inMemory(LandRBiomass_preSim$standAgeMap)) {
   standAgeMap <- LandRBiomass_preSim$standAgeMap
 }
 
+## note that species layers stack can be saved  as a multilayer raster obj (so stack("filename.grd") would work)
+## HOWEVER because this may NOT be always the case, we're loading them separately anyways
 if (!inMemory(LandRBiomass_preSim$speciesLayers)) {
   speciesLayers <- lapply(unstack(LandRBiomass_preSim$speciesLayers), function(x) {
     rasFilename <- raster::filename(x)
     rasFilename <- sub(outputPath(LandRBiomass_preSim), simPaths$outputPath, rasFilename)
     layerName <- names(x)
-    sppLayer <- raster(rasFilename)
+    sppLayer <- stack(rasFilename)[[layerName]]
 
     names(sppLayer) <- layerName
     return(sppLayer)
