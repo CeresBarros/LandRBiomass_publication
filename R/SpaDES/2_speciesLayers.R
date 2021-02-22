@@ -36,4 +36,7 @@ simOutSpeciesLayers <- Cache(simInitAndSpades
                              , objects = speciesObjects
                              , paths = speciesPaths
                              , debug = TRUE
-                             , .plotInitialTime = NA)
+                             , .plotInitialTime = NA
+                             , cacheRepo = speciesPaths$cachePath
+                             , userTags = "speciesLayersSim"
+                             , omitArgs = c("userTags", ".plotInitialTime", "debug"))
