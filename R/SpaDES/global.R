@@ -94,7 +94,8 @@ simParams <- list(
     , ".useCache" = eventCaching
   )
   , Biomass_speciesParameters = list(
-    "sppEquivCol" = sppEquivCol
+    "quantileAgeSubset" = list(Betu_Pap = 95, Lari_Lar = 95, Pice_Gla = 95, Pice_Mar = 95, Pinu_Ban = 99, Popu_Spp = 99)
+    , "sppEquivCol" = sppEquivCol
     , ".useCache" = eventCaching
   )
   , Biomass_core = list(
