@@ -16,6 +16,16 @@ if (!inMemory(LandRBiomass_simInit$rawBiomassMap)) {
   rawBiomassMap <- LandRBiomass_simInit$rawBiomassMap
 }
 
+## get biomassMap
+if (!inMemory(LandRBiomass_simInit$biomassMap)) {
+  rasFilename <- raster::filename(LandRBiomass_simInit$biomassMap)
+  rasFilename <- sub(ouputPath(LandRBiomass_simInit), simPaths$outputPath, rasFilename)
+
+  biomassMap <- raster(rasFilename)
+} else {
+  biomassMap <- LandRBiomass_simInit$biomassMap
+}
+
 if (!inMemory(LandRBiomass_simInit$standAgeMap)) {
   rasFilename <- raster::filename(LandRBiomass_simInit$standAgeMap)
   rasFilename <- sub(inputPath(LandRBiomass_simInit), simPaths$inputPath, rasFilename)
@@ -100,6 +110,4 @@ simulationOutputs <- rbindlist(simulationOutputs)
   rm(oldPath)
 }
 
-## get biomassMap (should be the same across all reps)
-biomassMap <- readRDS(simulationOutputs[objectName == "biomassMap", file][1])
 
