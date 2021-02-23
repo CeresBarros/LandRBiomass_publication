@@ -82,7 +82,8 @@ simParams <- list(
                                            (logAge + cover | ecoregionGroup)))
     , "exportModels" = "all"
     , "fixModelBiomass" = TRUE
-    ,"speciesUpdateFunction" = list(
+    , "speciesTableAreas" = c("BSW", "BP")
+    , "speciesUpdateFunction" = list(
       quote(LandR::speciesTableUpdate(sim$species, sim$speciesTable, sim$sppEquiv, P(sim)$sppEquivCol)),
       quote(LandR::updateSpeciesTable(speciesTable = sim$species, params = sim$speciesParams)))
     # next two are used when assigning pixelGroup membership; what resolution for
