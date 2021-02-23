@@ -174,7 +174,7 @@ simOutputs <- rbind(simOutputs, data.frame(objectName = "species",
 ## in the first year, eventPriorities need to be set to AFTER the init event (which has priority 1)
 simOutputs$eventPriority[simOutputs$saveTime == simTimes$start] <- 1.5
 
-## make a simInit that runs init events too
+## make a initialisation simList and run init events too
 LandRBiomass_simInit <- Cache(simInitAndSpades
                               , times = simTimes
                               , params = simParams
@@ -278,7 +278,7 @@ LandRBiomass_validation <- simInitAndSpades(times = validationTimes
                                             , objects = validationObjects
                                             , outputs = validationOutputs
                                             , paths = validationPaths
-                                            , .plotInitialTime = NA)   ## note that simPaths must respect the simulation outputPath
+                                            , .plotInitialTime = NA)
 
 q("no")
 
