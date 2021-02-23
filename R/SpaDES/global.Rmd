@@ -72,11 +72,11 @@ successionTimestep <- 10L
 
 speciesParams <- list(
   "shadetolerance" = list(
-    Betu_Pap = 1.5,
-    Lari_Lar = 1.5,
+    Betu_Pap = 1,
+    Lari_Lar = 1,
     Pice_Gla = 2,
     Pice_Mar = 3,
-    Pinu_Ban = 1,
+    Pinu_Ban = 1.5,
     Popu_Spp = 1
   )
 )
@@ -92,6 +92,8 @@ simParams <- list(
     , "forestedLCCClasses" = c(1:15, 34:35)
     , "LCCClassesToReplaceNN" = c(34:35)
     , "fitDeciduousCoverDiscount" = TRUE
+    , "subsetDataAgeModel" = FALSE
+    , "subsetDataBiomassModel" = FALSE
     , "biomassModel" =  quote(lme4::lmer(B ~ logAge * speciesCode + cover * speciesCode +
                                            (logAge + cover | ecoregionGroup)))
     , "exportModels" = "all"
@@ -113,9 +115,8 @@ simParams <- list(
   )
   , Biomass_core = list(
     "calcSummaryBGM" = c("start")
-    , "initialBiomassSource" = "cohortData" # can be 'biomassMap' or "spinup" too
-    # , ".plotInitialTime" = simTimes$start
-    , ".plotInitialTime" = NA ## for experiment
+    , "initialBiomassSource" = "cohortData" 
+    , ".plotInitialTime" = simTimes$start
     , "plotOverstory" = TRUE
     , "seedingAlgorithm" = "wardDispersal"
     , "sppEquivCol" = sppEquivCol
@@ -124,8 +125,7 @@ simParams <- list(
     , ".plotInterval" = 1
     , ".plotMaps" = TRUE
     , ".saveInitialTime" = NA
-    # , ".useCache" = eventCaching
-    , ".useCache" = eventCaching[1] # experiment doesn't like when init is cached
+    , ".useCache" = eventCaching[1]
     , ".useParallel" = useParallel
   )
 )
@@ -142,6 +142,12 @@ simOutputs <- rbind(simOutputs, data.frame(objectName = "pixelGroupMap",
                                            saveTime = unique(seq(simTimes$start, simTimes$end, by = 1)),
                                            eventPriority = 1))
 simOutputs <- rbind(simOutputs, data.frame(objectName = "biomassMap",
+                                           saveTime = simTimes$start,
+                                           eventPriority = 1))
+simOutputs <- rbind(simOutputs, data.frame(objectName = "speciesEcoregion",
+                                           saveTime = simTimes$start,
+                                           eventPriority = 1))
+simOutputs <- rbind(simOutputs, data.frame(objectName = "species",
                                            saveTime = simTimes$start,
                                            eventPriority = 1))
 
@@ -161,22 +167,24 @@ simObjects <- list(
   , "PSPplot" = PSPplot
 )
 
-if (runName == "parametriseSALarge") {
-  simObjects$studyArea <- studyAreaS
-  simObjects$studyAreaLarge <- studyAreaL
-} else {
-  simObjects$studyArea <- get(runName)
-}
+simObjects$studyAreaLarge <- studyAreaL
 
-LandRBiomass_simInit <- simInit(times = simTimes
-                                , params = simParams
-                                , modules = simModules
-                                , objects = simObjects
-                                , outputs = simOutputs
-                                , paths = simPaths)
+## make a initialisation simList and run init events too
+LandRBiomass_simInit <- Cache(simInitAndSpades
+                              , times = simTimes
+                              , params = simParams
+                              , modules = simModules
+                              , loadOrder = unlist(simModules)
+                              , objects = simObjects
+                              , paths = simPaths
+                              , outputs = simOutputs
+                              , events = "init"
+                              , .plotInitialTime = NA
+                              , userTags = "simInitAndInits"
+                              , omitArgs = c("userTags", ".plotInitialTime"))
 
 ## save the simList
-saveSimList(LandRBiomass_simInit, file.path(simPaths$outputPath, paste0("simInitList_", runName)))
+saveSimList(LandRBiomass_simInit, file.path(simPaths$outputPath, paste0("simInit", runName)))
 ```
 
 
@@ -227,10 +235,10 @@ source("R/SpaDES/3_simObjects4Valid.R")
 validationTimes <- list(start = 1, end = 1)
 validationParams <- list(
   Biomass_validationKNN = list(
-    "minCoverThreshold" = params(LandRBiomass_sim$sim1_rep01)$Biomass_borealDataPrep$minCoverThreshold
-    , "pixelGroupBiomassClass" = params(LandRBiomass_sim$sim1_rep01)$Biomass_borealDataPrep$pixelGroupBiomassClass
-    , "deciduousCoverDiscount" = params(LandRBiomass_sim$sim1_rep01)$Biomass_borealDataPrep$deciduousCoverDiscount
-    , "sppEquivCol" = params(LandRBiomass_sim$sim1_rep01)$Biomass_borealDataPrep$sppEquivCol
+    "minCoverThreshold" = params(LandRBiomass_simInit)$Biomass_borealDataPrep$minCoverThreshold
+    , "pixelGroupBiomassClass" = params(LandRBiomass_simInit)$Biomass_borealDataPrep$pixelGroupBiomassClass
+    , "deciduousCoverDiscount" = params(LandRBiomass_simInit)$Biomass_borealDataPrep$deciduousCoverDiscount
+    , "sppEquivCol" = params(LandRBiomass_simInit)$Biomass_borealDataPrep$sppEquivCol
     , "validationReps" = as.integer(1:10)  ## or length of simLists
     , "validationYears" = as.integer(c(2001, 2011))
     , ".useCache" = eventCaching
@@ -238,7 +246,7 @@ validationParams <- list(
 )
 
 validationObjects <- list(
-  "biomassMap" = biomassMap 
+  "biomassMap" = biomassMap
   , "rasterToMatch" = rasterToMatch
   , "rawBiomassMapStart" = rawBiomassMap
   , "rstLCChange" = rstLCChangeAllbin
