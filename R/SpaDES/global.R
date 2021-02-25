@@ -22,6 +22,18 @@ library(LandR)
 library(dplyr)
 library(data.table)
 
+
+# if (!require("Require")) {
+#   install.packages("Require")
+#   library(Require)
+# }
+
+# Require(c("SpaDES", "PredictiveEcology/SpaDES.experiment",
+#           "raster", "PredictiveEcology/LandR@development (>= 0.0.12.9003)",
+#           "PredictiveEcology/reproducible@development (>= 1.2.6.9005)",
+#           "dplyr", "data.table", "future"), upgrade = FALSE)
+
+
 ## -----------------------------------------------
 ## SIMULATION SETUP
 ## -----------------------------------------------
@@ -193,7 +205,6 @@ LandRBiomass_simInit <- Cache(simInitAndSpades
 saveSimList(LandRBiomass_simInit, file.path(simPaths$outputPath, paste0("simInit", runName)))
 
 amc::.gc()  ## clean ws
-library(future)
 plan("multiprocess", workers = 10)   ## each worker consuming roughly 16Gb
 LandRBiomass_sim <- experiment2(
   sim1 = LandRBiomass_simInit,
