@@ -223,6 +223,12 @@ qs::qsave(LandRBiomass_sim, file.path(simPaths$outputPath, paste0("simList_LandR
 if (!exists("simDirName"))
   simDirName <- "feb2021Runs"
 
+if (!exists("runName"))
+runName <- "parametriseSALarge"
+
+if (!exists("eventCaching"))
+  eventCaching <- c(".inputObjects", "init")
+
 if (!exists("simPaths"))
   simPaths <- list(cachePath = file.path("R/SpaDES/cache", simDirName)
                    , modulePath = file.path("R/SpaDES/m")
