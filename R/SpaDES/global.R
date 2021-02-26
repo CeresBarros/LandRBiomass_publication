@@ -90,8 +90,6 @@ simParams <- list(
     , "fitDeciduousCoverDiscount" = TRUE
     , "subsetDataAgeModel" = FALSE
     , "subsetDataBiomassModel" = FALSE
-    , "biomassModel" =  quote(lme4::lmer(B ~ logAge * speciesCode + cover * speciesCode +
-                                           (logAge + cover | ecoregionGroup)))
     , "exportModels" = "all"
     , "fixModelBiomass" = TRUE
     , "speciesTableAreas" = c("BSW", "BP")
