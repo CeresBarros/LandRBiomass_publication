@@ -21,7 +21,7 @@ library(raster)
 library(LandR)
 library(dplyr)
 library(data.table)
-
+library(future)
 
 # if (!require("Require")) {
 #   install.packages("Require")
