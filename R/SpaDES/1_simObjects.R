@@ -60,6 +60,7 @@ sppColorVect <- sppColors(sppEquivalencies_CA, sppEquivCol,
 
 ## PSP DATA ------------------------------------------------------------------
 ## Set up PSP data for LandR_speciesParameters
+opts <- options("reproducible.cachePath" = simPaths$cachePath)
 PSPmeasure <- Cache(prepInputs,
                     targetFile = "PSPmeasure.Rdat",
                     archive = "randomized_LandR_speciesParameters_Inputs.zip",
@@ -80,3 +81,5 @@ PSPgis <- Cache(prepInputs,
                  url = "https://drive.google.com/file/d/1LmOaEtCZ6EBeIlAm6ttfLqBqQnQu4Ca7/view?usp=sharing",
                  destinationPath = simPaths$inputPath,
                  fun = "readRDS")
+## go back to previous options
+options(opts)
