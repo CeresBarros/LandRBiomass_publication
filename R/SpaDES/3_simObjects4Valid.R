@@ -64,6 +64,7 @@ if (!inMemory(LandRBiomass_simInit$rasterToMatch)) {
 
 rasterToMatch[!is.na(rasterToMatch)] <- 1
 
+opts <- options("reproducible.cachePath" = simPaths$cachePath)
 rstLCChangeAllbin <- Cache(prepInputs,
                            targetFile = "change_2001_2011.dat",
                            archive = "LCchange_AlldisturbancesBinary.zip",
@@ -77,9 +78,7 @@ rstLCChangeAllbin <- Cache(prepInputs,
                            maskWithRTM = TRUE,
                            method = "ngb",
                            filename2 = file.path(options()$reproducible.inputPaths, "change_2001_2011_postProcess.tiff"),
-                           overwrite = TRUE,
-                           cacheRepo = simPaths$cachePath,
-                           useCache = TRUE)
+                           overwrite = TRUE)
 
 ## make sure the extent matches the study area (it won't if using a smaller study area than RTMLarge)
 rstLCChangeAllbin <- Cache(postProcess,
@@ -87,10 +86,8 @@ rstLCChangeAllbin <- Cache(postProcess,
                            studyArea = LandRBiomass_simInit$studyArea,
                            useSAcrs = FALSE,
                            filename2 = file.path(options()$reproducible.inputPaths, "change_2001_2011_postProcess.tiff"),
-                           overwrite = TRUE,
-                           cacheRepo = simPaths$cachePath,
-                           useCache = TRUE)
-
+                           overwrite = TRUE)
+options(opts)
 ## convert to mask
 rstLCChangeAllbin[getValues(rstLCChangeAllbin) != 1] <- NA
 

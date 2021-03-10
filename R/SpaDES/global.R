@@ -21,6 +21,18 @@ library(raster)
 library(LandR)
 library(dplyr)
 library(data.table)
+library(future)
+
+# if (!require("Require")) {
+#   install.packages("Require")
+#   library(Require)
+# }
+
+# Require(c("SpaDES", "PredictiveEcology/SpaDES.experiment",
+#           "raster", "PredictiveEcology/LandR@development (>= 0.0.12.9003)",
+#           "PredictiveEcology/reproducible@development (>= 1.2.6.9005)",
+#           "dplyr", "data.table", "future"), upgrade = FALSE)
+
 
 ## -----------------------------------------------
 ## SIMULATION SETUP
@@ -78,8 +90,6 @@ simParams <- list(
     , "fitDeciduousCoverDiscount" = TRUE
     , "subsetDataAgeModel" = FALSE
     , "subsetDataBiomassModel" = FALSE
-    , "biomassModel" =  quote(lme4::lmer(B ~ logAge * speciesCode + cover * speciesCode +
-                                           (logAge + cover | ecoregionGroup)))
     , "exportModels" = "all"
     , "fixModelBiomass" = TRUE
     , "speciesTableAreas" = c("BSW", "BP")
@@ -193,7 +203,6 @@ LandRBiomass_simInit <- Cache(simInitAndSpades
 saveSimList(LandRBiomass_simInit, file.path(simPaths$outputPath, paste0("simInit", runName)))
 
 amc::.gc()  ## clean ws
-library(future)
 plan("multiprocess", workers = 10)   ## each worker consuming roughly 16Gb
 LandRBiomass_sim <- experiment2(
   sim1 = LandRBiomass_simInit,
@@ -211,6 +220,12 @@ qs::qsave(LandRBiomass_sim, file.path(simPaths$outputPath, paste0("simList_LandR
 ## make objects again in case only this part of the script is being run:
 if (!exists("simDirName"))
   simDirName <- "feb2021Runs"
+
+if (!exists("runName"))
+runName <- "parametriseSALarge"
+
+if (!exists("eventCaching"))
+  eventCaching <- c(".inputObjects", "init")
 
 if (!exists("simPaths"))
   simPaths <- list(cachePath = file.path("R/SpaDES/cache", simDirName)
