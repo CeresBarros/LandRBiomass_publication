@@ -48,6 +48,7 @@ options("reproducible.useGDAL" = FALSE)
 # runName <- "studyAreaS"
 # runName <- "studyAreaL"
 runName <- "parametriseSALarge"
+# runName <- "parametriseSALargeSA2"
 eventCaching <- c(".inputObjects", "init")
 useParallel <- FALSE
 
