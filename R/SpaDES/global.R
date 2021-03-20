@@ -5,7 +5,7 @@
 ## ------------------------------------------------------
 
 ## clean workspace
-rm(list=ls()); amc::.gc()
+rm(list = ls()); amc::.gc()
 
 ## requires as of Jan 22 2020
 # reproducible 1.2.5.9000
@@ -209,6 +209,7 @@ LandRBiomass_sim <- experiment2(
   sim1 = LandRBiomass_simInit,
   clearSimEnv = TRUE,
   replicates = 10)
+future:::ClusterRegistry("stop")
 
 ## save simLists object.
 qs::qsave(LandRBiomass_sim, file.path(simPaths$outputPath, paste0("simList_LandRBiomass_sim_", runName)))
