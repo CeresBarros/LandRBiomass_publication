@@ -266,7 +266,7 @@ validationObjects <- list(
   "biomassMap" = biomassMap
   , "rasterToMatch" = rasterToMatch
   , "rawBiomassMapStart" = rawBiomassMap
-  , "rstLCChange" = rstLCChangeAllbin
+  # , "rstLCChange" = rstLCChangeAllbin
   , "simulationOutputs" = simulationOutputs
   , "speciesLayersStart" = speciesLayers
   , "sppColorVect" = LandRBiomass_simInit$sppColorVect
