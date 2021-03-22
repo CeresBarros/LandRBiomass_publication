@@ -59,10 +59,10 @@ runName <- "parametriseSALarge"
 
 ## paths
 simDirName <- "feb2021Runs"
-simPaths <- list(cachePath = file.path("R/SpaDES/cache", simDirName)
+simPaths <- list(cachePath = file.path("R/SpaDES/cache", simDirName, runName)
                  , modulePath = file.path("R/SpaDES/m")
                  , inputPath = file.path("R/SpaDES/inputs")
-                 , outputPath = file.path("R/SpaDES/outputs", simDirName))
+                 , outputPath = file.path("R/SpaDES/outputs", simDirName, runName))
 
 ## Get necessary objects -----------------------
 source("R/SpaDES/1_simObjects.R")
@@ -163,7 +163,7 @@ simObjects <- list(
   , "PSPplot" = PSPplot
 )
 
-if (runName == "parametriseSALarge") {
+if (grepl("parametriseSALarge", runName)) {
   simObjects$studyArea <- studyAreaS
   simObjects$studyAreaLarge <- studyAreaL
 } else {
@@ -204,12 +204,13 @@ LandRBiomass_simInit <- Cache(simInitAndSpades
                               , events = "init"
                               , .plotInitialTime = NA
                               , userTags = "simInitAndInits"
+                              , cacheRepo = simPaths$cachePath
                               , omitArgs = c("userTags", ".plotInitialTime"))
 
 saveSimList(LandRBiomass_simInit, file.path(simPaths$outputPath, paste0("simInit", runName)))
 
 amc::.gc()  ## clean ws
-plan("multiprocess", workers = 10)   ## each worker consuming roughly 16Gb
+plan("multiprocess", workers = 5)   ## each worker consuming roughly 16Gb
 LandRBiomass_sim <- experiment2(
   sim1 = LandRBiomass_simInit,
   clearSimEnv = TRUE,
@@ -229,21 +230,22 @@ if (!exists("simDirName"))
   simDirName <- "feb2021Runs"
 
 if (!exists("runName"))
-runName <- "parametriseSALarge"
+  runName <- "parametriseSALarge"
+# runName <- "parametriseSALargeSA2"
 
 if (!exists("eventCaching"))
   eventCaching <- c(".inputObjects", "init")
 
 if (!exists("simPaths"))
-  simPaths <- list(cachePath = file.path("R/SpaDES/cache", simDirName)
+  simPaths <- list(cachePath = file.path("R/SpaDES/cache", simDirName, runName)
                    , modulePath = file.path("R/SpaDES/m")
                    , inputPath = file.path("R/SpaDES/inputs")
-                   , outputPath = file.path("R/SpaDES/outputs", simDirName))
+                   , outputPath = file.path("R/SpaDES/outputs", simDirName, runName))
 
-validationPaths <- list(cachePath = file.path("R/SpaDES/cache", simDirName)
+validationPaths <- list(cachePath = file.path("R/SpaDES/cache", simDirName, runName)
                         , modulePath = file.path("R/SpaDES/m")
                         , inputPath = file.path("R/SpaDES/inputs")
-                        , outputPath = file.path("R/SpaDES/validation", simDirName))
+                        , outputPath = file.path("R/SpaDES/validation", simDirName, runName))
 
 source("R/SpaDES/3_simObjects4Valid.R")
 
