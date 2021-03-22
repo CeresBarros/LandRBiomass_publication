@@ -15,23 +15,26 @@ rm(list = ls()); amc::.gc()
 # SpaDES.addins_0.1.2
 # SpaDES.experiment 0.0.2.9000
 # LandR_0.0.12 ## development branch
-library(SpaDES)
-library(SpaDES.experiment)
-library(raster)
-library(LandR)
-library(dplyr)
-library(data.table)
-library(future)
+# library(SpaDES)
+# library(SpaDES.experiment)
+# library(raster)
+# library(LandR)
+# library(dplyr)
+# library(data.table)
+# library(future)
 
-# if (!require("Require")) {
-#   install.packages("Require")
-#   library(Require)
-# }
+if (!require("Require")) {
+  devtools::install_github("PredictiveEcology/Require@development")
+  library(Require)
+}
 
-# Require(c("SpaDES", "PredictiveEcology/SpaDES.experiment",
-#           "raster", "PredictiveEcology/LandR@development (>= 0.0.12.9003)",
-#           "PredictiveEcology/reproducible@development (>= 1.2.6.9005)",
-#           "dplyr", "data.table", "future"), upgrade = FALSE)
+Require(c("SpaDES",
+          "PredictiveEcology/SpaDES.experiment",
+          "raster",
+          "PredictiveEcology/LandR@modelBiomass",
+          "PredictiveEcology/reproducible@development",
+          "dplyr", "data.table", "future"),
+        upgrade = FALSE)
 
 
 ## -----------------------------------------------
