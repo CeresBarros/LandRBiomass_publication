@@ -203,6 +203,7 @@ LandRBiomass_simInit <- Cache(simInitAndSpades
                               , .plotInitialTime = NA
                               , userTags = "simInitAndInits"
                               , cacheRepo = simPaths$cachePath
+                              , useCache = FALSE ## package loading workaround
                               , omitArgs = c("userTags", ".plotInitialTime"))
 
 saveSimList(LandRBiomass_simInit, file.path(simPaths$outputPath, paste0("simInit", runName)))
