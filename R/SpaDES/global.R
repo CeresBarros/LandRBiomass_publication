@@ -15,23 +15,26 @@ rm(list = ls()); amc::.gc()
 # SpaDES.addins_0.1.2
 # SpaDES.experiment 0.0.2.9000
 # LandR_0.0.12 ## development branch
-library(SpaDES)
-library(SpaDES.experiment)
-library(raster)
-library(LandR)
-library(dplyr)
-library(data.table)
-library(future)
+# library(SpaDES)
+# library(SpaDES.experiment)
+# library(raster)
+# library(LandR)
+# library(dplyr)
+# library(data.table)
+# library(future)
 
-# if (!require("Require")) {
-#   install.packages("Require")
-#   library(Require)
-# }
+if (!require("Require")) {
+  devtools::install_github("PredictiveEcology/Require@development")
+  library(Require)
+}
 
-# Require(c("SpaDES", "PredictiveEcology/SpaDES.experiment",
-#           "raster", "PredictiveEcology/LandR@development (>= 0.0.12.9003)",
-#           "PredictiveEcology/reproducible@development (>= 1.2.6.9005)",
-#           "dplyr", "data.table", "future"), upgrade = FALSE)
+Require(c("SpaDES",
+          "PredictiveEcology/SpaDES.experiment",
+          "raster",
+          "PredictiveEcology/LandR@modelBiomass",
+          "PredictiveEcology/reproducible@development",
+          "dplyr", "data.table", "future"),
+        upgrade = FALSE)
 
 
 ## -----------------------------------------------
@@ -45,19 +48,21 @@ options("reproducible.useCache" = TRUE)
 options("reproducible.inputPaths" = file.path("R/SpaDES/inputs"))  ## store everything in inputs/ so that there are no duplicated files across modules
 options("reproducible.destinationPath" = file.path("R/SpaDES/inputs"))
 options("reproducible.useGDAL" = FALSE)
+
+eventCaching <- c(".inputObjects", "init")
+useParallel <- FALSE
+
 # runName <- "studyAreaS"
 # runName <- "studyAreaL"
 runName <- "parametriseSALarge"
 # runName <- "parametriseSALargeSA2"
-eventCaching <- c(".inputObjects", "init")
-useParallel <- FALSE
 
 ## paths
 simDirName <- "feb2021Runs"
-simPaths <- list(cachePath = file.path("R/SpaDES/cache", simDirName)
+simPaths <- list(cachePath = file.path("R/SpaDES/cache", simDirName, runName)
                  , modulePath = file.path("R/SpaDES/m")
                  , inputPath = file.path("R/SpaDES/inputs")
-                 , outputPath = file.path("R/SpaDES/outputs", simDirName))
+                 , outputPath = file.path("R/SpaDES/outputs", simDirName, runName))
 
 ## Get necessary objects -----------------------
 source("R/SpaDES/1_simObjects.R")
@@ -158,7 +163,7 @@ simObjects <- list(
   , "PSPplot" = PSPplot
 )
 
-if (runName == "parametriseSALarge") {
+if (grepl("parametriseSALarge", runName)) {
   simObjects$studyArea <- studyAreaS
   simObjects$studyAreaLarge <- studyAreaL
 } else {
@@ -199,12 +204,13 @@ LandRBiomass_simInit <- Cache(simInitAndSpades
                               , events = "init"
                               , .plotInitialTime = NA
                               , userTags = "simInitAndInits"
+                              , cacheRepo = simPaths$cachePath
                               , omitArgs = c("userTags", ".plotInitialTime"))
 
 saveSimList(LandRBiomass_simInit, file.path(simPaths$outputPath, paste0("simInit", runName)))
 
 amc::.gc()  ## clean ws
-plan("multiprocess", workers = 10)   ## each worker consuming roughly 16Gb
+plan("multiprocess", workers = 5)   ## each worker consuming roughly 16Gb
 LandRBiomass_sim <- experiment2(
   sim1 = LandRBiomass_simInit,
   clearSimEnv = TRUE,
@@ -224,21 +230,22 @@ if (!exists("simDirName"))
   simDirName <- "feb2021Runs"
 
 if (!exists("runName"))
-runName <- "parametriseSALarge"
+  runName <- "parametriseSALarge"
+# runName <- "parametriseSALargeSA2"
 
 if (!exists("eventCaching"))
   eventCaching <- c(".inputObjects", "init")
 
 if (!exists("simPaths"))
-  simPaths <- list(cachePath = file.path("R/SpaDES/cache", simDirName)
+  simPaths <- list(cachePath = file.path("R/SpaDES/cache", simDirName, runName)
                    , modulePath = file.path("R/SpaDES/m")
                    , inputPath = file.path("R/SpaDES/inputs")
-                   , outputPath = file.path("R/SpaDES/outputs", simDirName))
+                   , outputPath = file.path("R/SpaDES/outputs", simDirName, runName))
 
-validationPaths <- list(cachePath = file.path("R/SpaDES/cache", simDirName)
+validationPaths <- list(cachePath = file.path("R/SpaDES/cache", simDirName, runName)
                         , modulePath = file.path("R/SpaDES/m")
                         , inputPath = file.path("R/SpaDES/inputs")
-                        , outputPath = file.path("R/SpaDES/validation", simDirName))
+                        , outputPath = file.path("R/SpaDES/validation", simDirName, runName))
 
 source("R/SpaDES/3_simObjects4Valid.R")
 
@@ -261,7 +268,7 @@ validationObjects <- list(
   "biomassMap" = biomassMap
   , "rasterToMatch" = rasterToMatch
   , "rawBiomassMapStart" = rawBiomassMap
-  , "rstLCChange" = rstLCChangeAllbin
+  # , "rstLCChange" = rstLCChangeAllbin
   , "simulationOutputs" = simulationOutputs
   , "speciesLayersStart" = speciesLayers
   , "sppColorVect" = LandRBiomass_simInit$sppColorVect
