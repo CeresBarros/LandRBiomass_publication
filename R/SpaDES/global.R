@@ -29,13 +29,11 @@ if (!require("Require")) {
 }
 
 Require(c("SpaDES",
+          "raster","dplyr", "data.table", "future",
           "PredictiveEcology/SpaDES.experiment",
-          "raster",
           "PredictiveEcology/LandR@modelBiomass",
-          "PredictiveEcology/reproducible@development",
-          "dplyr", "data.table", "future"),
+          "PredictiveEcology/reproducible@development"),
         upgrade = FALSE)
-
 
 ## -----------------------------------------------
 ## SIMULATION SETUP
@@ -55,7 +53,7 @@ useParallel <- FALSE
 # runName <- "studyAreaS"
 # runName <- "studyAreaL"
 runName <- "parametriseSALarge"
-# runName <- "parametriseSALargeSA2"
+# runName <- "parametriseSALarge2"
 
 ## paths
 simDirName <- "feb2021Runs"
@@ -231,7 +229,7 @@ if (!exists("simDirName"))
 
 if (!exists("runName"))
   runName <- "parametriseSALarge"
-# runName <- "parametriseSALargeSA2"
+# runName <- "parametriseSALarge2"
 
 if (!exists("eventCaching"))
   eventCaching <- c(".inputObjects", "init")
