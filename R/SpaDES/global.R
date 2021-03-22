@@ -48,12 +48,14 @@ options("reproducible.useCache" = TRUE)
 options("reproducible.inputPaths" = file.path("R/SpaDES/inputs"))  ## store everything in inputs/ so that there are no duplicated files across modules
 options("reproducible.destinationPath" = file.path("R/SpaDES/inputs"))
 options("reproducible.useGDAL" = FALSE)
+
+eventCaching <- c(".inputObjects", "init")
+useParallel <- FALSE
+
 # runName <- "studyAreaS"
 # runName <- "studyAreaL"
 runName <- "parametriseSALarge"
 # runName <- "parametriseSALargeSA2"
-eventCaching <- c(".inputObjects", "init")
-useParallel <- FALSE
 
 ## paths
 simDirName <- "feb2021Runs"
