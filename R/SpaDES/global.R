@@ -52,7 +52,8 @@ useParallel <- FALSE
 
 # runName <- "studyAreaS"
 # runName <- "studyAreaL"
-runName <- "parametriseSALarge"
+# runName <- "parametriseSALarge"
+runName <- "parametriseSALarge_noBsppParams"
 # runName <- "parametriseSALarge2"
 
 ## paths
@@ -81,10 +82,18 @@ speciesParams <- list(
   )
 )
 
-simModules <- list("Biomass_borealDataPrep"
-                   , "Biomass_speciesParameters"
-                   , "Biomass_core"
-)
+if (grepl("_noBsppParams", runName)) {
+  ## no need to change parameters list, superfluos params will simply not be used
+  ## same for objects
+  simModules <- list("Biomass_borealDataPrep"
+                     , "Biomass_core"
+  )
+} else {
+  simModules <- list("Biomass_borealDataPrep"
+                     , "Biomass_speciesParameters"
+                     , "Biomass_core"
+  )
+}
 
 simParams <- list(
   Biomass_borealDataPrep = list(
@@ -203,7 +212,7 @@ LandRBiomass_simInit <- Cache(simInitAndSpades
                               , .plotInitialTime = NA
                               , userTags = "simInitAndInits"
                               , cacheRepo = simPaths$cachePath
-                              , useCache = FALSE ## package loading workaround
+                              # , useCache = FALSE ## package loading workaround
                               , omitArgs = c("userTags", ".plotInitialTime"))
 
 saveSimList(LandRBiomass_simInit, file.path(simPaths$outputPath, paste0("simInit", runName)))
@@ -229,8 +238,9 @@ if (!exists("simDirName"))
   simDirName <- "feb2021Runs"
 
 if (!exists("runName"))
-  runName <- "parametriseSALarge"
-# runName <- "parametriseSALarge2"
+  # runName <- "parametriseSALarge"
+  # runName <- "parametriseSALarge2"
+  runName <- "parametriseSALarge_noBsppParams"
 
 if (!exists("eventCaching"))
   eventCaching <- c(".inputObjects", "init")
