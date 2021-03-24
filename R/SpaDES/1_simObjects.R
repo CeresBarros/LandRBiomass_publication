@@ -9,7 +9,7 @@
 
 ## create a larger study area and create a smaller one (half extent)
 ## note that projection of the orignal CRS is always necessary
-if (!grepl("SA2", runName)) {
+if (!grepl("SALarge2", runName)) {
   originalcrs <- "+proj=longlat +datum=NAD83 +no_defs +ellps=GRS80 +towgs84=0,0,0"
   largeExtent <- extent(-104.757, -104.2197, 55.68663, 56.20319)
   smallExtent <- largeExtent
