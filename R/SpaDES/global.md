@@ -9,11 +9,10 @@ editor_options:
   chunk_output_type: console
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE, eval = interactive(), results = "hold") ## TODO: set 'eval = TRUE'
-```
 
-```{r init}
+
+
+```r
 library(Require)
 Require(c(
   "data.table", "dplyr", "ggplot2",
@@ -46,14 +45,16 @@ simPaths <- list(cachePath = file.path("R/SpaDES/cache", simDirName)
 
 ### Get study area and other necessary objects 
 
-```{r simulationSetup}
+
+```r
 ## Get necessary objects -----------------------
 source("R/SpaDES/1_simObjects.R")
 ```
 
 ## Simulation setup - part 2 - species layers
 
-```{r simulationSetup2}
+
+```r
 ## Run Biomass_speciesData to get species layers
 ## running this separately from other modules makes switching
 ## between using a large and a smaller study area easier when the smaller SA is within the large one,
@@ -74,7 +75,8 @@ rm(toRm)
   If 0, then there is never a notion of "mixed" vegetation types and a species is a leading species if it has the highest relative biomass in the pixel.
 * `successionTimestep` defines the frequency at which dispersal and age reclassification occurs - every 10 years is the default LANDIS behaviour. 
 
-```{r simulationSetup3}
+
+```r
 ## simulation params
 simTimes <- list(start = 2001, end = 2031)
 vegLeadingProportion <- 0 
@@ -201,13 +203,15 @@ saveSimList(LandRBiomass_simInit, file.path(simPaths$outputPath, paste0("simInit
 
 Here we run just one repetition
 
-```{r runSimulation}
+
+```r
 LandRBiomass_sim <- spades(LandRBiomass_simInit, .plotInitialTime = simTimes$start)
 ```
 
 If we were to run several repetitions, this would be how:
 
-```{r runExperiment, eval = FALSE}
+
+```r
 library(future)
 plan("multiprocess", workers = 1)   ## each worker consumes roughly 10Gb
 LandRBiomass_sim <- experiment2(
@@ -220,7 +224,8 @@ LandRBiomass_sim <- experiment2(
 
 We can use the `simList` objects to plot simulation objects, such as the input layers used for parameterisation.
 
-```{r plots, fig.show = "hold"}
+
+```r
 ## study area within Saskatchewan province
 ## get Canadian provinces and subset to SK
 can1 <- raster::getData('GADM', country = "CAN", level = 1, path = tempdir())
@@ -258,7 +263,8 @@ Plot(simOutSpeciesLayers$speciesLayers,
 
 Similarly, we can have a look at the species traits values used in the simulation directly from the `simList` object (although we also chose to save them).
 
-```{r speciesTraits, eval=FALSE}
+
+```r
 LandRBiomass_simInit$species
 LandRBiomass_simInit$minRelativeB ## can be spatially varying, but identical across ecolocation (AKA ecoregion)
 LandRBiomass_simInit$sufficientLight
@@ -267,9 +273,7 @@ LandRBiomass_simInit$speciesEcoregion
 
 For example, these were the (spatially) invariant species traits used in the simulation:
 
-```{r speciesTraitsShow, include=FALSE}
-kable(LandRBiomass_simInit$species, caption = "Invariant species traits")
-```
+
 
 # Validation
 
@@ -277,7 +281,8 @@ Here we run the validation on the outputs of just one repetition.
 
 We begin by preparing all the inputs necessary for the `Biomass_validationKNN` module.
 
-```{r validationPrep}
+
+```r
 ## get the  land-cover change map (needed to have an RTM first, so get it from the simInitList)
 ## /!\ it is assumed that the filename of the raster in the simList corresponds to the raster found in disk.
 ## this may not be the case if the simulations were run in another machine and saved rasters were not imported.
@@ -351,7 +356,8 @@ validationOutputs <- rbind(validationOutputs, data.frame(objectName = "speciesLa
 
 We can now run the validation:
 
-```{r validationRun}
+
+```r
 LandRBiomass_validation <- simInitAndSpades(times = validationTimes
                                             , params = validationParams
                                             , modules = "Biomass_validationKNN"
