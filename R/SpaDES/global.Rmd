@@ -30,7 +30,7 @@ options("reproducible.destinationPath" = file.path("R/SpaDES/inputs"))
 options("reproducible.useGDAL" = FALSE)
 
 ## set run name and paths
-runName <- "parametriseSALarge"
+runName <- "baseCase"
 eventCaching <- c(".inputObjects", "init")
 useParallel <- FALSE
 

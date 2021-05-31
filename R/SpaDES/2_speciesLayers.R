@@ -24,7 +24,7 @@ speciesParameters <- list(
 
 
 speciesObjects <- list(
-  "studyAreaLarge" = if (grepl("study", runName)) get(runName) else studyAreaL
+  "studyAreaLarge" = if (grepl("studyArea", runName)) get(runName) else studyAreaL
   , "sppEquiv" = sppEquivalencies_CA
   , "sppColorVect" = sppColorVect
 )

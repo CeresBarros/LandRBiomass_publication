@@ -52,9 +52,9 @@ useParallel <- FALSE
 
 # runName <- "studyAreaS"
 # runName <- "studyAreaL"
-# runName <- "parametriseSALarge"
-runName <- "parametriseSALarge_noBsppParams"
-# runName <- "parametriseSALarge2"
+# runName <- "baseCase"
+# runName <- "demo1"
+runName <- "demo2"
 
 ## paths
 simDirName <- "feb2021Runs"
@@ -82,7 +82,7 @@ speciesParams <- list(
   )
 )
 
-if (grepl("_noBsppParams", runName)) {
+if (runName == "demo2") {
   ## no need to change parameters list, superfluos params will simply not be used
   ## same for objects
   simModules <- list("Biomass_borealDataPrep"
@@ -170,11 +170,11 @@ simObjects <- list(
   , "PSPplot" = PSPplot
 )
 
-if (grepl("parametriseSALarge", runName)) {
+if (grepl("studyArea", runName)) {
+  simObjects$studyArea <- get(runName)
+} else {
   simObjects$studyArea <- studyAreaS
   simObjects$studyAreaLarge <- studyAreaL
-} else {
-  simObjects$studyArea <- get(runName)
 }
 
 
@@ -238,9 +238,9 @@ if (!exists("simDirName"))
   simDirName <- "feb2021Runs"
 
 if (!exists("runName"))
-  # runName <- "parametriseSALarge"
-  # runName <- "parametriseSALarge2"
-  runName <- "parametriseSALarge_noBsppParams"
+  # runName <- "baseCase"
+  # runName <- "demo1"
+  runName <- "demo2"
 
 if (!exists("eventCaching"))
   eventCaching <- c(".inputObjects", "init")

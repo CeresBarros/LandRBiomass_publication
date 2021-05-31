@@ -2,7 +2,7 @@ library(LandR)
 library(raster)
 library(quickPlot)
 
-resDir <- "R/SpaDES/outputs/parametriseSALarge/"
+resDir <- "R/SpaDES/outputs/baseCase/"
 outDir <- "C:/Ceres/temp"
 dir.create(outDir)
 
