@@ -267,7 +267,7 @@ LandRBiomass_simInit$speciesEcoregion
 
 For example, these were the (spatially) invariant species traits used in the simulation:
 
-```{r speciesTraitsShow, include=FALSE}
+```{r speciesTraitsShow, echo=FALSE}
 kable(LandRBiomass_simInit$species, caption = "Invariant species traits")
 ```
 
