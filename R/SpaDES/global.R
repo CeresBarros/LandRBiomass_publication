@@ -31,7 +31,7 @@ if (!require("Require")) {
 Require(c("SpaDES",
           "raster","dplyr", "data.table", "future",
           "PredictiveEcology/SpaDES.experiment",
-          "PredictiveEcology/LandR@modelBiomass",
+          "CeresBarros/LandR@modelBiomass (>= 1.0.3)",
           "PredictiveEcology/reproducible@development"),
         upgrade = FALSE)
 
