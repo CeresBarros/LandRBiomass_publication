@@ -167,17 +167,30 @@ rm(toRm)
 ## subset sppEquivalencies
 sppEquivalencies_CA <- sppEquivalencies_CA[Boreal %in% names(simOutSpeciesLayers$speciesLayers)]
 
+## Get land-cover raster now that we have a rasterToMatchLarge
+if (is.null(P(simOutSpeciesLayers)$.studyAreaName)) {
+  SAname <- reproducible::studyAreaName(simOutSpeciesLayers$studyAreaLarge)
+}
+rstLCC2005 <- LandR::prepInputsLCC(
+  year = 2005L,
+  destinationPath = simPaths$inputPath,
+  studyArea = simOutSpeciesLayers$studyAreaLarge,   ## Ceres: makePixel table needs same no. pixels for this, RTM rawBiomassMap, LCC.. etc
+  rasterToMatch = simOutSpeciesLayers$rasterToMatchLarge,
+  filename2 = .suffix("rstLCC.tif", paste0("_", SAname)),
+  overwrite = TRUE,
+  cacheRepo = simPaths$cachePath,
+  userTags = c("rstLCC", SAname),
+  omitArgs = c("userTags"))
+
 simObjects <- list(
-  "sppEquiv" = sppEquivalencies_CA
+  "rstLCC" = rstLCC2005
+  , "sppEquiv" = sppEquivalencies_CA
   , "sppColorVect" = sppColorVect
   , "speciesLayers" = simOutSpeciesLayers$speciesLayers
   , "speciesParams" = speciesParams
   , "treed" = simOutSpeciesLayers$treed
   , "numTreed" = simOutSpeciesLayers$numTreed
   , "nonZeroCover" = simOutSpeciesLayers$nonZeroCover
-  , "PSPgis" = PSPgis
-  , "PSPmeasure" = PSPmeasure
-  , "PSPplot" = PSPplot
 )
 
 if (grepl("studyArea", runName)) {
