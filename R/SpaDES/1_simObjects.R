@@ -9,7 +9,9 @@
 
 ## create a larger study area and create a smaller one (half extent)
 ## note that projection of the orignal CRS is always necessary
-if (!grepl("SA2", runName)) {
+
+if (runName %in% c("baseCase", "demo2", "studyAreaS", "studyAreaL")) {
+  ## set A
   originalcrs <- "+proj=longlat +datum=NAD83 +no_defs +ellps=GRS80 +towgs84=0,0,0"
   largeExtent <- extent(-104.757, -104.2197, 55.68663, 56.20319)
   smallExtent <- largeExtent
@@ -26,8 +28,9 @@ if (!grepl("SA2", runName)) {
   studyAreaS <-  SpatialPolygonsDataFrame(studyAreaS, data.frame(id = 1:length(studyAreaS)))
   crs(studyAreaS) <- originalcrs
   studyAreaS <- spTransform(studyAreaS, originalcrs)
-} else {
-## second set of study areas, north of the first
+
+} else if (runName == "demo1") {
+  ## second set of study areas, north of the first (set B)
   originalcrs <- "+proj=longlat +datum=NAD83 +no_defs +ellps=GRS80 +towgs84=0,0,0"
   largeExtent <- extent(-104.757, -104.2197, 56.25485, 56.77141)
   smallExtent <- largeExtent
@@ -44,6 +47,8 @@ if (!grepl("SA2", runName)) {
   studyAreaS <-  SpatialPolygonsDataFrame(studyAreaS, data.frame(id = 1:length(studyAreaS)))
   crs(studyAreaS) <- originalcrs
   studyAreaS <- spTransform(studyAreaS, originalcrs)
+} else {
+  stop("runName must be one of 'baseCase', 'demo1', 'demo2', 'studyAreaS' or 'studyAreaL'")
 }
 
 ## now reproject to Biomass_core standard
@@ -78,29 +83,3 @@ sppEquivalencies_CA <- na.omit(sppEquivalencies_CA, sppEquivCol)
 sppColorVect <- sppColors(sppEquivalencies_CA, sppEquivCol,
                           newVals = "Mixed", palette = "Accent")
 
-
-## PSP DATA ------------------------------------------------------------------
-## Set up PSP data for LandR_speciesParameters
-opts <- options("reproducible.cachePath" = simPaths$cachePath)
-PSPmeasure <- Cache(prepInputs,
-                    targetFile = "PSPmeasure.Rdat",
-                    archive = "randomized_LandR_speciesParameters_Inputs.zip",
-                    url = "https://drive.google.com/file/d/1LmOaEtCZ6EBeIlAm6ttfLqBqQnQu4Ca7/view?usp=sharing",
-                    destinationPath = simPaths$inputPath,
-                    fun = "readRDS")
-
-PSPplot <- Cache(prepInputs,
-                    targetFile = "PSPplot.Rdat",
-                    archive = "randomized_LandR_speciesParameters_Inputs.zip",
-                    url = "https://drive.google.com/file/d/1LmOaEtCZ6EBeIlAm6ttfLqBqQnQu4Ca7/view?usp=sharing",
-                    destinationPath = simPaths$inputPath,
-                    fun = "readRDS")
-
-PSPgis <- Cache(prepInputs,
-                 targetFile = "randomizedPSPdata.Rdat",
-                 archive = "randomized_LandR_speciesParameters_Inputs.zip",
-                 url = "https://drive.google.com/file/d/1LmOaEtCZ6EBeIlAm6ttfLqBqQnQu4Ca7/view?usp=sharing",
-                 destinationPath = simPaths$inputPath,
-                 fun = "readRDS")
-## go back to previous options
-options(opts)

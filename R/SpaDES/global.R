@@ -31,7 +31,7 @@ if (!require("Require")) {
 Require(c("SpaDES",
           "raster","dplyr", "data.table", "future",
           "PredictiveEcology/SpaDES.experiment",
-          "PredictiveEcology/LandR@modelBiomass",
+          "CeresBarros/LandR@modelBiomass (>= 1.0.3)",
           "PredictiveEcology/reproducible@development"),
         upgrade = FALSE)
 
@@ -50,10 +50,18 @@ options("reproducible.useGDAL" = FALSE)
 eventCaching <- c(".inputObjects", "init")
 useParallel <- FALSE
 
+## use studyAreaS or L to parameterise AND run simualations in the SAME area
+## one study area from set A
 # runName <- "studyAreaS"
 # runName <- "studyAreaL"
-runName <- "parametriseSALarge"
-# runName <- "parametriseSALarge2"
+
+## use one of the following to parameterise the model in a larger study area than the simulation area
+## baseCase uses set A of study areas, parameterises using Biomass_borealDataPrep and Biomass_speciesParameters
+## demo1 uses set B of study areas, parameterises using Biomass_borealDataPrep and Biomass_speciesParameters
+## demo2 uses set A of study areas, parameterises using Biomass_borealDataPrep only
+# runName <- "baseCase"
+# runName <- "demo1"
+runName <- "demo2"
 
 ## paths
 simDirName <- "feb2021Runs"
@@ -81,10 +89,20 @@ speciesParams <- list(
   )
 )
 
-simModules <- list("Biomass_borealDataPrep"
-                   , "Biomass_speciesParameters"
-                   , "Biomass_core"
-)
+if (runName %in% c("baseCase", "demo1", "studyAreaS", "studyAreaL")) {
+  simModules <- list("Biomass_borealDataPrep"
+                     , "Biomass_speciesParameters"
+                     , "Biomass_core"
+  )
+} else if (runName == "demo2") {
+  ## no need to change parameters list, superfluous params. will simply not be used
+  ## same for objects
+  simModules <- list("Biomass_borealDataPrep"
+                     , "Biomass_core"
+  )
+} else {
+  stop("runName must be one of 'baseCase', 'demo1', 'demo2', 'studyAreaS' or 'studyAreaL'")
+}
 
 simParams <- list(
   Biomass_borealDataPrep = list(
@@ -106,6 +124,7 @@ simParams <- list(
     , "pixelGroupBiomassClass" = 100
     , "useCloudCacheForStats" = FALSE
     , "cloudFolderID" = NA
+    , ".plots" = "png"
     , ".useCache" = eventCaching
   )
   , Biomass_speciesParameters = list(
@@ -123,7 +142,7 @@ simParams <- list(
     , "sppEquivCol" = sppEquivCol
     , "successionTimestep" = successionTimestep
     , "vegLeadingProportion" = vegLeadingProportion
-    , ".plotInterval" = 1
+    , ".plotInterval" = 1L
     , ".plotMaps" = TRUE
     , ".saveInitialTime" = NA
     # , ".useCache" = eventCaching
@@ -148,24 +167,37 @@ rm(toRm)
 ## subset sppEquivalencies
 sppEquivalencies_CA <- sppEquivalencies_CA[Boreal %in% names(simOutSpeciesLayers$speciesLayers)]
 
+## Get land-cover raster now that we have a rasterToMatchLarge
+if (is.null(P(simOutSpeciesLayers)$.studyAreaName)) {
+  SAname <- reproducible::studyAreaName(simOutSpeciesLayers$studyAreaLarge)
+}
+rstLCC2005 <- LandR::prepInputsLCC(
+  year = 2005L,
+  destinationPath = simPaths$inputPath,
+  studyArea = simOutSpeciesLayers$studyAreaLarge,   ## Ceres: makePixel table needs same no. pixels for this, RTM rawBiomassMap, LCC.. etc
+  rasterToMatch = simOutSpeciesLayers$rasterToMatchLarge,
+  filename2 = .suffix("rstLCC.tif", paste0("_", SAname)),
+  overwrite = TRUE,
+  cacheRepo = simPaths$cachePath,
+  userTags = c("rstLCC", SAname),
+  omitArgs = c("userTags"))
+
 simObjects <- list(
-  "sppEquiv" = sppEquivalencies_CA
+  "rstLCC" = rstLCC2005
+  , "sppEquiv" = sppEquivalencies_CA
   , "sppColorVect" = sppColorVect
   , "speciesLayers" = simOutSpeciesLayers$speciesLayers
   , "speciesParams" = speciesParams
   , "treed" = simOutSpeciesLayers$treed
   , "numTreed" = simOutSpeciesLayers$numTreed
   , "nonZeroCover" = simOutSpeciesLayers$nonZeroCover
-  , "PSPgis" = PSPgis
-  , "PSPmeasure" = PSPmeasure
-  , "PSPplot" = PSPplot
 )
 
-if (grepl("parametriseSALarge", runName)) {
+if (grepl("studyArea", runName)) {
+  simObjects$studyArea <- get(runName)
+} else {
   simObjects$studyArea <- studyAreaS
   simObjects$studyAreaLarge <- studyAreaL
-} else {
-  simObjects$studyArea <- get(runName)
 }
 
 
@@ -203,13 +235,17 @@ LandRBiomass_simInit <- Cache(simInitAndSpades
                               , .plotInitialTime = NA
                               , userTags = "simInitAndInits"
                               , cacheRepo = simPaths$cachePath
-                              , useCache = FALSE ## package loading workaround
+                              # , useCache = FALSE ## package loading workaround
                               , omitArgs = c("userTags", ".plotInitialTime"))
 
 saveSimList(LandRBiomass_simInit, file.path(simPaths$outputPath, paste0("simInit", runName)))
 
 amc::.gc()  ## clean ws
-plan("multiprocess", workers = 5)   ## each worker consuming roughly 16Gb
+if (Sys.info()$sysname == "Windows") {
+  plan("multisession", workers = 5)   ## each worker consuming roughly 16Gb
+} else {
+  plan("multicore", workers = 5)
+}
 LandRBiomass_sim <- experiment2(
   sim1 = LandRBiomass_simInit,
   clearSimEnv = TRUE,
@@ -229,8 +265,9 @@ if (!exists("simDirName"))
   simDirName <- "feb2021Runs"
 
 if (!exists("runName"))
-  runName <- "parametriseSALarge"
-# runName <- "parametriseSALarge2"
+  # runName <- "baseCase"
+  # runName <- "demo1"
+  runName <- "demo2"
 
 if (!exists("eventCaching"))
   eventCaching <- c(".inputObjects", "init")
