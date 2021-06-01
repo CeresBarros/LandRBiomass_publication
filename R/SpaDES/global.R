@@ -142,7 +142,7 @@ simParams <- list(
     , "sppEquivCol" = sppEquivCol
     , "successionTimestep" = successionTimestep
     , "vegLeadingProportion" = vegLeadingProportion
-    , ".plotInterval" = 1
+    , ".plotInterval" = 1L
     , ".plotMaps" = TRUE
     , ".saveInitialTime" = NA
     # , ".useCache" = eventCaching
@@ -228,7 +228,11 @@ LandRBiomass_simInit <- Cache(simInitAndSpades
 saveSimList(LandRBiomass_simInit, file.path(simPaths$outputPath, paste0("simInit", runName)))
 
 amc::.gc()  ## clean ws
-plan("multiprocess", workers = 5)   ## each worker consuming roughly 16Gb
+if (Sys.info()$sysname == "Windows") {
+  plan("multisession", workers = 5)   ## each worker consuming roughly 16Gb
+} else {
+  plan("multicore", workers = 5)
+}
 LandRBiomass_sim <- experiment2(
   sim1 = LandRBiomass_simInit,
   clearSimEnv = TRUE,
