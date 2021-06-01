@@ -50,8 +50,15 @@ options("reproducible.useGDAL" = FALSE)
 eventCaching <- c(".inputObjects", "init")
 useParallel <- FALSE
 
+## use studyAreaS or L to parameterise AND run simualations in the SAME area
+## one study area from set A
 # runName <- "studyAreaS"
 # runName <- "studyAreaL"
+
+## use one of the following to parameterise the model in a larger study area than the simulation area
+## baseCase uses set A of study areas, parameterises using Biomass_borealDataPrep and Biomass_speciesParameters
+## demo1 uses set B of study areas, parameterises using Biomass_borealDataPrep and Biomass_speciesParameters
+## demo2 uses set A of study areas, parameterises using Biomass_borealDataPrep only
 # runName <- "baseCase"
 # runName <- "demo1"
 runName <- "demo2"
@@ -82,17 +89,19 @@ speciesParams <- list(
   )
 )
 
-if (runName == "demo2") {
-  ## no need to change parameters list, superfluos params will simply not be used
+if (runName %in% c("baseCase", "demo1", "studyAreaS", "studyAreaL")) {
+  simModules <- list("Biomass_borealDataPrep"
+                     , "Biomass_speciesParameters"
+                     , "Biomass_core"
+  )
+} else if (runName == "demo2") {
+  ## no need to change parameters list, superfluous params. will simply not be used
   ## same for objects
   simModules <- list("Biomass_borealDataPrep"
                      , "Biomass_core"
   )
 } else {
-  simModules <- list("Biomass_borealDataPrep"
-                     , "Biomass_speciesParameters"
-                     , "Biomass_core"
-  )
+  stop("runName must be one of 'baseCase', 'demo1', 'demo2', 'studyAreaS' or 'studyAreaL'")
 }
 
 simParams <- list(

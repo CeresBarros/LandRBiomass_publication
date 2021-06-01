@@ -9,25 +9,8 @@
 
 ## create a larger study area and create a smaller one (half extent)
 ## note that projection of the orignal CRS is always necessary
-if (runName == "demo1") {
-  ## second set of study areas, north of the first (set B)
-  originalcrs <- "+proj=longlat +datum=NAD83 +no_defs +ellps=GRS80 +towgs84=0,0,0"
-  largeExtent <- extent(-104.757, -104.2197, 56.25485, 56.77141)
-  smallExtent <- largeExtent
 
-  smallExtent@xmax <- largeExtent@xmin + (largeExtent@xmax - largeExtent@xmin)*0.5   ## this is minimum size (10 000 pix at 250m res) -- need to increase large are to double
-  smallExtent@ymax <- largeExtent@ymin + (largeExtent@ymax - largeExtent@ymin)*0.5
-
-  studyAreaL <- as(largeExtent, "SpatialPolygons")
-  studyAreaL <-  SpatialPolygonsDataFrame(studyAreaL, data.frame(id = 1:length(studyAreaL)))
-  crs(studyAreaL) <- originalcrs
-  studyAreaL <- spTransform(studyAreaL, originalcrs)
-
-  studyAreaS <- as(smallExtent, "SpatialPolygons")
-  studyAreaS <-  SpatialPolygonsDataFrame(studyAreaS, data.frame(id = 1:length(studyAreaS)))
-  crs(studyAreaS) <- originalcrs
-  studyAreaS <- spTransform(studyAreaS, originalcrs)
-} else {
+if (runName %in% c("baseCase", "demo2", "studyAreaS", "studyAreaL")) {
   ## set A
   originalcrs <- "+proj=longlat +datum=NAD83 +no_defs +ellps=GRS80 +towgs84=0,0,0"
   largeExtent <- extent(-104.757, -104.2197, 55.68663, 56.20319)
@@ -46,6 +29,26 @@ if (runName == "demo1") {
   crs(studyAreaS) <- originalcrs
   studyAreaS <- spTransform(studyAreaS, originalcrs)
 
+} else if (runName == "demo1") {
+  ## second set of study areas, north of the first (set B)
+  originalcrs <- "+proj=longlat +datum=NAD83 +no_defs +ellps=GRS80 +towgs84=0,0,0"
+  largeExtent <- extent(-104.757, -104.2197, 56.25485, 56.77141)
+  smallExtent <- largeExtent
+
+  smallExtent@xmax <- largeExtent@xmin + (largeExtent@xmax - largeExtent@xmin)*0.5   ## this is minimum size (10 000 pix at 250m res) -- need to increase large are to double
+  smallExtent@ymax <- largeExtent@ymin + (largeExtent@ymax - largeExtent@ymin)*0.5
+
+  studyAreaL <- as(largeExtent, "SpatialPolygons")
+  studyAreaL <-  SpatialPolygonsDataFrame(studyAreaL, data.frame(id = 1:length(studyAreaL)))
+  crs(studyAreaL) <- originalcrs
+  studyAreaL <- spTransform(studyAreaL, originalcrs)
+
+  studyAreaS <- as(smallExtent, "SpatialPolygons")
+  studyAreaS <-  SpatialPolygonsDataFrame(studyAreaS, data.frame(id = 1:length(studyAreaS)))
+  crs(studyAreaS) <- originalcrs
+  studyAreaS <- spTransform(studyAreaS, originalcrs)
+} else {
+  stop("runName must be one of 'baseCase', 'demo1', 'demo2', 'studyAreaS' or 'studyAreaL'")
 }
 
 ## now reproject to Biomass_core standard
