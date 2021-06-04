@@ -241,7 +241,7 @@ LandRBiomass_simInit <- Cache(simInitAndSpades
 saveSimList(LandRBiomass_simInit, file.path(simPaths$outputPath, paste0("simInit", runName)))
 
 amc::.gc()  ## clean ws
-if (Sys.info()$sysname == "Windows") {
+if (Sys.info()["sysname"] == "Windows") {
   plan("multisession", workers = 5)   ## each worker consuming roughly 16Gb
 } else {
   plan("multicore", workers = 5)
