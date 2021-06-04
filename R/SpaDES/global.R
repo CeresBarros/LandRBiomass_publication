@@ -341,5 +341,6 @@ LandRBiomass_validation <- simInitAndSpades(times = validationTimes
                                             , paths = validationPaths
                                             , .plotInitialTime = NA)
 
+saveSimList(LandRBiomass_validation, file.path(simPaths$outputPath, paste0("simValid", runName)))
 q("no")
 
