@@ -64,7 +64,7 @@ useParallel <- FALSE
 runName <- "demo2"
 
 ## paths
-simDirName <- "feb2021Runs"
+simDirName <- "jun2021Runs"
 simPaths <- list(cachePath = file.path("R/SpaDES/cache", simDirName, runName)
                  , modulePath = file.path("R/SpaDES/m")
                  , inputPath = file.path("R/SpaDES/inputs")
@@ -241,7 +241,7 @@ LandRBiomass_simInit <- Cache(simInitAndSpades
 saveSimList(LandRBiomass_simInit, file.path(simPaths$outputPath, paste0("simInit", runName)))
 
 amc::.gc()  ## clean ws
-if (Sys.info()$sysname == "Windows") {
+if (Sys.info()["sysname"] == "Windows") {
   plan("multisession", workers = 5)   ## each worker consuming roughly 16Gb
 } else {
   plan("multicore", workers = 5)
@@ -262,7 +262,7 @@ qs::qsave(LandRBiomass_sim, file.path(simPaths$outputPath, paste0("simList_LandR
 
 ## make objects again in case only this part of the script is being run:
 if (!exists("simDirName"))
-  simDirName <- "feb2021Runs"
+  simDirName <- "jun2021Runs"
 
 if (!exists("runName"))
   # runName <- "baseCase"
@@ -304,7 +304,6 @@ validationObjects <- list(
   "biomassMap" = biomassMap
   , "rasterToMatch" = rasterToMatch
   , "rawBiomassMapStart" = rawBiomassMap
-  # , "rstLCChange" = rstLCChangeAllbin
   , "simulationOutputs" = simulationOutputs
   , "speciesLayersStart" = speciesLayers
   , "sppColorVect" = LandRBiomass_simInit$sppColorVect
@@ -342,5 +341,6 @@ LandRBiomass_validation <- simInitAndSpades(times = validationTimes
                                             , paths = validationPaths
                                             , .plotInitialTime = NA)
 
+saveSimList(LandRBiomass_validation, file.path(simPaths$outputPath, paste0("simValid", runName)))
 q("no")
 
