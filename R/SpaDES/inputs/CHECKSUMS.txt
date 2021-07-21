@@ -17,6 +17,7 @@
 "nbac_1986_to_2019_20200921.shp.xml" "49362a47063b36ef" "47330" "xxhash64"
 "nbac_1986_to_2019_20200921.shx" "26a3b330986becf2" "272052" "xxhash64"
 "nbac_1986_to_2019_20200921.zip" "e82aee39b9df22cb" "881892742" "xxhash64"
+"runing time_mapsize.csv" "e6d214704c224f96" "983" "xxhash64"
 "BNDFFC_documentation_FR.pdf" "d88af71ab4dfb780" "496239" "xxhash64"
 "BNDFFC_FR_End-User Agreement.pdf" "c21f7431a58f6eca" "217700" "xxhash64"
 "C2C_change_type_1985_2011_LISEZMOI.txt" "fcc89370b30d6388" "6104" "xxhash64"

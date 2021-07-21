@@ -10,7 +10,7 @@
 ## create a larger study area and create a smaller one (half extent)
 ## note that projection of the orignal CRS is always necessary
 
-if (runName %in% c("baseCase", "demo2", "studyAreaS", "studyAreaL")) {
+if (runName %in% c("baseCase", "altParameters", "studyAreaS", "studyAreaL")) {
   ## set A
   originalcrs <- "+proj=longlat +datum=NAD83 +no_defs +ellps=GRS80 +towgs84=0,0,0"
   largeExtent <- extent(-104.757, -104.2197, 55.68663, 56.20319)
@@ -29,7 +29,7 @@ if (runName %in% c("baseCase", "demo2", "studyAreaS", "studyAreaL")) {
   crs(studyAreaS) <- originalcrs
   studyAreaS <- spTransform(studyAreaS, originalcrs)
 
-} else if (runName == "demo1") {
+} else if (runName == "studyAreaChange") {
   ## second set of study areas, north of the first (set B)
   originalcrs <- "+proj=longlat +datum=NAD83 +no_defs +ellps=GRS80 +towgs84=0,0,0"
   largeExtent <- extent(-104.757, -104.2197, 56.25485, 56.77141)
@@ -48,7 +48,7 @@ if (runName %in% c("baseCase", "demo2", "studyAreaS", "studyAreaL")) {
   crs(studyAreaS) <- originalcrs
   studyAreaS <- spTransform(studyAreaS, originalcrs)
 } else {
-  stop("runName must be one of 'baseCase', 'demo1', 'demo2', 'studyAreaS' or 'studyAreaL'")
+  stop("runName must be one of 'baseCase', 'studyAreaChange', 'altParameters', 'studyAreaS' or 'studyAreaL'")
 }
 
 ## now reproject to Biomass_core standard

@@ -57,18 +57,21 @@ useParallel <- FALSE
 
 ## use one of the following to parameterise the model in a larger study area than the simulation area
 ## baseCase uses set A of study areas, parameterises using Biomass_borealDataPrep and Biomass_speciesParameters
-## demo1 uses set B of study areas, parameterises using Biomass_borealDataPrep and Biomass_speciesParameters
-## demo2 uses set A of study areas, parameterises using Biomass_borealDataPrep only
-# runName <- "baseCase"
-# runName <- "demo1"
-runName <- "demo2"
+## studyAreaChange uses set B of study areas, parameterises using Biomass_borealDataPrep and Biomass_speciesParameters
+## altParameterisation uses set A of study areas, parameterises using Biomass_borealDataPrep only
+runName <- "baseCase"
+# runName <- "studyAreaChange"
+# runName <- "altParameters"
 
 ## paths
-simDirName <- "jun2021Runs"
-simPaths <- list(cachePath = file.path("R/SpaDES/cache", simDirName, runName)
+simDirName <- "jul2021Runs"
+simPaths <- list(cachePath = file.path("R/SpaDES/cache", simDirName)
                  , modulePath = file.path("R/SpaDES/m")
                  , inputPath = file.path("R/SpaDES/inputs")
                  , outputPath = file.path("R/SpaDES/outputs", simDirName, runName))
+
+figDir <- "R/SpaDES/outputs/GeneralFigs"
+dir.create(figDir)
 
 ## Get necessary objects -----------------------
 source("R/SpaDES/1_simObjects.R")
@@ -89,19 +92,19 @@ speciesParams <- list(
   )
 )
 
-if (runName %in% c("baseCase", "demo1", "studyAreaS", "studyAreaL")) {
+if (runName %in% c("baseCase", "studyAreaChange", "studyAreaS", "studyAreaL")) {
   simModules <- list("Biomass_borealDataPrep"
                      , "Biomass_speciesParameters"
                      , "Biomass_core"
   )
-} else if (runName == "demo2") {
+} else if (runName == "altParameters") {
   ## no need to change parameters list, superfluous params. will simply not be used
   ## same for objects
   simModules <- list("Biomass_borealDataPrep"
                      , "Biomass_core"
   )
 } else {
-  stop("runName must be one of 'baseCase', 'demo1', 'demo2', 'studyAreaS' or 'studyAreaL'")
+  stop("runName must be one of 'baseCase', 'studyAreaChange', 'altParameters', 'studyAreaS' or 'studyAreaL'")
 }
 
 simParams <- list(
@@ -266,8 +269,8 @@ if (!exists("simDirName"))
 
 if (!exists("runName"))
   # runName <- "baseCase"
-  # runName <- "demo1"
-  runName <- "demo2"
+  # runName <- "studyAreaChange"
+  runName <- "altParameters"
 
 if (!exists("eventCaching"))
   eventCaching <- c(".inputObjects", "init")
@@ -342,5 +345,11 @@ LandRBiomass_validation <- simInitAndSpades(times = validationTimes
                                             , .plotInitialTime = NA)
 
 saveSimList(LandRBiomass_validation, file.path(simPaths$outputPath, paste0("simValid", runName)))
+
+## -----------------------------------------------
+## POST-HOC ANALYSIS - figures
+## -----------------------------------------------
+source("R/SpaDES/pubFigures.R")
+
 q("no")
 

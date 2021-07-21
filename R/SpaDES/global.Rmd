@@ -193,6 +193,9 @@ LandRBiomass_simInit <- Cache(simInitAndSpades
                               , userTags = "simInitAndInits"
                               , omitArgs = c("userTags", ".plotInitialTime"))
 
+# look at the model structure and object exchange
+objectDiagram(LandRBiomass_simInit, width = 1000, height = 2500)
+
 ## save the simList
 saveSimList(LandRBiomass_simInit, file.path(simPaths$outputPath, paste0("simInit", runName)))
 ```
