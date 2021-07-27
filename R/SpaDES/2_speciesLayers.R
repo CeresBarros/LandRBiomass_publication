@@ -9,6 +9,10 @@
 ## or other modules). That's why caching is kept separate from the rest
 ## of the simulation
 
+if (!runName %in% c("baseCase", "studyAreaChange", "studyAreaS", "studyAreaL")) {
+  stop("runName must be one of 'baseCase', 'studyAreaChange', 'altParameters', 'studyAreaS' or 'studyAreaL'")
+}
+
 speciesPaths <- list(cachePath = file.path(simPaths$cachePath, "speciesLayers"),
                      modulePath = file.path("R/SpaDES/m"),
                      inputPath = file.path("R/SpaDES/inputs"),
@@ -24,7 +28,7 @@ speciesParameters <- list(
 
 
 speciesObjects <- list(
-  "studyAreaLarge" = if (grepl("studyArea", runName)) get(runName) else studyAreaL
+  "studyAreaLarge" = if (grepl("studyArea(S|L)$", runName)) get(runName) else studyAreaL
   , "sppEquiv" = sppEquivalencies_CA
   , "sppColorVect" = sppColorVect
 )

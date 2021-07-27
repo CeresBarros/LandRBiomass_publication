@@ -196,13 +196,12 @@ simObjects <- list(
   , "nonZeroCover" = simOutSpeciesLayers$nonZeroCover
 )
 
-if (grepl("studyArea", runName)) {
+if (grepl("studyArea(S|L)$", runName)) {
   simObjects$studyArea <- get(runName)
 } else {
   simObjects$studyArea <- studyAreaS
   simObjects$studyAreaLarge <- studyAreaL
 }
-
 
 ## objects will be saved at the start of the simulation (so they reflect the previous year)
 simOutputs <- data.frame(expand.grid(objectName = "cohortData",
