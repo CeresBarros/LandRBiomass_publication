@@ -44,3 +44,5 @@ simOutSpeciesLayers <- Cache(simInitAndSpades
                              , cacheRepo = speciesPaths$cachePath
                              , userTags = "speciesLayersSim"
                              , omitArgs = c("userTags", ".plotInitialTime", "debug"))
+
+saveSimList(simOutSpeciesLayers, file.path(simPaths$outputPath, paste0("simList_speciesLayers", runName)))
