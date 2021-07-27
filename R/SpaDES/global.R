@@ -7,21 +7,14 @@
 ## clean workspace
 rm(list = ls()); amc::.gc()
 
-## requires as of Jan 22 2020
-# reproducible 1.2.5.9000
-# quickPlot_0.1.7.9001
-# SpaDES.core 1.0.5
-# SpaDES.tools_0.3.7
+## requires as of Jul 26 2021
+# reproducible 1.2.7.9004
+# quickPlot_0.1.7.9002
+# SpaDES.core 1.0.8.9001
+# SpaDES.tools_0.3.8.9000
 # SpaDES.addins_0.1.2
-# SpaDES.experiment 0.0.2.9000
-# LandR_0.0.12 ## development branch
-# library(SpaDES)
-# library(SpaDES.experiment)
-# library(raster)
-# library(LandR)
-# library(dplyr)
-# library(data.table)
-# library(future)
+# SpaDES.experiment 0.0.2.9002
+# LandR 1.0.5
 
 if (!require("Require")) {
   devtools::install_github("PredictiveEcology/Require@development")
@@ -31,7 +24,7 @@ if (!require("Require")) {
 Require(c("SpaDES",
           "raster","dplyr", "data.table", "future",
           "PredictiveEcology/SpaDES.experiment",
-          "CeresBarros/LandR@modelBiomass (>= 1.0.3)",
+          "CeresBarros/LandR@modelBiomass (>= 1.0.5)",
           "PredictiveEcology/reproducible@development"),
         upgrade = FALSE)
 
@@ -127,7 +120,7 @@ simParams <- list(
     , "pixelGroupBiomassClass" = 100
     , "useCloudCacheForStats" = FALSE
     , "cloudFolderID" = NA
-    , ".plots" = "png"
+    , ".plots" = "object"
     , ".useCache" = eventCaching
   )
   , Biomass_speciesParameters = list(
@@ -138,52 +131,20 @@ simParams <- list(
   , Biomass_core = list(
     "calcSummaryBGM" = c("start")
     , "initialBiomassSource" = "cohortData" # can be 'biomassMap' or "spinup" too
-    # , ".plotInitialTime" = simTimes$start
-    , ".plotInitialTime" = NA ## for experiment
     , "plotOverstory" = TRUE
     , "seedingAlgorithm" = "wardDispersal"
     , "sppEquivCol" = sppEquivCol
     , "successionTimestep" = successionTimestep
     , "vegLeadingProportion" = vegLeadingProportion
+    , ".plotInitialTime" = simTimes$start
     , ".plotInterval" = 1L
-    , ".plotMaps" = TRUE
+    , ".plots" = "object"
+    , ".plotMaps" = FALSE
     , ".saveInitialTime" = NA
-    # , ".useCache" = eventCaching
     , ".useCache" = eventCaching[1] # experiment doesn't like when init is cached
     , ".useParallel" = useParallel
   )
 )
-
-## Run Biomass_speciesData to get species layers
-## running this separately from other modules makes switching
-## between using a large and a smaller study area easier when the smaller SA is within the large one,
-## as it keeps the data in separate folders that can be used across simulations/scenarios
-source("R/SpaDES/2_speciesLayers.R")
-
-## check species layers:
-# plot(simOutSpeciesLayers$speciesLayers)
-## Populus grandidentata shouldn't be inin SK (and has only v. few pixels in the layer) and will be excluded
-toRm <- which(names(simOutSpeciesLayers$speciesLayers) %in% c("Popu_Gra"))
-simOutSpeciesLayers$speciesLayers <- dropLayer(simOutSpeciesLayers$speciesLayers, i = toRm)
-rm(toRm)
-
-## subset sppEquivalencies
-sppEquivalencies_CA <- sppEquivalencies_CA[Boreal %in% names(simOutSpeciesLayers$speciesLayers)]
-
-## Get land-cover raster now that we have a rasterToMatchLarge
-if (is.null(P(simOutSpeciesLayers)$.studyAreaName)) {
-  SAname <- reproducible::studyAreaName(simOutSpeciesLayers$studyAreaLarge)
-}
-rstLCC2005 <- LandR::prepInputsLCC(
-  year = 2005L,
-  destinationPath = simPaths$inputPath,
-  studyArea = simOutSpeciesLayers$studyAreaLarge,   ## Ceres: makePixel table needs same no. pixels for this, RTM rawBiomassMap, LCC.. etc
-  rasterToMatch = simOutSpeciesLayers$rasterToMatchLarge,
-  filename2 = .suffix("rstLCC.tif", paste0("_", SAname)),
-  overwrite = TRUE,
-  cacheRepo = simPaths$cachePath,
-  userTags = c("rstLCC", SAname),
-  omitArgs = c("userTags"))
 
 simObjects <- list(
   "rstLCC" = rstLCC2005
@@ -234,17 +195,16 @@ LandRBiomass_simInit <- Cache(simInitAndSpades
                               , paths = simPaths
                               , outputs = simOutputs
                               , events = "init"
-                              , .plotInitialTime = NA
+                              # , .plots = "screen"
                               , userTags = "simInitAndInits"
                               , cacheRepo = simPaths$cachePath
-                              # , useCache = FALSE ## package loading workaround
                               , omitArgs = c("userTags", ".plotInitialTime"))
 
 saveSimList(LandRBiomass_simInit, file.path(simPaths$outputPath, paste0("simInit", runName)))
 
 amc::.gc()  ## clean ws
 if (Sys.info()["sysname"] == "Windows") {
-  plan("multisession", workers = 5)   ## each worker consuming roughly 16Gb
+  plan("multisession", workers = 5)   ## each worker consuming roughly 6Gb
 } else {
   plan("multicore", workers = 5)
 }
