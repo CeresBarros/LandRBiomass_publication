@@ -69,6 +69,37 @@ dir.create(figDir)
 ## Get necessary objects -----------------------
 source("R/SpaDES/1_simObjects.R")
 
+## Run Biomass_speciesData to get species layers
+## running this separately from other modules makes switching
+## between using a large and a smaller study area easier when the smaller SA is within the large one,
+## as it keeps the data in separate folders that can be used across simulations/scenarios
+source("R/SpaDES/2_speciesLayers.R")
+
+## check species layers:
+# plot(simOutSpeciesLayers$speciesLayers)
+## Populus grandidentata shouldn't be inin SK (and has only v. few pixels in the layer) and will be excluded
+toRm <- which(names(simOutSpeciesLayers$speciesLayers) %in% c("Popu_Gra"))
+simOutSpeciesLayers$speciesLayers <- dropLayer(simOutSpeciesLayers$speciesLayers, i = toRm)
+rm(toRm)
+
+## subset sppEquivalencies
+sppEquivalencies_CA <- sppEquivalencies_CA[Boreal %in% names(simOutSpeciesLayers$speciesLayers)]
+
+## Get land-cover raster now that we have a rasterToMatchLarge
+if (is.null(P(simOutSpeciesLayers)$.studyAreaName)) {
+  SAname <- reproducible::studyAreaName(simOutSpeciesLayers$studyAreaLarge)
+}
+rstLCC2005 <- LandR::prepInputsLCC(
+  year = 2005L,
+  destinationPath = simPaths$inputPath,
+  studyArea = simOutSpeciesLayers$studyAreaLarge,   ## Ceres: makePixel table needs same no. pixels for this, RTM rawBiomassMap, LCC.. etc
+  rasterToMatch = simOutSpeciesLayers$rasterToMatchLarge,
+  filename2 = .suffix("rstLCC.tif", paste0("_", SAname)),
+  overwrite = TRUE,
+  cacheRepo = simPaths$cachePath,
+  userTags = c("rstLCC", SAname),
+  omitArgs = c("userTags"))
+
 ## simulation params
 simTimes <- list(start = 2001, end = 2031)
 vegLeadingProportion <- 0 # indicates what proportion the stand must be in one species group for it to be leading.
@@ -175,12 +206,6 @@ simOutputs <- rbind(simOutputs, data.frame(objectName = "pixelGroupMap",
 simOutputs <- rbind(simOutputs, data.frame(objectName = "biomassMap",
                                            saveTime = simTimes$start,
                                            eventPriority = 1))
-simOutputs <- rbind(simOutputs, data.frame(objectName = "speciesEcoregion",
-                                           saveTime = simTimes$start,
-                                           eventPriority = 1))
-simOutputs <- rbind(simOutputs, data.frame(objectName = "species",
-                                           saveTime = simTimes$start,
-                                           eventPriority = 1))
 
 ## in the first year, eventPriorities need to be set to AFTER the init event (which has priority 1)
 simOutputs$eventPriority[simOutputs$saveTime == simTimes$start] <- 1.5
@@ -224,23 +249,23 @@ qs::qsave(LandRBiomass_sim, file.path(simPaths$outputPath, paste0("simList_LandR
 
 ## make objects again in case only this part of the script is being run:
 if (!exists("simDirName"))
-  simDirName <- "jun2021Runs"
+  simDirName <- "jul2021Runs"
 
 if (!exists("runName"))
-  # runName <- "baseCase"
+  runName <- "baseCase"
   # runName <- "studyAreaChange"
-  runName <- "altParameters"
+  # runName <- "altParameters"
 
 if (!exists("eventCaching"))
   eventCaching <- c(".inputObjects", "init")
 
 if (!exists("simPaths"))
-  simPaths <- list(cachePath = file.path("R/SpaDES/cache", simDirName, runName)
+  simPaths <- list(cachePath = file.path("R/SpaDES/cache", simDirName)
                    , modulePath = file.path("R/SpaDES/m")
                    , inputPath = file.path("R/SpaDES/inputs")
                    , outputPath = file.path("R/SpaDES/outputs", simDirName, runName))
 
-validationPaths <- list(cachePath = file.path("R/SpaDES/cache", simDirName, runName)
+validationPaths <- list(cachePath = file.path("R/SpaDES/cache", simDirName)
                         , modulePath = file.path("R/SpaDES/m")
                         , inputPath = file.path("R/SpaDES/inputs")
                         , outputPath = file.path("R/SpaDES/validation", simDirName, runName))
@@ -300,10 +325,9 @@ LandRBiomass_validation <- simInitAndSpades(times = validationTimes
                                             , modules = "Biomass_validationKNN"
                                             , objects = validationObjects
                                             , outputs = validationOutputs
-                                            , paths = validationPaths
-                                            , .plotInitialTime = NA)
+                                            , paths = validationPaths)
 
-saveSimList(LandRBiomass_validation, file.path(simPaths$outputPath, paste0("simValid", runName)))
+saveSimList(LandRBiomass_validation, file.path(validationPaths$outputPath, paste0("simValid", runName)))
 
 ## -----------------------------------------------
 ## POST-HOC ANALYSIS - figures
