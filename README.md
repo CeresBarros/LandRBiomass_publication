@@ -32,4 +32,4 @@ git clone --recurse-submodules -j8 https://github.com/PredictiveEcology/LandWeb
 ```
 
 ## Reporting bugs
-Contact us via the package GitHub site: https://github.com/CeresBarros/LandRBiomass_publication
+Contact us via the package GitHub site: https://github.com/CeresBarros/LandRBiomass_publication/issues
