@@ -151,7 +151,7 @@ simParams <- list(
     , "pixelGroupBiomassClass" = 100
     , "useCloudCacheForStats" = FALSE
     , "cloudFolderID" = NA
-    , ".plots" = "object"
+    , ".plots" = c("object", "raw")
     , ".useCache" = eventCaching
   )
   , Biomass_speciesParameters = list(
@@ -169,7 +169,7 @@ simParams <- list(
     , "vegLeadingProportion" = vegLeadingProportion
     , ".plotInitialTime" = simTimes$start
     , ".plotInterval" = 1L
-    , ".plots" = "object"
+    , ".plots" = c("object", "raw")
     , ".plotMaps" = FALSE
     , ".saveInitialTime" = NA
     , ".useCache" = eventCaching[1] # experiment doesn't like when init is cached
@@ -284,6 +284,7 @@ validationParams <- list(
     , "sppEquivCol" = params(LandRBiomass_simInit)$Biomass_borealDataPrep$sppEquivCol
     , "validationReps" = as.integer(1:10)  ## or length of simLists
     , "validationYears" = as.integer(c(2001, 2011))
+    , ".plots" = c("object", "raw", "png")
     , ".useCache" = eventCaching
   )
 )
