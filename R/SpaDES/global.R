@@ -221,11 +221,12 @@ LandRBiomass_simInit <- Cache(simInitAndSpades
                               , outputs = simOutputs
                               , events = "init"
                               # , .plots = "screen"
+                              , .studyAreaName = studyAreaName(simObjects$studyAreaLarge)
                               , userTags = "simInitAndInits"
                               , cacheRepo = simPaths$cachePath
                               , omitArgs = c("userTags", ".plotInitialTime"))
 
-saveSimList(LandRBiomass_simInit, file.path(simPaths$outputPath, paste0("simInit", runName)))
+saveSimList(LandRBiomass_simInit, file.path(simPaths$outputPath, paste0("simInit", runName)))   ## only save in first runs
 
 amc::.gc()  ## clean ws
 if (Sys.info()["sysname"] == "Windows") {
@@ -325,9 +326,10 @@ LandRBiomass_validation <- simInitAndSpades(times = validationTimes
                                             , modules = "Biomass_validationKNN"
                                             , objects = validationObjects
                                             , outputs = validationOutputs
-                                            , paths = validationPaths)
+                                            , paths = validationPaths
+                                            , .studyAreaName = studyAreaName(simObjects$studyAreaLarge))
 
-saveSimList(LandRBiomass_validation, file.path(validationPaths$outputPath, paste0("simValid", runName)))
+saveSimList(LandRBiomass_validation, file.path(validationPaths$outputPath, paste0("simValid", runName)))   ## only save in first runs
 
 ## -----------------------------------------------
 ## POST-HOC ANALYSIS - figures
