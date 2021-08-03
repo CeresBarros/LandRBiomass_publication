@@ -8,9 +8,9 @@
 rm(list = ls()); amc::.gc()
 
 ## requires as of Jul 26 2021
-# reproducible 1.2.7.9004
+# reproducible 1.2.7.9011
 # quickPlot_0.1.7.9002
-# SpaDES.core 1.0.8.9001
+# SpaDES.core 1.0.8.9014
 # SpaDES.tools_0.3.8.9000
 # SpaDES.addins_0.1.2
 # SpaDES.experiment 0.0.2.9002
