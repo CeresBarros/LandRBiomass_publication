@@ -22,12 +22,14 @@ The installing packages necessary to run the simulations requires installing dev
 * *Debian/Ubuntu Linux*: ensure `r-base-dev` is installed.
 
 2. Install `devtools` package:
-```
-install.packages(devtools)
+
+```r
+install.packages("devtools")
 ```
 
 3. Getting the code
-```
+
+```bash
 git clone --recurse-submodules -j8 https://github.com/PredictiveEcology/LandWeb
 ```
 
