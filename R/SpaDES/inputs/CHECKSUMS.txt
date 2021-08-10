@@ -108,6 +108,7 @@
 "NFI_MODIS250m_2011_kNN_Species_Popu_Tre_v1.tif" "918db4ad75d20299" "140200510" "xxhash64"
 "NFI_MODIS250m_2011_kNN_Species_Popu_Tri_v1.tif" "4069cec52232163a" "8273639" "xxhash64"
 "NFI_MODIS250m_2011_kNN_Structure_Biomass_TotalLiveAboveGround_v1.tif" "cb8174c4b1ec4b1b" "311101317" "xxhash64"
+"NFI_MODIS250m_2011_kNN_Structure_Stand_Age_v1.tif" "ccff4929b4591b7d" "259251529" "xxhash64"
 "randomized_LandR_speciesParameters_Inputs.zip" "91c463349e1dda11" "10659681" "xxhash64"
 "randomizedPSPgis.rds" "93e9ea6c11f00735" "107113" "xxhash64"
 "randomizedPSPmeasure.rds" "96a94d086160d887" "15863970" "xxhash64"
