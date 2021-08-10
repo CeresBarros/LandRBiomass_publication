@@ -4,9 +4,6 @@
 ## Ceres: June 2018
 ## ------------------------------------------------------
 
-## clean workspace
-rm(list = ls()); amc::.gc()
-
 ## requires as of Jul 26 2021
 # reproducible 1.2.7.9011
 # quickPlot_0.1.7.9002
@@ -16,17 +13,59 @@ rm(list = ls()); amc::.gc()
 # SpaDES.experiment 0.0.2.9002
 # LandR 1.0.5
 
+if (!exists("pkgDir")) {
+  pkgDir <- file.path("packages", version$platform,
+                      paste0(version$major, ".", strsplit(version$minor, "[.]")[[1]][1]))
+
+  if (!dir.exists(pkgDir)) {
+    dir.create(pkgDir, recursive = TRUE)
+  }
+  .libPaths(pkgDir)
+}
+
+if (!require("devtools")) {
+  install.packages("devtools", lib = pkgDir)
+}
+
 if (!require("Require")) {
-  devtools::install_github("PredictiveEcology/Require@development")
+  install.packages("Require", lib = pkgDir)
   library(Require)
 }
 
+if (!require("SpaDES")) {
+  install.packages("SpaDES", dependencies = TRUE, lib = pkgDir)
+}
+
+if (FALSE) {
+  devtools::install_github("PredictiveEcology/SpaDES.core@development")
+  devtools::install_github("PredictiveEcology/LandR@development")
+  devtools::install_github("ianmseddy/LandR.CS")
+  devtools::install_github("CeresBarros/reproducible@DotsBugFix")
+  devtools::install_github("PredictiveEcology/SpaDES.install")
+  devtools::install_github("PredictiveEcology/SpaDES.experiment@development")
+}
+
+# ## PLEASE RESTART R SESSION HERE!
+# out <- Require::Require(c("PredictiveEcology/SpaDES.core@development (>= 1.0.8.9014)",
+#                           "PredictiveEcology/LandR@modelBiomass (>= 1.0.5)",
+#                           "CeresBarros/reproducible@DotsBugFix (>= 1.2.7.9011)"), upgrade = FALSE)  ## NOT WORKING
+# ## PLEASE RESTART R SESSION HERE!
+# out <- Require::Require(c("PredictiveEcology/SpaDES.install (>= 0.0.2)",
+#                           "PredictiveEcology/SpaDES.experiment@development"), upgrade = FALSE) ## NOT WORKING
+# out <- Require::Require(c("PredictiveEcology/SpaDES.experiment@development"), upgrade = FALSE) ## NOT WORKING
+
+## PLEASE RESTART R SESSION HERE!
+out <- SpaDES.install::makeSureAllPackagesInstalled(modulePath = "R/SpaDES/m")
+
+
+## load packages and make sure minimum versions are installed.
 Require(c("SpaDES",
-          "raster","dplyr", "data.table", "future",
+          "raster", "dplyr", "data.table", "future",
           "PredictiveEcology/SpaDES.experiment",
-          "CeresBarros/LandR@modelBiomass (>= 1.0.5)",
-          "PredictiveEcology/reproducible@development"),
-        upgrade = FALSE)
+          "PredictiveEcology/LandR@development (>= 1.0.5)",
+          "CeresBarros/reproducible@DotsBugFix (>= 1.2.7.9011)"), upgrade = FALSE)
+
+googledrive::drive_auth(email = "ceresvbarros@hotmail.com")
 
 ## -----------------------------------------------
 ## SIMULATION SETUP
