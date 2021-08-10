@@ -9,7 +9,7 @@
 ## or other modules). That's why caching is kept separate from the rest
 ## of the simulation
 
-if (!runName %in% c("baseCase", "studyAreaChange", "studyAreaS", "studyAreaL")) {
+if (!runName %in% c("baseCase", "studyAreaChange", "altParameters", "studyAreaS", "studyAreaL")) {
   stop("runName must be one of 'baseCase', 'studyAreaChange', 'altParameters', 'studyAreaS' or 'studyAreaL'")
 }
 
