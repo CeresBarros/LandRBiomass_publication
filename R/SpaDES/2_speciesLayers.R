@@ -33,7 +33,7 @@ speciesObjects <- list(
   , "sppColorVect" = sppColorVect
 )
 
-
+SAname <- studyAreaName(speciesObjects$studyAreaLarge)
 simOutSpeciesLayers <- Cache(simInitAndSpades
                              , times = list(start = 0, end = 1)
                              , params = speciesParameters
@@ -42,8 +42,8 @@ simOutSpeciesLayers <- Cache(simInitAndSpades
                              , paths = speciesPaths
                              , debug = TRUE
                              , .plotInitialTime = NA
-                             , .studyAreaName = studyAreaName(speciesObjects$studyAreaLarge)
+                             , .studyAreaName = SAname
                              , cacheRepo = speciesPaths$cachePath
-                             , userTags = "speciesLayersSim"
+                             , userTags = c("speciesLayersSim", SAname)
                              , omitArgs = c("userTags", ".plotInitialTime", "debug"))
 saveSimList(simOutSpeciesLayers, file.path(simPaths$outputPath, paste0("simList_speciesLayers", runName)))   ## only save in first runs

@@ -126,7 +126,7 @@ sppEquivalencies_CA <- sppEquivalencies_CA[Boreal %in% names(simOutSpeciesLayers
 
 ## Get land-cover raster now that we have a rasterToMatchLarge
 if (is.null(P(simOutSpeciesLayers)$.studyAreaName)) {
-  SAname <- reproducible::studyAreaName(simOutSpeciesLayers$studyAreaLarge)
+  SAname <- studyAreaName(simOutSpeciesLayers$studyAreaLarge)
 }
 rstLCC2005 <- LandR::prepInputsLCC(
   year = 2005L,
@@ -250,6 +250,7 @@ simOutputs <- rbind(simOutputs, data.frame(objectName = "biomassMap",
 simOutputs$eventPriority[simOutputs$saveTime == simTimes$start] <- 1.5
 
 ## make a initialisation simList and run init events too
+SAname <- studyAreaName(simObjects$studyAreaLarge)
 LandRBiomass_simInit <- Cache(simInitAndSpades
                               , times = simTimes
                               , params = simParams
@@ -260,8 +261,8 @@ LandRBiomass_simInit <- Cache(simInitAndSpades
                               , outputs = simOutputs
                               , events = "init"
                               # , .plots = "screen"
-                              , .studyAreaName = studyAreaName(simObjects$studyAreaLarge)
-                              , userTags = "simInitAndInits"
+                              , .studyAreaName = SAname
+                              , userTags = c("simInitAndInits", SAname)
                               , cacheRepo = simPaths$cachePath
                               , omitArgs = c("userTags", ".plotInitialTime"))
 
@@ -360,14 +361,14 @@ validationOutputs <- rbind(validationOutputs, data.frame(objectName = "speciesLa
 validationOutputs <- rbind(validationOutputs, data.frame(objectName = "speciesLayersEnd",
                                                          saveTime = c(validationTimes$start),
                                                          eventPriority = 1))
-
+SAname <- studyAreaName(validationObjects$studyArea)
 LandRBiomass_validation <- simInitAndSpades(times = validationTimes
                                             , params = validationParams
                                             , modules = "Biomass_validationKNN"
                                             , objects = validationObjects
                                             , outputs = validationOutputs
                                             , paths = validationPaths
-                                            , .studyAreaName = studyAreaName(simObjects$studyAreaLarge))
+                                            , .studyAreaName = SAname)
 
 saveSimList(LandRBiomass_validation, file.path(validationPaths$outputPath, paste0("simValid", runName)))   ## only save in first runs
 
