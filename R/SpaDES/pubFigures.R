@@ -14,7 +14,7 @@ Require(c("raster", "sf", "data.table", "ggplot2",
 ## GET ALL SIMLISTS ------------------------------------
 runNames <- c("baseCase", "studyAreaChange", "altParameters")
 
-if (!exists(simOutSpeciesLayers)) {
+if (!exists("simOutSpeciesLayers")) {
   simOutSpeciesLayers <- loadFromCache(speciesPaths$cachePath, cacheId = "f13730c0a3d0f3c8")
 }
 
@@ -61,6 +61,8 @@ objectDiagram(preSimListbaseCase, width = 1000, height = 2500)
 webshot("http://localhost:20581/session/viewhtml6aec1852565c/index.html",
         file = file.path(figDir, "objectDiagram_baseCase.png"))
 
+## INSPECT MODEL BIOMASS AND MODEL COVER
+preSimListaltParameters$modelBiomass$rsq
 
 
 ## "ENSEMBLE" OF TWO INITIAL CONDITIONS ----------------------------------
