@@ -62,7 +62,7 @@ out <- SpaDES.install::makeSureAllPackagesInstalled(modulePath = "R/SpaDES/m")
 Require(c("SpaDES",
           "raster", "dplyr", "data.table", "future",
           "PredictiveEcology/SpaDES.experiment",
-          "PredictiveEcology/LandR@development (>= 1.0.5)",
+          "PredictiveEcology/LandR@development (>= 1.0.5.9001)",
           "CeresBarros/reproducible@DotsBugFix (>= 1.2.7.9011)"), upgrade = FALSE)
 
 googledrive::drive_auth(email = "ceresvbarros@hotmail.com")
