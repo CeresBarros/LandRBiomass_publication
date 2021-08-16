@@ -91,9 +91,9 @@ useParallel <- FALSE
 ## baseCase uses set A of study areas, parameterises using Biomass_borealDataPrep and Biomass_speciesParameters
 ## studyAreaChange uses set B of study areas, parameterises using Biomass_borealDataPrep and Biomass_speciesParameters
 ## altParameterisation uses set A of study areas, parameterises using Biomass_borealDataPrep only
-runName <- "baseCase"
+# runName <- "baseCase"
 # runName <- "studyAreaChange"
-# runName <- "altParameters"
+runName <- "altParameters"
 
 ## paths
 simDirName <- "jul2021Runs"
@@ -290,8 +290,8 @@ if (!exists("simDirName"))
 
 if (!exists("runName"))
   runName <- "baseCase"
-  # runName <- "studyAreaChange"
-  # runName <- "altParameters"
+# runName <- "studyAreaChange"
+# runName <- "altParameters"
 
 if (!exists("eventCaching"))
   eventCaching <- c(".inputObjects", "init")
