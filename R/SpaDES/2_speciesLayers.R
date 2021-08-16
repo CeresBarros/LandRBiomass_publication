@@ -18,15 +18,6 @@ speciesPaths <- list(cachePath = file.path(simPaths$cachePath, "speciesLayers"),
                      inputPath = file.path("R/SpaDES/inputs"),
                      outputPath = file.path(simPaths$outputPath, "speciesLayers"))
 
-speciesParameters <- list(
-  Biomass_speciesData = list(
-    "types" = c("KNN")
-    , "sppEquivCol" = sppEquivCol
-    , ".useCache" = eventCaching
-  )
-)
-
-
 speciesObjects <- list(
   "studyAreaLarge" = if (grepl("studyArea(S|L)$", runName)) get(runName) else studyAreaL
   , "sppEquiv" = sppEquivalencies_CA
@@ -34,6 +25,15 @@ speciesObjects <- list(
 )
 
 SAname <- studyAreaName(speciesObjects$studyAreaLarge)
+
+speciesParameters <- list(
+  Biomass_speciesData = list(
+    "types" = c("KNN")
+    , "sppEquivCol" = sppEquivCol
+    , ".studyAreaName" = SAname
+    , ".useCache" = eventCaching
+  )
+)
 simOutSpeciesLayers <- Cache(simInitAndSpades
                              , times = list(start = 0, end = 1)
                              , params = speciesParameters
