@@ -13,6 +13,8 @@ m/*/*.zip
 *.R.save
 *.swp
 
+testBadCache.R
+
 ## don't ignore
 !m/*/data/CHECKSUMS.txt
 !inputs/CHECKSUMS.txt
