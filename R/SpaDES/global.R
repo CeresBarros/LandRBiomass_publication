@@ -65,8 +65,6 @@ Require(c("SpaDES",
           "PredictiveEcology/LandR@development (>= 1.0.5.9001)",
           "CeresBarros/reproducible@DotsBugFix (>= 1.2.7.9011)"), upgrade = FALSE)
 
-googledrive::drive_auth(email = "ceresvbarros@hotmail.com")
-
 ## -----------------------------------------------
 ## SIMULATION SETUP
 ## -----------------------------------------------
