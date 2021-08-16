@@ -125,9 +125,6 @@ rm(toRm)
 sppEquivalencies_CA <- sppEquivalencies_CA[Boreal %in% names(simOutSpeciesLayers$speciesLayers)]
 
 ## Get land-cover raster now that we have a rasterToMatchLarge
-if (is.null(P(simOutSpeciesLayers)$.studyAreaName)) {
-  SAname <- studyAreaName(simOutSpeciesLayers$studyAreaLarge)
-}
 rstLCC2005 <- LandR::prepInputsLCC(
   year = 2005L,
   destinationPath = simPaths$inputPath,
@@ -250,7 +247,6 @@ simOutputs <- rbind(simOutputs, data.frame(objectName = "biomassMap",
 simOutputs$eventPriority[simOutputs$saveTime == simTimes$start] <- 1.5
 
 ## make a initialisation simList and run init events too
-SAname <- studyAreaName(simObjects$studyAreaLarge)
 LandRBiomass_simInit <- Cache(simInitAndSpades
                               , times = simTimes
                               , params = simParams
