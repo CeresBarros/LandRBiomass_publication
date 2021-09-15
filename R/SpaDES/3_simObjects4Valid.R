@@ -1,10 +1,8 @@
 ## load simList from simInit()
-if (!exists("LandRBiomass_simInit"))
-  LandRBiomass_simInit <- loadSimList(file.path(simPaths$outputPath, paste0("simInit", runName)))
+LandRBiomass_simInit <- loadSimList(file.path(simPaths$outputPath, paste0("simInit", runName)))
 
 ## load the experiment simLists object
-if (!exists("LandRBiomass_sim"))
-  LandRBiomass_sim <- qs::qread(file.path(simPaths$outputPath, paste0("simList_LandRBiomass_sim_", runName)))
+LandRBiomass_sim <- qs::qread(file.path(simPaths$outputPath, paste0("simList_LandRBiomass_sim_", runName)))
 
 ## get necessary rasters from simList (only rasters aren't kept in memory)
 if (!inMemory(LandRBiomass_simInit$rawBiomassMap)) {
