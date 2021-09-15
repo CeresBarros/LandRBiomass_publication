@@ -36,33 +36,22 @@ if (!require("SpaDES")) {
   install.packages("SpaDES", dependencies = TRUE, lib = pkgDir)
 }
 
-if (FALSE) {
+if (FALSE) {  ## run this part manually.
   devtools::install_github("PredictiveEcology/SpaDES.core@development")
-  devtools::install_github("PredictiveEcology/LandR@development")
+  devtools::install_github("PredictiveEcology/LandR@c9b07db756fc9d5d8beeef6b005b84652ab41785")
   devtools::install_github("ianmseddy/LandR.CS")
   devtools::install_github("CeresBarros/reproducible@DotsBugFix")
   devtools::install_github("PredictiveEcology/SpaDES.install")
   devtools::install_github("PredictiveEcology/SpaDES.experiment@development")
+
+  out <- SpaDES.install::makeSureAllPackagesInstalled(modulePath = "R/SpaDES/m")
 }
-
-# ## PLEASE RESTART R SESSION HERE!
-# out <- Require::Require(c("PredictiveEcology/SpaDES.core@development (>= 1.0.8.9014)",
-#                           "PredictiveEcology/LandR@modelBiomass (>= 1.0.5)",
-#                           "CeresBarros/reproducible@DotsBugFix (>= 1.2.7.9011)"), upgrade = FALSE)  ## NOT WORKING
-# ## PLEASE RESTART R SESSION HERE!
-# out <- Require::Require(c("PredictiveEcology/SpaDES.install (>= 0.0.2)",
-#                           "PredictiveEcology/SpaDES.experiment@development"), upgrade = FALSE) ## NOT WORKING
-# out <- Require::Require(c("PredictiveEcology/SpaDES.experiment@development"), upgrade = FALSE) ## NOT WORKING
-
-## PLEASE RESTART R SESSION HERE!
-out <- SpaDES.install::makeSureAllPackagesInstalled(modulePath = "R/SpaDES/m")
-
 
 ## load packages and make sure minimum versions are installed.
 Require(c("SpaDES",
           "raster", "dplyr", "data.table", "future",
           "PredictiveEcology/SpaDES.experiment",
-          "PredictiveEcology/LandR@development (>= 1.0.5.9001)",
+          "PredictiveEcology/LandR@development (>= 1.0.5.9003)",
           "CeresBarros/reproducible@DotsBugFix (>= 1.2.7.9011)"), upgrade = FALSE)
 
 ## -----------------------------------------------
