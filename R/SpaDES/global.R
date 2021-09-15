@@ -271,24 +271,6 @@ qs::qsave(LandRBiomass_sim, file.path(simPaths$outputPath, paste0("simList_LandR
 ## /!\ it is assumed that the filename of the raster in the simList corresponds to the raster found in disk.
 ## this may not be the case if the simulations were run in another machine and saved rasters were not imported.
 
-## make objects again in case only this part of the script is being run:
-if (!exists("simDirName"))
-  simDirName <- "jul2021Runs"
-
-if (!exists("runName"))
-  runName <- "baseCase"
-# runName <- "studyAreaChange"
-# runName <- "altParameters"
-
-if (!exists("eventCaching"))
-  eventCaching <- c(".inputObjects", "init")
-
-if (!exists("simPaths"))
-  simPaths <- list(cachePath = file.path("R/SpaDES/cache", simDirName)
-                   , modulePath = file.path("R/SpaDES/m")
-                   , inputPath = file.path("R/SpaDES/inputs")
-                   , outputPath = file.path("R/SpaDES/outputs", simDirName, runName))
-
 validationPaths <- list(cachePath = file.path("R/SpaDES/cache", simDirName)
                         , modulePath = file.path("R/SpaDES/m")
                         , inputPath = file.path("R/SpaDES/inputs")
