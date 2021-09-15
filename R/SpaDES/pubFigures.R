@@ -35,6 +35,15 @@ for (runName in runNames) {
   eval(parse(text = paste0("validSimList", runName, " <- qs::qread(file.path('R/SpaDES/validation', simDirName, runName, paste0('simValid', runName)))")))
 }
 
+plotTheme <- function(majorYlines = TRUE, ...) {
+  .theme <- theme_pubr(...)
+  if (majorYlines) {
+    .theme <- .theme +
+      theme(panel.grid.major.y = element_line(colour = "grey", linetype = "dotted", size = 0.5))
+  }
+  .theme
+}
+
 ## ELAPSED TIMES ----------------------------------
 elapsedTime(speciesLayersSimListbaseCase)
 elapsedTime(speciesLayersSimListstudyAreaChange)
@@ -70,6 +79,7 @@ webshot("http://localhost:20581/session/viewhtml6aec1852565c/index.html",
         file = file.path(figDir, "objectDiagram_baseCase.png"))
 
 ## INSPECT MODEL BIOMASS AND MODEL COVER ----------------------------------
+## two statistical models used to derive spatially-varying species traits (maxB, maxANPP and SEP)
 preSimListbaseCase$modelBiomass$rsq
 preSimListbaseCase$modelCover$rsq
 
@@ -451,6 +461,49 @@ allPlotsSim <- plot_grid(speciesPlots, landscapePlots[[3]], ncol = 1,
 ggsave(plot = allPlotsSim, filename = file.path(figDir, "simulationPlots_studyAreaChange.png"),
        bg = "white", width = 14, height = 10, dpi = 300)
 
+## Simulation plots for example 2
+## base case
+speciesBoverstory_BC <- qread(file.path(outputPath(simListbaseCase$sim1_rep01), "figures", "overstory_biomass_gg.qs"))
+speciesAge_BC <- qread(file.path(outputPath(simListbaseCase$sim1_rep01), "figures", "biomass-weighted_species_age_gg.qs"))
+speciesDom_BC <- qread(file.path(outputPath(simListbaseCase$sim1_rep01), "figures", "N_pixels_leading_gg.qs"))
+speciesANPP_BC <- qread(file.path(outputPath(simListbaseCase$sim1_rep01), "figures", "total_aNPP_by_species_gg.qs"))
+
+speciesBoverstory_BC <- speciesBoverstory_BC + labs(title = "Overstory biomass", y = expression(g/m^2), x = "Year", fill = "")
+speciesAge_BC <- speciesAge_BC + labs(title = "Species age", y = "Years", x = "Year", colour = "")
+speciesDom_BC <- speciesDom_BC + labs(title = "Species dominance", y = "No. of pixels", x = "Year", fill = "")
+speciesANPP_BC <- speciesANPP_BC + labs(title = "Total aNPP", y = expression(g/m^2), x = "Year", colour = "")
+
+## alternative params.
+speciesBoverstory_AP <- qread(file.path(outputPath(simListaltParameters$sim1_rep01), "figures", "overstory_biomass_gg.qs"))
+speciesAge_AP <- qread(file.path(outputPath(simListaltParameters$sim1_rep01), "figures", "biomass-weighted_species_age_gg.qs"))
+speciesDom_AP <- qread(file.path(outputPath(simListaltParameters$sim1_rep01), "figures", "N_pixels_leading_gg.qs"))
+speciesANPP_AP <- qread(file.path(outputPath(simListaltParameters$sim1_rep01), "figures", "total_aNPP_by_species_gg.qs"))
+
+speciesBoverstory_AP <- speciesBoverstory_AP + labs(title = "Overstory biomass", y = expression(g/m^2), x = "Year", fill = "")
+speciesAge_AP <- speciesAge_AP + labs(title = "Species age", y = "Years", x = "Year", colour = "")
+speciesDom_AP <- speciesDom_AP + labs(title = "Species dominance", y = "No. of pixels", x = "Year", fill = "")
+speciesANPP_AP <- speciesANPP_AP + labs(title = "Total aNPP", y = expression(g/m^2), x = "Year", colour = "")
+
+
+allPlotsSim_BC_AP <- plot_grid(
+  plot_grid(
+    plot_grid(speciesBoverstory_BC + theme(legend.position = "none", text = element_text(size = 10)),
+              speciesDom_BC + theme(legend.position = "none", text = element_text(size = 10)),
+              speciesAge_BC + theme(legend.position = "none", text = element_text(size = 10)),
+              speciesANPP_BC + theme(legend.position = "none", text = element_text(size = 10)),
+              align = 'v', axis = 'l', ncol = 1),
+    plot_grid(speciesBoverstory_AP + theme(legend.position = "none", text = element_text(size = 10)),
+              speciesDom_AP + theme(legend.position = "none", text = element_text(size = 10)),
+              speciesAge_AP + theme(legend.position = "none", text = element_text(size = 10)),
+              speciesANPP_AP + theme(legend.position = "none", text = element_text(size = 10)),
+              align = 'v', axis = 'l', ncol = 1),
+    ncol = 2, labels = c("a)", "b)")),
+  NULL,
+  get_legend(speciesBoverstory_BC + theme(legend.direction = "horizontal", text = element_text(size = 10))),
+  ncol = 1, rel_heights = c(1, 0, 0.1))
+ggsave(plot = allPlotsSim_BC_AP, filename = file.path(figDir, "simulationPlots_example2.png"),
+       bg = "white", height = 290, width = 180, dpi = 300, units = "mm")
+
 
 ## VALIDATION FIGURES ----------------------------------------
 ## Full suite of validation plots from study area change
@@ -467,64 +520,239 @@ pixelDeltaB <- qread(file.path(outputPath(validSimListstudyAreaChange), "figures
 landscapeMAD <- qread(file.path(outputPath(validSimListstudyAreaChange), "figures", "landscapeMAD_gg.qs"))
 pixelMAD <- qread(file.path(outputPath(validSimListstudyAreaChange), "figures", "pixelMAD_gg.qs"))
 
-
 landscapeRelB <- landscapeRelB + labs(title = "Relative abundance")
-landscapePresAbs <- landscapePresAbs + labs(title = "Presences", y = "No. of pixels")
-landscapeDom <- landscapeDom + labs(title = "Dominance", y = "No. of pixels")
-landscapeDeltaB <- landscapeDeltaB + labs(title = "Changes in biomass")
+landscapePresAbs <- landscapePresAbs + labs(title = "Presences")
+landscapeDom <- landscapeDom + labs(title = "Dominance")
+landscapeDeltaB <- landscapeDeltaB + labs(title = "Changes in biomass", y = expression(g/m^2))
 
 pixelRelB <- pixelRelB + labs(title = "Relative abundance")
-pixelDeltaB <- pixelDeltaB + labs(title = "Changes in biomass")
+pixelDeltaB <- pixelDeltaB + labs(title = "Changes in biomass", y = expression(g/m^2))
 
-landscapeMAD <- landscapeMAD + labs(title = "Landscape-level")
-pixelMAD <- pixelMAD + labs(title = "Pixel-level")
+landscapeMAD <- landscapeMAD + labs(title = "Landscape-level", y = "")
+pixelMAD <- pixelMAD + labs(title = "Pixel-level", y = "")
 
 allPlotsValid <- plot_grid(
   plot_grid(
-    plot_grid(landscapeRelB + theme(legend.position = "none"),
-              landscapePresAbs + theme(legend.position = "none"),
-              landscapeDom + theme(legend.position = "none"),
-              landscapeDeltaB + theme(legend.position = "none"),
+    plot_grid(landscapeRelB + theme(legend.position = "none", text = element_text(size = 10)),
+              landscapePresAbs + theme(legend.position = "none", text = element_text(size = 10)),
+              landscapeDom + theme(legend.position = "none", text = element_text(size = 10)),
+              landscapeDeltaB + theme(legend.position = "none", text = element_text(size = 10)),
               align = "v", axis = "l", ncol = 2),
-    get_legend(landscapeRelB), rel_heights = c(1, 0.1), ncol = 1),
-  plot_grid(pixelRelB + theme(legend.position = "none"),
-            pixelDeltaB + theme(legend.position = "none"),
-            get_legend(pixelDeltaB), ncol = 1, rel_heights = c(1, 1, 0.1),
-            align = "v", axis = "l"),
-  plot_grid(landscapeMAD + theme(legend.position = "none"),
-            pixelMAD + theme(legend.position = "none"),
-            get_legend(landscapeMAD), ncol = 1, rel_heights = c(1, 1, 0.1),
-            align = "v", axis = "l"),
-  ncol = 3, rel_widths = c(1.2, 0.6, 0.6), labels = c("a)", "b)", "c)"))
+    NULL,
+    get_legend(landscapeRelB), rel_heights = c(1, -0.05, 0.1), ncol = 1
+  ),
+  NULL,
+  plot_grid(
+    plot_grid(pixelRelB + theme(legend.position = "none", text = element_text(size = 10)),
+              landscapeMAD + theme(legend.position = "none", text = element_text(size = 10)),
+              ncol = 2, labels = c("b)", "c)"),
+              align = "h", axis = "b"),
+    plot_grid(pixelDeltaB + theme(legend.position = "none", text = element_text(size = 10)),
+              pixelMAD + theme(legend.position = "none", text = element_text(size = 10)),
+              NULL, NULL,
+              get_legend(pixelDeltaB),
+              get_legend(landscapeMAD + guides(colour = guide_legend(ncol = 2))),
+              ncol = 2, rel_heights = c(1, -0.05, 0.2),
+              align = "h", axis = "b"),
+    align = "v", axis = "l", ncol = 1
+  ),
+  ncol = 1, rel_heights = c(1, 0.01, 1.25), align = "v", axis = "l",
+  labels = c("a)", "")
+)
 
 ggsave(plot = allPlotsValid, filename = file.path(figDir, "validationPlots_studyAreaChange.png"),
-       bg = "white", width = 14, height = 8, dpi = 300)
+       bg = "white", height = 290, width = 210, dpi = 300, units = "mm")
 
 
 ## plots confronting Example 2 simulations
-landscapeRelB_BC <- qread(file.path(outputPath(validSimListbaseCase), "figures", "LandscapeComparisons_relB_data.qs"))
-landscapeDom_BC <- qread(file.path(outputPath(validSimListbaseCase), "figures", "LandscapeComparisons_Dom_data.qs"))
-landscapeDeltaB_BC <- qread(file.path(outputPath(validSimListbaseCase), "figures", "LandscapeComparisons_deltaB_data.qs"))
+## here we extract the plot data to make nicer plots
+## Base case
+landscapeVars_BC_AP <- rbindlist(list("aBC" = validSimListbaseCase$landscapeVars,
+                                      "bAP" = validSimListaltParameters$landscapeVars),
+                                 idcol = "simulation")
+pixelVars_BC_AP <- rbindlist(list("aBC" = validSimListbaseCase$pixelVars,
+                                  "bAP" = validSimListaltParameters$pixelVars),
+                             idcol = "simulation")
+pixelVars_BC_AP[, dataType2 := ifelse(dataType == "simulated", simulation, dataType)]
 
-pixelRelB_BC <- qread(file.path(outputPath(validSimListbaseCase), "figures", "PixelComparisons_relB_data.qs"))
-pixelDeltaB_BC <- qread(file.path(outputPath(validSimListbaseCase), "figures", "PixelComparisons_deltaB_data.qs"))
+landscapeMAD_BC_AP <- rbindlist(list("aBC" = validSimListbaseCase$landscapeMAD,
+                                     "bAP" = validSimListaltParameters$landscapeMAD),
+                                idcol = "simulation")
+landscapeMAD_BC_AP <- melt(landscapeMAD_BC_AP,
+                           measure.vars = c("meanAbsDevRelAbund", "meanAbsDevCount", "meanAbsDevCountDom", "meanAbsDevDeltaB"),
+                           value.name = "MAD")
 
-## for MAD its the GG output
-landscapeMAD_BC <- qread(file.path(outputPath(validSimListbaseCase), "figures", "landscapeMAD_gg.qs"))
-pixelMAD_BC <- qread(file.path(outputPath(validSimListbaseCase), "figures", "pixelMAD_gg.qs"))
+pixelMAD_BC_AP <- rbindlist(list("aBC" = validSimListbaseCase$pixelMAD,
+                                 "bAP" = validSimListaltParameters$pixelMAD),
+                            idcol = "simulation")
 
-## plots confronting Example 2 simulations
-landscapeRelB_AP <- qread(file.path(outputPath(validSimListaltParameters), "figures", "LandscapeComparisons_relB_data.qs"))
-landscapeDom_AP <- qread(file.path(outputPath(validSimListaltParameters), "figures", "LandscapeComparisons_Dom_data.qs"))
-landscapeDeltaB_AP <- qread(file.path(outputPath(validSimListaltParameters), "figures", "LandscapeComparisons_deltaB_data.qs"))
+pixelMAD_BC_AP <- melt(pixelMAD_BC_AP,
+                       measure.vars = c("meanAbsDevRelAbund", "meanAbsDevDeltaB"),
+                       value.name = "MAD")
 
-pixelRelB_AP <- qread(file.path(outputPath(validSimListaltParameters), "figures", "PixelComparisons_relB_data.qs"))
-pixelDeltaB_AP <- qread(file.path(outputPath(validSimListaltParameters), "figures", "PixelComparisons_deltaB_data.qs"))
+## bind to keep all factor levels for colours
+landPixelMAD_BC_AP <- rbindlist(list("landscape" = landscapeMAD_BC_AP,
+                                     "pixel" = pixelMAD_BC_AP), fill = TRUE,
+                                idcol = "level")
 
-## for MAD its the GG output
-landscapeMAD_AP <- qread(file.path(outputPath(validSimListaltParameters), "figures", "landscapeMAD_gg.qs"))
-pixelMAD_AP <- qread(file.path(outputPath(validSimListaltParameters), "figures", "pixelMAD_gg.qs"))
+landPixelMAD_BC_AP[, variableFacet := factor(variable,
+                                             levels = unique(variable),
+                                             labels = c("frac('species B', 'total/pixel B')",
+                                                        "paste('No. of pixels')",
+                                                        "paste('No. of pixels ')",
+                                                        "g/m^2"))]
 
+speciesLabels <- validSimListbaseCase@.envir$.mods$Biomass_validationKNN$.objects$speciesLabels
+MADLabels <- list("meanAbsDevRelAbund" = "rel. abundance",
+                  "meanAbsDevCount" = "presences",
+                  "meanAbsDevCountDom" = "dominance",
+                  "meanAbsDevDeltaB" = bquote(paste(Delta, B)))
 
+cols <- c("speciesCode", "relAbund", "dataType", "year", "simulation")
+plotLandRelB_BC_AP <- ggplot(na.omit(landscapeVars_BC_AP[dataType == "simulated", ..cols]),
+                             aes(x = speciesCode, y = relAbund, fill = simulation)) +
+  stat_summary(fun = "mean", geom = "bar", position = "dodge") +
+  stat_summary(fun.data = "mean_sd", geom = "linerange", size = 1) +
+  stat_summary(data = na.omit(landscapeVars_BC_AP[dataType == "observed", ..cols]),
+               aes(x = speciesCode, y = relAbund, colour = "observed"),
+               fun = "mean", geom = "point", size = 2) +
+  scale_fill_brewer(palette = "Paired", labels = c("aBC" = "base case", "bAP" = "alternative param.")) +
+  scale_x_discrete(labels = speciesLabels) +
+  scale_color_manual(values = c("observed" = "red3")) +
+  scale_y_continuous(limits = c(0,1)) +
+  plotTheme(base_size = 12, margin = FALSE, x.text.angle = 45, legend = "bottom") +
+  facet_grid(~ year) +
+  labs(title = "Species relative abundances",
+       x = "", y = expression(over("species B", "total B")),
+       colour = "", fill = "") +
+  guides(fill = guide_legend(override.aes = list(colour = "transparent")))
 
+cols <- c("speciesCode", "count", "dataType", "year", "simulation")
+plotLandPres_BC_AP <- ggplot(na.omit(landscapeVars_BC_AP[dataType == "simulated", ..cols]),
+                             aes(x = speciesCode, y = count, fill = simulation)) +
+  stat_summary(fun = "mean", geom = "bar", position = "dodge") +
+  stat_summary(fun.data = "mean_sd", geom = "linerange", size = 1) +
+  stat_summary(data = na.omit(landscapeVars_BC_AP[dataType == "observed", ..cols]),
+               aes(x = speciesCode, y = count, colour = "observed"),
+               fun = "mean", geom = "point", size = 2) +
+  scale_fill_brewer(palette = "Paired", labels = c("aBC" = "base case", "bAP" = "alternative param.")) +
+  scale_x_discrete(labels = speciesLabels) +
+  scale_color_manual(values = c("observed" = "red3")) +
+  plotTheme(base_size = 12, margin = FALSE, x.text.angle = 45, legend = "bottom") +
+  facet_grid(~ year) +
+  labs(title = "Species' presences",
+       x = "", y = "No. of pixels",
+       colour = "", fill = "") +
+  guides(fill = guide_legend(override.aes = list(colour = "transparent")))
 
+cols <- c("speciesCode", "deltaB", "dataType", "simulation", "rep")
+plotLandDeltaB_BC_AP <- ggplot(na.omit(landscapeVars_BC_AP[dataType == "simulated", ..cols]),
+                               aes(x = speciesCode, y = deltaB, fill = simulation)) +
+  stat_summary(fun = "mean", geom = "bar", position = "dodge") +
+  stat_summary(fun.data = "mean_sd", geom = "linerange", size = 1) +
+  stat_summary(data = na.omit(landscapeVars_BC_AP[dataType == "observed", ..cols]),
+               aes(x = speciesCode, y = deltaB, colour = "observed"),
+               fun = "mean", geom = "point", size = 2) +
+  scale_fill_brewer(palette = "Paired", labels = c("aBC" = "base case", "bAP" = "alternative param.")) +
+  scale_x_discrete(labels = speciesLabels, drop = TRUE) +
+  scale_color_manual(values = c("observed" = "red3")) +
+  plotTheme(base_size = 12, margin = FALSE, x.text.angle = 45, legend = "bottom") +
+  labs(title = expression(paste("Changes in biomass (", Delta, "B)")),
+       x = "", y = expression(g/m^2),
+       colour = "", fill = "") +
+  guides(fill = guide_legend(override.aes = list(colour = "transparent")))
+
+plotLandMAD_BC_AP <- ggplot(landPixelMAD_BC_AP[level == "landscape"],
+                            aes(x = speciesCode, y = MAD, colour = variable, alpha = simulation)) +
+  stat_summary(fun.data = "mean_sdl", position = position_dodge(width = 0.5),
+               size = 0.4) +
+  scale_x_discrete(labels = speciesLabels) +
+  scale_y_continuous(breaks = scales::extended_breaks(n = 5)) +
+  scale_color_brewer(palette = "Dark2", labels = MADLabels) +
+  scale_alpha_manual(values = c("aBC" = 0.6, "bAP" = 1.0),
+                     labels = c("aBC" = "base case", "bAP" = "alternative param.")) +
+  plotTheme(base_size = 12, legend = "top", x.text.angle = 45) +
+  labs(title = "Mean absolute deviation",
+       colour = "", x = "", y = "", alpha = "") +
+  theme(strip.placement = "outside", strip.switch.pad.wrap = unit(0, "cm"),
+        strip.background = element_blank(), legend.position = "bottom") +
+  facet_wrap(~ variableFacet, ncol = 1, scales = "free_y",
+             labeller = label_parsed,
+             strip.position = "left")
+
+cols <- c("speciesCode", "relAbund", "year", "dataType2", "simulation", "rep")
+plotPixelRelB_BC_AP <- ggplot() +
+  geom_boxplot(data = na.omit(pixelVars_BC_AP[, ..cols]),
+               aes(x = speciesCode, y = relAbund, fill = dataType2,
+                   alpha = speciesCode == "pixel")) +
+  scale_x_discrete(labels = c(speciesLabels, "pixel" = "pixel")) +
+  scale_alpha_manual(values = c("TRUE" = 0.3, "FALSE" = 1.0), guide = "none") +
+  scale_fill_brewer(palette = "Paired",
+                    labels = c("aBC" = "base case", "bAP" = "alternative param.", "observed" = "observed")) +
+  plotTheme(base_size = 12, margin = FALSE, x.text.angle = 45, legend = "bottom") +
+  facet_grid(~ year) +
+  labs(title = "Species relative abundances",
+       x = "", y = expression(over("species B", "pixel B")),
+       colour = "", fill = "")
+
+cols <- c("speciesCode", "deltaB", "dataType2", "simulation", "rep")
+plotPixelDeltaB_BC_AP <- ggplot() +
+  geom_boxplot(data = na.omit(pixelVars_BC_AP[, ..cols]),
+               aes(x = speciesCode, y = deltaB, fill = dataType2,
+                   alpha = speciesCode == "pixel")) +
+  scale_x_discrete(labels = c(speciesLabels, "pixel" = "pixel")) +
+  scale_alpha_manual(values = c("TRUE" = 0.3, "FALSE" = 1.0), guide = "none") +
+  scale_fill_brewer(palette = "Paired",
+                    labels = c("aBC" = "base case", "bAP" = "alternative param.", "observed" = "observed")) +
+  plotTheme(base_size = 12, margin = FALSE, x.text.angle = 45, legend = "bottom") +
+  labs(title = expression(paste("Changes in biomass (", Delta, "B)")),
+       x = "", y = expression(g/m^2),
+       colour = "", fill = "")
+
+plotPixelMAD_BC_AP <- ggplot(landPixelMAD_BC_AP[level == "pixel"],
+                             aes(x = speciesCode, y = MAD, colour = variable, alpha = simulation)) +
+  stat_summary(fun.data = "mean_sdl", position = position_dodge(width = 0.5),
+               size = 0.4) +
+  scale_x_discrete(labels = speciesLabels) +
+  scale_y_continuous(breaks = scales::extended_breaks(n = 5)) +
+  scale_color_brewer(palette = "Dark2", labels = MADLabels, drop = FALSE) +
+  scale_alpha_manual(values = c("aBC" = 0.6, "bAP" = 1.0),
+                     labels = c("aBC" = "base case", "bAP" = "alternative param.")) +
+  plotTheme(base_size = 12, legend = "top", x.text.angle = 45) +
+  labs(title = "Mean absolute deviation",
+       colour = "", y = "", x = "", alpha = "") +
+  theme(strip.placement = "outside", strip.switch.pad.wrap = unit(0, "cm"),
+        strip.background = element_blank(), legend.position = "bottom") +
+  facet_wrap(~ variableFacet, ncol = 1, scales = "free_y",
+             labeller = label_parsed,
+             strip.position = "left")
+
+## make a plot with all plots
+allPlotsValid_BC_AP <- plot_grid(
+  plot_grid(
+    plot_grid(plotLandRelB_BC_AP + theme(legend.position = "none", text = element_text(size = 10)),
+              plotLandPres_BC_AP + theme(legend.position = "none", text = element_text(size = 10)),
+              plotLandDeltaB_BC_AP + theme(legend.position = "none", text = element_text(size = 10)),
+              NULL,
+              get_legend(plotLandRelB_BC_AP),
+              rel_heights = c(1, 1, 1, -0.05, 0.1), ncol = 1, align = "v", axis = "l"),
+    plot_grid(plotPixelRelB_BC_AP + theme(legend.position = "none", text = element_text(size = 10)),
+              plotPixelDeltaB_BC_AP + theme(legend.position = "none", text = element_text(size = 10)),
+              NULL,
+              get_legend(plotPixelRelB_BC_AP),
+              rel_heights = c(1, 1, -0.05, 0.1), ncol = 1, align = "v", axis = "l"),
+    ncol = 2, align = "h", axis = "b",
+    labels = c("a)", "b)")
+  ),
+  NULL,
+  plot_grid(
+    plotLandMAD_BC_AP + theme(legend.position = "none", text = element_text(size = 10)),
+    plotPixelMAD_BC_AP + theme(legend.position = "none", text = element_text(size = 10)),
+    ncol = 2, align = "h", axis = "b"),
+  NULL,
+  get_legend(plotLandMAD_BC_AP),
+  rel_heights = c(1, 0.03, 0.5, -0.05, 0.1),
+  ncol = 1, align = "v", axis = "l")
+
+ggsave(plot = allPlotsValid_BC_AP, filename = file.path(figDir, "validationPlots_example2.png"),
+       bg = "white", height = 280, width = 220, dpi = 300, units = "mm")
