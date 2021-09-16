@@ -33,5 +33,9 @@ install.packages("devtools")
 git clone --recurse-submodules -j8 https://github.com/PredictiveEcology/LandWeb
 ```
 
+4. Run simulations
+* follow R/SpaDES/global.Rmd to learn how to run a simulation
+* run R/SpaDES/global.R to reproduce all the scenario simulations (with replication) used in the publication
+
 ## Reporting bugs
 Contact us via the package GitHub site: https://github.com/CeresBarros/LandRBiomass_publication/issues
