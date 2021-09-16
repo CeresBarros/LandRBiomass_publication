@@ -10,10 +10,11 @@ editor_options:
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE, eval = interactive(), results = "hold") ## TODO: set 'eval = TRUE'
+isInteractive <- interactive()
+knitr::opts_chunk$set(echo = TRUE, eval = isInteractive, results = "hold") ## TODO: set 'eval = TRUE'
 ```
 
-```{r init}
+```{r init, eval = TRUE}
 library(Require)
 Require(c(
   "data.table", "dplyr", "ggplot2",
@@ -35,7 +36,7 @@ eventCaching <- c(".inputObjects", "init")
 useParallel <- FALSE
 
 ## paths
-simDirName <- "test"
+simDirName <- "sep2021Runs"
 simPaths <- list(cachePath = file.path("R/SpaDES/cache", simDirName)
                  , modulePath = file.path("R/SpaDES/m")
                  , inputPath = file.path("R/SpaDES/inputs")
@@ -186,12 +187,17 @@ LandRBiomass_simInit <- Cache(simInitAndSpades
                               , .plotInitialTime = NA
                               , userTags = "simInitAndInits"
                               , omitArgs = c("userTags", ".plotInitialTime"))
-
-# look at the model structure and object exchange
-objectDiagram(LandRBiomass_simInit, width = 1000, height = 2500)
-
 ## save the simList
 saveSimList(LandRBiomass_simInit, file.path(simPaths$outputPath, paste0("simInit", runName)))
+```
+
+```{r loadSimInit, include=FALSE, eval = !isInteractive}
+LandRBiomass_simInit <- loadSimList(file.path("GitHubActionsSims", simDirName, runName, paste0("simInitbaseCase", runName)))
+```
+
+```{r objDiagram}
+# look at the model structure and object exchange
+objectDiagram(LandRBiomass_simInit, width = 1000, height = 2500)
 ```
 
 ## Run simulation
@@ -202,9 +208,13 @@ Here we run just one repetition
 LandRBiomass_sim <- spades(LandRBiomass_simInit, .plotInitialTime = simTimes$start)
 ```
 
+```{r loadSimulation, include=FALSE, eval = !isInteractive}
+LandRBiomass_sim <- qs::qread(file.path("GitHubActionsSims", simDirName, runName, paste0("simList_LandRBiomass_sim_", runName)))
+```
+
 If we were to run several repetitions, this would be how:
 
-```{r runExperiment, eval = FALSE}
+```{r runExperiment}
 library(future)
 plan("multiprocess", workers = 1)   ## each worker consumes roughly 10Gb
 LandRBiomass_sim <- experiment2(
@@ -217,7 +227,7 @@ LandRBiomass_sim <- experiment2(
 
 We can use the `simList` objects to plot simulation objects, such as the input layers used for parameterisation.
 
-```{r plots, fig.show = "hold"}
+```{r plots, fig.show = "hold", eval = TRUE}
 ## study area within Saskatchewan province
 ## get Canadian provinces and subset to SK
 can1 <- raster::getData('GADM', country = "CAN", level = 1, path = tempdir())
@@ -264,7 +274,7 @@ LandRBiomass_simInit$speciesEcoregion
 
 For example, these were the (spatially) invariant species traits used in the simulation:
 
-```{r speciesTraitsShow, echo=FALSE}
+```{r speciesTraitsShow, echo=FALSE, eval = TRUE}
 kable(LandRBiomass_simInit$species, caption = "Invariant species traits")
 ```
 
