@@ -17,10 +17,10 @@ knitr::opts_chunk$set(echo = TRUE, eval = isInteractive, results = "hold") ## TO
 ```{r init, eval = TRUE}
 library(Require)
 Require(c(
-  "data.table", "dplyr", "ggplot2",
+  "data.table", "dplyr", "ggplot2", "ggspatial",
   "quickPlot", "raster", "sp", "SpaDES",
   "PredictiveEcology/SpaDES.experiment",
-  "PredictiveEcology/LandR",
+  "PredictiveEcology/LandR"
 ))
 
 options("reproducible.useNewDigestAlgorith" = 2)
@@ -192,7 +192,7 @@ saveSimList(LandRBiomass_simInit, file.path(simPaths$outputPath, paste0("simInit
 ```
 
 ```{r loadSimInit, include=FALSE, eval = !isInteractive}
-LandRBiomass_simInit <- loadSimList(file.path("GitHubActionsSims", simDirName, runName, paste0("simInitbaseCase", runName)))
+LandRBiomass_simInit <- loadSimList(file.path("GitHubActionsSims", simDirName, runName, paste0("simInit", runName)))
 ```
 
 ```{r objDiagram}
