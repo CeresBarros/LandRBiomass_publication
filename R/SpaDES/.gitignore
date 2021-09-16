@@ -12,6 +12,9 @@ m/*/cache
 m/*/*.zip
 *.R.save
 *.swp
+global_cache
+global_files
+global.md
 
 testBadCache.R
 

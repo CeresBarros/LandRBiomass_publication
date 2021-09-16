@@ -11,14 +11,16 @@ editor_options:
 
 
 
+## Package setup
+
 
 ```r
 library(Require)
 Require(c(
-  "data.table", "dplyr", "ggplot2",
+  "data.table", "dplyr", "ggplot2", "ggspatial",
   "quickPlot", "raster", "sp", "SpaDES",
   "PredictiveEcology/SpaDES.experiment",
-  "PredictiveEcology/LandR",
+  "PredictiveEcology/LandR"
 ))
 
 options("reproducible.useNewDigestAlgorith" = 2)
@@ -29,12 +31,12 @@ options("reproducible.destinationPath" = file.path("R/SpaDES/inputs"))
 options("reproducible.useGDAL" = FALSE)
 
 ## set run name and paths
-runName <- "parametriseSALarge"
+runName <- "baseCase"
 eventCaching <- c(".inputObjects", "init")
 useParallel <- FALSE
 
 ## paths
-simDirName <- "test"
+simDirName <- "sep2021Runs"
 simPaths <- list(cachePath = file.path("R/SpaDES/cache", simDirName)
                  , modulePath = file.path("R/SpaDES/m")
                  , inputPath = file.path("R/SpaDES/inputs")
@@ -68,6 +70,8 @@ toRm <- which(names(simOutSpeciesLayers$speciesLayers) %in% c("Popu_Gra"))
 simOutSpeciesLayers$speciesLayers <- dropLayer(simOutSpeciesLayers$speciesLayers, i = toRm)
 rm(toRm)
 ```
+
+
 
 ## Simulation setup - part 3 - module parameters and outputs
 
@@ -156,12 +160,6 @@ simOutputs <- rbind(simOutputs, data.frame(objectName = "pixelGroupMap",
 simOutputs <- rbind(simOutputs, data.frame(objectName = "biomassMap",
                                            saveTime = simTimes$start,
                                            eventPriority = 1))
-simOutputs <- rbind(simOutputs, data.frame(objectName = "speciesEcoregion",
-                                           saveTime = simTimes$start,
-                                           eventPriority = 1))
-simOutputs <- rbind(simOutputs, data.frame(objectName = "species",
-                                           saveTime = simTimes$start,
-                                           eventPriority = 1))
 
 ## in the first year, eventPriorities need to be set to AFTER the init event (which has priority 1)
 simOutputs$eventPriority[simOutputs$saveTime == simTimes$start] <- 1.5
@@ -194,9 +192,16 @@ LandRBiomass_simInit <- Cache(simInitAndSpades
                               , .plotInitialTime = NA
                               , userTags = "simInitAndInits"
                               , omitArgs = c("userTags", ".plotInitialTime"))
-
 ## save the simList
 saveSimList(LandRBiomass_simInit, file.path(simPaths$outputPath, paste0("simInit", runName)))
+```
+
+
+
+
+```r
+# look at the model structure and object exchange
+objectDiagram(LandRBiomass_simInit, width = 1000, height = 2500)
 ```
 
 ## Run simulation
@@ -207,6 +212,8 @@ Here we run just one repetition
 ```r
 LandRBiomass_sim <- spades(LandRBiomass_simInit, .plotInitialTime = simTimes$start)
 ```
+
+
 
 If we were to run several repetitions, this would be how:
 
@@ -239,15 +246,20 @@ plotStudyAreas <- ggplot() +
   labs(fill = "") +
   theme_void()
 
-clearPlot(force = TRUE)
-Plot(plotStudyAreas, title = " ")
 
-## input stand biomass and age, ecological zonation (ecodistricts) and land-cover (LCC 2005)
 plotEcodist <- ggplot() +
   layer_spatial(LandRBiomass_simInit$ecoregionLayer, aes(fill = as.factor(ECODISTRIC))) + 
   labs(fill = "") +
   theme_void()
+```
 
+
+```r
+## study area within Saskatchewan province
+clearPlot(force = TRUE)
+Plot(plotStudyAreas, title = " ")
+
+## input stand biomass and age, ecological zonation (ecodistricts) and land-cover (LCC 2005)
 clearPlot(force = TRUE)
 Plot(LandRBiomass_simInit$rawBiomassMap,
      LandRBiomass_simInit$standAgeMap, 
@@ -260,6 +272,10 @@ clearPlot(force = TRUE)
 Plot(simOutSpeciesLayers$speciesLayers,
      title = names(simOutSpeciesLayers$speciesLayers))
 ```
+
+![](global_files/figure-html/plots2-1.png)<!-- -->![](global_files/figure-html/plots2-2.png)<!-- -->![](global_files/figure-html/plots2-3.png)<!-- -->![](global_files/figure-html/plots2-4.png)<!-- -->
+
+
 
 Similarly, we can have a look at the species traits values used in the simulation directly from the `simList` object (although we also chose to save them).
 
@@ -274,6 +290,16 @@ LandRBiomass_simInit$speciesEcoregion
 For example, these were the (spatially) invariant species traits used in the simulation:
 
 
+Table: Invariant species traits
+
+|species  |Area | longevity| sexualmature| shadetolerance| firetolerance| seeddistance_eff| seeddistance_max| resproutprob| resproutage_min| resproutage_max|postfireregen | leaflongevity| wooddecayrate| mortalityshape| growthcurve| leafLignin|hardsoft |speciesCode | mANPPproportion| inflationFactor|
+|:--------|:----|---------:|------------:|--------------:|-------------:|----------------:|----------------:|------------:|---------------:|---------------:|:-------------|-------------:|-------------:|--------------:|-----------:|----------:|:--------|:-----------|---------------:|---------------:|
+|Betu_Pap |BP   |       140|           20|            1.0|             1|              200|             5000|          0.5|              10|              70|resprout      |             1|          0.07|             15|         0.5|        0.1|hard     |Betu_Pap    |            5.00|        1.115822|
+|Lari_Lar |BP   |       350|           40|            1.0|             1|               50|              200|          0.0|               0|               0|none          |             1|          0.02|             25|         0.0|        0.2|soft     |Lari_Lar    |            3.33|        1.000000|
+|Pice_Gla |BP   |       400|           30|            2.0|             2|              100|              303|          0.0|               0|               0|none          |             3|          0.02|             15|         0.5|        0.2|soft     |Pice_Gla    |            3.25|        1.042535|
+|Pice_Mar |BP   |       250|           30|            3.0|             2|               80|              200|          0.0|               0|               0|serotiny      |             3|          0.02|             15|         0.5|        0.2|soft     |Pice_Mar    |            4.25|        1.060445|
+|Pinu_Ban |BP   |       150|           20|            1.5|             2|               30|              100|          0.0|               0|               0|serotiny      |             2|          0.01|             15|         0.5|        0.2|soft     |Pinu_Ban    |            2.75|        1.355014|
+|Popu_Spp |BP   |       200|           20|            1.0|             2|             1000|             5000|          0.9|              10|             130|resprout      |             1|          0.07|             25|         0.5|        0.1|hard     |Popu_Spp    |            2.00|        1.261034|
 
 # Validation
 
@@ -286,16 +312,6 @@ We begin by preparing all the inputs necessary for the `Biomass_validationKNN` m
 ## get the  land-cover change map (needed to have an RTM first, so get it from the simInitList)
 ## /!\ it is assumed that the filename of the raster in the simList corresponds to the raster found in disk.
 ## this may not be the case if the simulations were run in another machine and saved rasters were not imported.
-
-## make objects again in case only this part of the script is being run:
-if (!exists("simDirName"))
-  simDirName <- "test"
-
-if (!exists("simPaths"))
-  simPaths <- list(cachePath = file.path("R/SpaDES/cache", simDirName)
-                   , modulePath = file.path("R/SpaDES/m")
-                   , inputPath = file.path("R/SpaDES/inputs")
-                   , outputPath = file.path("R/SpaDES/outputs", simDirName))
 
 validationPaths <- list(cachePath = file.path("R/SpaDES/cache", simDirName)
                         , modulePath = file.path("R/SpaDES/m")

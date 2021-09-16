@@ -11,10 +11,13 @@ editor_options:
 
 ```{r setup, include=FALSE}
 isInteractive <- interactive()
-knitr::opts_chunk$set(echo = TRUE, eval = isInteractive, results = "hold") ## TODO: set 'eval = TRUE'
+knitr::opts_chunk$set(echo = TRUE, eval = isInteractive, results = "hold",
+                      cache = 2) ## TODO: set 'eval = TRUE'
 ```
 
-```{r init, eval = TRUE}
+## Package setup
+
+```{r init, eval = TRUE, results = FALSE}
 library(Require)
 Require(c(
   "data.table", "dplyr", "ggplot2", "ggspatial",
@@ -67,6 +70,10 @@ source("R/SpaDES/2_speciesLayers.R")
 toRm <- which(names(simOutSpeciesLayers$speciesLayers) %in% c("Popu_Gra"))
 simOutSpeciesLayers$speciesLayers <- dropLayer(simOutSpeciesLayers$speciesLayers, i = toRm)
 rm(toRm)
+```
+
+```{r loadSppLayers, include=FALSE, eval = !isInteractive}
+simOutSpeciesLayers <- qs::qread(file.path("GitHubActionsSims", simDirName, runName, paste0("simList_speciesLayers", runName)))
 ```
 
 ## Simulation setup - part 3 - module parameters and outputs
@@ -191,7 +198,7 @@ LandRBiomass_simInit <- Cache(simInitAndSpades
 saveSimList(LandRBiomass_simInit, file.path(simPaths$outputPath, paste0("simInit", runName)))
 ```
 
-```{r loadSimInit, include=FALSE, eval = !isInteractive}
+```{r loadSimInit, include=FALSE, eval = !isInteractive, cache = FALSE}
 LandRBiomass_simInit <- loadSimList(file.path("GitHubActionsSims", simDirName, runName, paste0("simInit", runName)))
 ```
 
@@ -227,7 +234,7 @@ LandRBiomass_sim <- experiment2(
 
 We can use the `simList` objects to plot simulation objects, such as the input layers used for parameterisation.
 
-```{r plots, fig.show = "hold", eval = TRUE}
+```{r plotData, fig.show = "hold", eval = TRUE}
 ## study area within Saskatchewan province
 ## get Canadian provinces and subset to SK
 can1 <- raster::getData('GADM', country = "CAN", level = 1, path = tempdir())
@@ -241,15 +248,19 @@ plotStudyAreas <- ggplot() +
   labs(fill = "") +
   theme_void()
 
-clearPlot(force = TRUE)
-Plot(plotStudyAreas, title = " ")
 
-## input stand biomass and age, ecological zonation (ecodistricts) and land-cover (LCC 2005)
 plotEcodist <- ggplot() +
   layer_spatial(LandRBiomass_simInit$ecoregionLayer, aes(fill = as.factor(ECODISTRIC))) + 
   labs(fill = "") +
   theme_void()
+```
 
+```{r plots, fig.show = "hold"}
+## study area within Saskatchewan province
+clearPlot(force = TRUE)
+Plot(plotStudyAreas, title = " ")
+
+## input stand biomass and age, ecological zonation (ecodistricts) and land-cover (LCC 2005)
 clearPlot(force = TRUE)
 Plot(LandRBiomass_simInit$rawBiomassMap,
      LandRBiomass_simInit$standAgeMap, 
@@ -263,6 +274,28 @@ Plot(simOutSpeciesLayers$speciesLayers,
      title = names(simOutSpeciesLayers$speciesLayers))
 ```
 
+```{r plots2, fig.show = 'asis', eval = !isInteractive, echo = FALSE}
+plot(plotStudyAreas, main = " ")
+
+## input stand biomass and age, ecological zonation (ecodistricts) and land-cover (LCC 2005)
+plotEcodist <- ggplot() +
+  layer_spatial(LandRBiomass_simInit$ecoregionLayer, aes(fill = as.factor(ECODISTRIC))) + 
+  labs(fill = "") +
+  theme_void()
+
+plot(stack(LandRBiomass_simInit$rawBiomassMap,
+     LandRBiomass_simInit$standAgeMap, 
+     LandRBiomass_simInit$rstLCC),
+     main = c("kNN stand biomass - kNN stand age - land-cover"))
+
+plot(plotEcodist, main = "ecolocations")
+## species % cover
+plot(simOutSpeciesLayers$speciesLayers,
+     main = paste(names(simOutSpeciesLayers$speciesLayers), collapse = ", "))
+```
+
+
+
 Similarly, we can have a look at the species traits values used in the simulation directly from the `simList` object (although we also chose to save them).
 
 ```{r speciesTraits, eval=FALSE}
@@ -275,7 +308,7 @@ LandRBiomass_simInit$speciesEcoregion
 For example, these were the (spatially) invariant species traits used in the simulation:
 
 ```{r speciesTraitsShow, echo=FALSE, eval = TRUE}
-kable(LandRBiomass_simInit$species, caption = "Invariant species traits")
+knitr::kable(LandRBiomass_simInit$species, caption = "Invariant species traits")
 ```
 
 # Validation
