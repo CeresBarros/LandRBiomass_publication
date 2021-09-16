@@ -45,9 +45,10 @@ plotTheme <- function(majorYlines = TRUE, ...) {
 }
 
 ## ELAPSED TIMES ----------------------------------
-elapsedTime(speciesLayersSimListbaseCase)
-elapsedTime(speciesLayersSimListstudyAreaChange)
-elapsedTime(speciesLayersSimListaltParameters)
+## in minutes
+sum(as.numeric(elapsedTime(speciesLayersSimListbaseCase)$elapsedTime))/60
+sum(as.numeric(elapsedTime(speciesLayersSimListstudyAreaChange)$elapsedTime))/60
+sum(as.numeric(elapsedTime(speciesLayersSimListaltParameters)$elapsedTime))/60
 
 elapsedTime(preSimListbaseCase)
 elapsedTime(preSimListstudyAreaChange)
