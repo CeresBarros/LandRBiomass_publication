@@ -289,16 +289,6 @@ We begin by preparing all the inputs necessary for the `Biomass_validationKNN` m
 ## /!\ it is assumed that the filename of the raster in the simList corresponds to the raster found in disk.
 ## this may not be the case if the simulations were run in another machine and saved rasters were not imported.
 
-## make objects again in case only this part of the script is being run:
-if (!exists("simDirName"))
-  simDirName <- "test"
-
-if (!exists("simPaths"))
-  simPaths <- list(cachePath = file.path("R/SpaDES/cache", simDirName)
-                   , modulePath = file.path("R/SpaDES/m")
-                   , inputPath = file.path("R/SpaDES/inputs")
-                   , outputPath = file.path("R/SpaDES/outputs", simDirName))
-
 validationPaths <- list(cachePath = file.path("R/SpaDES/cache", simDirName)
                         , modulePath = file.path("R/SpaDES/m")
                         , inputPath = file.path("R/SpaDES/inputs")
