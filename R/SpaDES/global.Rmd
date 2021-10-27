@@ -15,16 +15,49 @@ knitr::opts_chunk$set(echo = TRUE, eval = isInteractive, results = "hold",
                       cache = 2) ## TODO: set 'eval = TRUE'
 ```
 
-## Package setup
+## Package installation
+```{pkgInstall}
+if (!exists("pkgDir")) {
+  pkgDir <- file.path("packages", version$platform,
+                      paste0(version$major, ".", strsplit(version$minor, "[.]")[[1]][1]))
 
+  if (!dir.exists(pkgDir)) {
+    dir.create(pkgDir, recursive = TRUE)
+  }
+  .libPaths(pkgDir)
+}
+
+if (!require("devtools")) {
+  install.packages("devtools", lib = pkgDir)
+}
+
+if (!require("Require")) {
+  install.packages("Require", lib = pkgDir)
+  library(Require)
+}
+
+if (!require("SpaDES")) {
+  install.packages("SpaDES", dependencies = TRUE, lib = pkgDir)
+}
+
+devtools::install_github("PredictiveEcology/SpaDES.core@8a7886a6afd7f3b90df10ea6b87caae8661f8709")
+devtools::install_github("PredictiveEcology/LandR@093c39898912a6e89ac9b6e862733052a0fae407")
+devtools::install_github("ianmseddy/LandR.CS@b39c8c72d20189fa6b6aeb057cdc751a631e0efa")
+devtools::install_github("PredictiveEcology/reproducible@aedea49637a6ebd0db6897f1d33f53959f41bee2")
+devtools::install_github("PredictiveEcology/SpaDES.install@80c43dcb94d897d25545105a7b83111cf634a556")
+devtools::install_github("PredictiveEcology/SpaDES.experiment@5a23c40f8aa9a9efc6dc16e040f8771561059152")
+
+out <- SpaDES.install::makeSureAllPackagesInstalled(modulePath = "R/SpaDES/m")
+```
+
+## Package setup
 ```{r init, eval = TRUE, results = FALSE}
 library(Require)
-Require(c(
-  "data.table", "dplyr", "ggplot2", "ggspatial",
-  "quickPlot", "raster", "sp", "SpaDES",
-  "PredictiveEcology/SpaDES.experiment",
-  "PredictiveEcology/LandR"
-))
+Require(c("SpaDES",
+          "raster", "dplyr", "data.table", "future",
+          "PredictiveEcology/SpaDES.experiment",
+          "PredictiveEcology/LandR@development (>= 1.0.5.9003)",
+          "PredictiveEcology/reproducible (>= 1.2.7.9011)"), upgrade = FALSE)
 
 options("reproducible.useNewDigestAlgorith" = 2)
 options("spades.moduleCodeChecks" = FALSE)
