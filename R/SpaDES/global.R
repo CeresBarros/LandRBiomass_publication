@@ -64,7 +64,7 @@ options("reproducible.inputPaths" = file.path("R/SpaDES/inputs"))  ## store ever
 options("reproducible.destinationPath" = file.path("R/SpaDES/inputs"))
 options("reproducible.useGDAL" = FALSE)
 
-eventCaching <- c(".inputObjects", "init")[1]
+eventCaching <- c(".inputObjects", "init")
 useParallel <- FALSE
 
 ## use studyAreaS or L to parameterise AND run simualations in the SAME area
