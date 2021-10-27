@@ -9,6 +9,9 @@ editor_options:
   chunk_output_type: console
 ---
 
+# A simplified example of publication runs
+For full code used in publication see `global.R`
+
 ```{r setup, include=FALSE}
 isInteractive <- interactive()
 knitr::opts_chunk$set(echo = TRUE, eval = isInteractive, results = "hold",
