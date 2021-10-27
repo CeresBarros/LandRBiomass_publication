@@ -106,10 +106,17 @@ source("R/SpaDES/2_speciesLayers.R")
 toRm <- which(names(simOutSpeciesLayers$speciesLayers) %in% c("Popu_Gra"))
 simOutSpeciesLayers$speciesLayers <- dropLayer(simOutSpeciesLayers$speciesLayers, i = toRm)
 rm(toRm)
+
+## subset sppEquivalencies
+sppEquivalencies_CA <- sppEquivalencies_CA[Boreal %in% names(simOutSpeciesLayers$speciesLayers)]
 ```
 
 ```{r loadSppLayers, include=FALSE, eval = !isInteractive}
 simOutSpeciesLayers <- qs::qread(file.path("GitHubActionsSims", simDirName, runName, paste0("simList_speciesLayers", runName)))
+
+## subset sppEquivalencies
+sppEquivalencies_CA <- sppEquivalencies_CA[Boreal %in% names(simOutSpeciesLayers$speciesLayers)]
+
 ```
 
 ## Simulation setup - part 3 - module parameters and outputs
@@ -148,11 +155,10 @@ simParams <- list(
     , "fitDeciduousCoverDiscount" = TRUE
     , "subsetDataAgeModel" = FALSE
     , "subsetDataBiomassModel" = FALSE
-    , "biomassModel" =  quote(lme4::lmer(B ~ logAge * speciesCode + cover * speciesCode +
-                                           (logAge + cover | ecoregionGroup)))
     , "exportModels" = "all"
     , "fixModelBiomass" = TRUE
-    ,"speciesUpdateFunction" = list(
+    , "speciesTableAreas" = c("BSW", "BP")
+    , "speciesUpdateFunction" = list(
       quote(LandR::speciesTableUpdate(sim$species, sim$speciesTable, sim$sppEquiv, P(sim)$sppEquivCol)),
       quote(LandR::updateSpeciesTable(speciesTable = sim$species, params = sim$speciesParams)))
     # next two are used when assigning pixelGroup membership; what resolution for
@@ -161,31 +167,31 @@ simParams <- list(
     , "pixelGroupBiomassClass" = 100
     , "useCloudCacheForStats" = FALSE
     , "cloudFolderID" = NA
+    , ".plots" = c("object", "raw")
     , ".useCache" = eventCaching
   )
   , Biomass_speciesParameters = list(
-    "sppEquivCol" = sppEquivCol
+    "quantileAgeSubset" = list(Betu_Pap = 95, Lari_Lar = 95, Pice_Gla = 95, Pice_Mar = 95, Pinu_Ban = 99, Popu_Spp = 99)
+    , "sppEquivCol" = sppEquivCol
     , ".useCache" = eventCaching
   )
   , Biomass_core = list(
     "calcSummaryBGM" = c("start")
     , "initialBiomassSource" = "cohortData" 
-    , ".plotInitialTime" = simTimes$start
     , "plotOverstory" = TRUE
     , "seedingAlgorithm" = "wardDispersal"
     , "sppEquivCol" = sppEquivCol
     , "successionTimestep" = successionTimestep
     , "vegLeadingProportion" = vegLeadingProportion
-    , ".plotInterval" = 1
-    , ".plotMaps" = TRUE
+    , ".plotInitialTime" = simTimes$start
+    , ".plotInterval" = 1L
+    , ".plots" = c("object", "raw")
+    , ".plotMaps" = FALSE
     , ".saveInitialTime" = NA
-    , ".useCache" = eventCaching[1]
+    , ".useCache" = eventCaching[1] # experiment doesn't like when init is cached
     , ".useParallel" = useParallel
   )
 )
-
-## subset sppEquivalencies
-sppEquivalencies_CA <- sppEquivalencies_CA[Boreal %in% names(simOutSpeciesLayers$speciesLayers)]
 
 ## objects will be saved at the start of the simulation (so they reflect the previous year)
 simOutputs <- data.frame(expand.grid(objectName = "cohortData",
@@ -203,19 +209,17 @@ simOutputs <- rbind(simOutputs, data.frame(objectName = "biomassMap",
 simOutputs$eventPriority[simOutputs$saveTime == simTimes$start] <- 1.5
 
 simObjects <- list(
-  "sppEquiv" = sppEquivalencies_CA
+  "rstLCC" = rstLCC2005
+  , "sppEquiv" = sppEquivalencies_CA
   , "sppColorVect" = sppColorVect
   , "speciesLayers" = simOutSpeciesLayers$speciesLayers
   , "speciesParams" = speciesParams
   , "treed" = simOutSpeciesLayers$treed
   , "numTreed" = simOutSpeciesLayers$numTreed
   , "nonZeroCover" = simOutSpeciesLayers$nonZeroCover
-  , "PSPgis" = PSPgis
-  , "PSPmeasure" = PSPmeasure
-  , "PSPplot" = PSPplot
+  , "studyArea" = studyAreaS
+  , "studyAreaLarge" = studyAreaL
 )
-
-simObjects$studyAreaLarge <- studyAreaL
 
 ## make a initialisation simList and run init events too
 LandRBiomass_simInit <- Cache(simInitAndSpades
