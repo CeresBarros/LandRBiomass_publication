@@ -529,40 +529,42 @@ landscapeDeltaB <- landscapeDeltaB + labs(title = "Changes in biomass", y = expr
 pixelRelB <- pixelRelB + labs(title = "Relative abundance")
 pixelDeltaB <- pixelDeltaB + labs(title = "Changes in biomass", y = expression(g/m^2))
 
-landscapeMAD <- landscapeMAD + labs(title = "Landscape-level", y = "")
-pixelMAD <- pixelMAD + labs(title = "Pixel-level", y = "")
+## remove deltaB
+landscapeMAD$data <- landscapeMAD$data[variable != "g/m^2"]
+pixelMAD$data <- pixelMAD$data[variable != "g/m^2"]
+
+landscapeMAD <- landscapeMAD + labs(title = "Mean abs. deviation", y = "") +
+  scale_color_brewer(palette = "Dark2",
+                     labels = landscapeMAD$plot_env$collabs,
+                     drop = TRUE)
+pixelMAD <- pixelMAD + labs(title = "Mean abs. deviation", y = "") +
+  scale_color_brewer(palette = "Dark2",
+                     labels = pixelMAD$plot_env$collabs,
+                     drop = TRUE)
+
+
 
 allPlotsValid <- plot_grid(
-  plot_grid(
-    plot_grid(landscapeRelB + theme(legend.position = "none", text = element_text(size = 10)),
-              landscapePresAbs + theme(legend.position = "none", text = element_text(size = 10)),
-              landscapeDom + theme(legend.position = "none", text = element_text(size = 10)),
-              landscapeDeltaB + theme(legend.position = "none", text = element_text(size = 10)),
-              align = "v", axis = "l", ncol = 2),
-    NULL,
-    get_legend(landscapeRelB), rel_heights = c(1, -0.05, 0.1), ncol = 1
-  ),
-  NULL,
-  plot_grid(
-    plot_grid(pixelRelB + theme(legend.position = "none", text = element_text(size = 10)),
-              landscapeMAD + theme(legend.position = "none", text = element_text(size = 10)),
-              ncol = 2, labels = c("b)", "c)"),
-              align = "h", axis = "b"),
-    plot_grid(pixelDeltaB + theme(legend.position = "none", text = element_text(size = 10)),
-              pixelMAD + theme(legend.position = "none", text = element_text(size = 10)),
-              NULL, NULL,
-              get_legend(pixelDeltaB),
-              get_legend(landscapeMAD + guides(colour = guide_legend(ncol = 2))),
-              ncol = 2, rel_heights = c(1, -0.05, 0.2),
-              align = "h", axis = "b"),
-    align = "v", axis = "l", ncol = 1
-  ),
-  ncol = 1, rel_heights = c(1, 0.01, 1.25), align = "v", axis = "l",
-  labels = c("a)", "")
+  plot_grid(landscapeRelB + theme(legend.position = "none", text = element_text(size = 10)),
+            landscapeDom + theme(legend.position = "none", text = element_text(size = 10)),
+            align = "v", axis = "l", ncol = 1),
+  plot_grid(landscapePresAbs + theme(legend.position = "none", text = element_text(size = 10)),
+            landscapeMAD + theme(legend.position = "none", text = element_text(size = 10)),
+            align = "v", axis = "l", ncol = 1),
+  NULL, NULL,
+  get_legend(landscapeRelB), NULL,
+  NULL, NULL,
+  pixelRelB + theme(legend.position = "none", text = element_text(size = 10)),
+  pixelMAD + theme(legend.position = "none", text = element_text(size = 10)),
+  NULL, NULL,
+  get_legend(pixelRelB),
+  get_legend(landscapeMAD + guides(colour = guide_legend(ncol = 2))),
+  labels = c("a)", "", "", "", "", "", "", "", "b)", "", "", "", "",""),
+  rel_heights = c(1, -0.01, 0.05, 0.05, 0.5, -0.01, 0.1), ncol = 2,
 )
 
 ggsave(plot = allPlotsValid, filename = file.path(figDir, "validationPlots_studyAreaChange.png"),
-       bg = "white", height = 290, width = 210, dpi = 300, units = "mm")
+       bg = "white", height = 250, width = 210, dpi = 300, units = "mm")
 
 
 ## plots confronting Example 2 simulations
@@ -646,6 +648,24 @@ plotLandPres_BC_AP <- ggplot(na.omit(landscapeVars_BC_AP[dataType == "simulated"
        colour = "", fill = "") +
   guides(fill = guide_legend(override.aes = list(colour = "transparent")))
 
+cols <- c("speciesCode", "countDom", "dataType", "year", "simulation")
+plotLandDom_BC_AP <- ggplot(na.omit(landscapeVars_BC_AP[dataType == "simulated", ..cols]),
+                            aes(x = speciesCode, y = countDom, fill = simulation)) +
+  stat_summary(fun = "mean", geom = "bar", position = "dodge") +
+  stat_summary(fun.data = "mean_sd", geom = "linerange", size = 1) +
+  stat_summary(data = na.omit(landscapeVars_BC_AP[dataType == "observed", ..cols]),
+               aes(x = speciesCode, y = countDom, colour = "observed"),
+               fun = "mean", geom = "point", size = 2) +
+  scale_fill_brewer(palette = "Paired", labels = c("aBC" = "base case", "bAP" = "alternative param.")) +
+  scale_x_discrete(labels = speciesLabels) +
+  scale_color_manual(values = c("observed" = "red3")) +
+  plotTheme(base_size = 12, margin = FALSE, x.text.angle = 45, legend = "bottom") +
+  facet_grid(~ year) +
+  labs(title = "Species' dominance",
+       x = "", y = "No. of pixels",
+       colour = "", fill = "") +
+  guides(fill = guide_legend(override.aes = list(colour = "transparent")))
+
 cols <- c("speciesCode", "deltaB", "dataType", "simulation", "rep")
 plotLandDeltaB_BC_AP <- ggplot(na.omit(landscapeVars_BC_AP[dataType == "simulated", ..cols]),
                                aes(x = speciesCode, y = deltaB, fill = simulation)) +
@@ -663,17 +683,19 @@ plotLandDeltaB_BC_AP <- ggplot(na.omit(landscapeVars_BC_AP[dataType == "simulate
        colour = "", fill = "") +
   guides(fill = guide_legend(override.aes = list(colour = "transparent")))
 
-plotLandMAD_BC_AP <- ggplot(landPixelMAD_BC_AP[level == "landscape"],
+## exclude deltaB (and landscape level from x axis given that relative B, presence and dominance is always at the species level)
+# plotLandMAD_BC_AP <- ggplot(landPixelMAD_BC_AP[level == "landscape"],
+plotLandMAD_BC_AP <- ggplot(landPixelMAD_BC_AP[level == "landscape" & variable != "meanAbsDevDeltaB" & speciesCode != "landscape"],
                             aes(x = speciesCode, y = MAD, colour = variable, alpha = simulation)) +
   stat_summary(fun.data = "mean_sdl", position = position_dodge(width = 0.5),
                size = 0.4) +
   scale_x_discrete(labels = speciesLabels) +
   scale_y_continuous(breaks = scales::extended_breaks(n = 5)) +
-  scale_color_brewer(palette = "Dark2", labels = MADLabels) +
+  scale_color_brewer(palette = "Dark2", labels = MADLabels, drop = TRUE) +
   scale_alpha_manual(values = c("aBC" = 0.6, "bAP" = 1.0),
                      labels = c("aBC" = "base case", "bAP" = "alternative param.")) +
   plotTheme(base_size = 12, legend = "top", x.text.angle = 45) +
-  labs(title = "Mean absolute deviation",
+  labs(title = "Mean abs. deviation",
        colour = "", x = "", y = "", alpha = "") +
   theme(strip.placement = "outside", strip.switch.pad.wrap = unit(0, "cm"),
         strip.background = element_blank(), legend.position = "bottom") +
@@ -710,7 +732,9 @@ plotPixelDeltaB_BC_AP <- ggplot() +
        x = "", y = expression(g/m^2),
        colour = "", fill = "")
 
-plotPixelMAD_BC_AP <- ggplot(landPixelMAD_BC_AP[level == "pixel"],
+## exclude deltaB (and pixel level from x axis given that relative B is always at the species level)
+# plotPixelMAD_BC_AP <- ggplot(landPixelMAD_BC_AP[level == "pixel"],
+plotPixelMAD_BC_AP <- ggplot(landPixelMAD_BC_AP[level == "pixel" & variable != "meanAbsDevDeltaB" & speciesCode != "pixel"],
                              aes(x = speciesCode, y = MAD, colour = variable, alpha = simulation)) +
   stat_summary(fun.data = "mean_sdl", position = position_dodge(width = 0.5),
                size = 0.4) +
@@ -720,7 +744,7 @@ plotPixelMAD_BC_AP <- ggplot(landPixelMAD_BC_AP[level == "pixel"],
   scale_alpha_manual(values = c("aBC" = 0.6, "bAP" = 1.0),
                      labels = c("aBC" = "base case", "bAP" = "alternative param.")) +
   plotTheme(base_size = 12, legend = "top", x.text.angle = 45) +
-  labs(title = "Mean absolute deviation",
+  labs(title = "Mean abs. deviation",
        colour = "", y = "", x = "", alpha = "") +
   theme(strip.placement = "outside", strip.switch.pad.wrap = unit(0, "cm"),
         strip.background = element_blank(), legend.position = "bottom") +
@@ -729,31 +753,28 @@ plotPixelMAD_BC_AP <- ggplot(landPixelMAD_BC_AP[level == "pixel"],
              strip.position = "left")
 
 ## make a plot with all plots
+alignedPlots <- align_plots(plotLandDom_BC_AP + theme(legend.position = "none", text = element_text(size = 10)),
+                            plotLandMAD_BC_AP + theme(legend.position = "none", text = element_text(size = 10)),
+                            align = "h", axis = "b")
+
 allPlotsValid_BC_AP <- plot_grid(
-  plot_grid(
-    plot_grid(plotLandRelB_BC_AP + theme(legend.position = "none", text = element_text(size = 10)),
-              plotLandPres_BC_AP + theme(legend.position = "none", text = element_text(size = 10)),
-              plotLandDeltaB_BC_AP + theme(legend.position = "none", text = element_text(size = 10)),
-              NULL,
-              get_legend(plotLandRelB_BC_AP),
-              rel_heights = c(1, 1, 1, -0.05, 0.1), ncol = 1, align = "v", axis = "l"),
-    plot_grid(plotPixelRelB_BC_AP + theme(legend.position = "none", text = element_text(size = 10)),
-              plotPixelDeltaB_BC_AP + theme(legend.position = "none", text = element_text(size = 10)),
-              NULL,
-              get_legend(plotPixelRelB_BC_AP),
-              rel_heights = c(1, 1, -0.05, 0.1), ncol = 1, align = "v", axis = "l"),
-    ncol = 2, align = "h", axis = "b",
-    labels = c("a)", "b)")
-  ),
-  NULL,
-  plot_grid(
-    plotLandMAD_BC_AP + theme(legend.position = "none", text = element_text(size = 10)),
-    plotPixelMAD_BC_AP + theme(legend.position = "none", text = element_text(size = 10)),
-    ncol = 2, align = "h", axis = "b"),
-  NULL,
-  get_legend(plotLandMAD_BC_AP),
-  rel_heights = c(1, 0.03, 0.5, -0.05, 0.1),
-  ncol = 1, align = "v", axis = "l")
+  plotLandRelB_BC_AP + theme(legend.position = "none", text = element_text(size = 10)),
+  plotLandDom_BC_AP + theme(legend.position = "none", text = element_text(size = 10)),
+  NULL, NULL,
+  plotLandPres_BC_AP + theme(legend.position = "none", text = element_text(size = 10)),
+  plotLandMAD_BC_AP + theme(legend.position = "none", text = element_text(size = 10)),
+  NULL, NULL,
+  get_legend(plotLandRelB_BC_AP), NULL,
+  NULL, NULL,
+  plotPixelRelB_BC_AP + theme(legend.position = "none", text = element_text(size = 10)),
+  plotPixelMAD_BC_AP + theme(legend.position = "none", text = element_text(size = 10)),
+  NULL, NULL,
+  get_legend(plotPixelRelB_BC_AP), get_legend(plotLandMAD_BC_AP + theme(legend.box = "vertical", legend.margin = margin(0,0,0,0))),
+  rel_heights = c(0.9, -0.05, 0.9, -0.05, 0.1, 0.05, 0.9, -0.01, 0.2),
+  ncol = 2, byrow = TRUE,
+  labels = c("a)", "", "","", "", "", "", "", "", "", "", "", "b)"),
+  align = "hv", axis = "bl"
+)
 
 ggsave(plot = allPlotsValid_BC_AP, filename = file.path(figDir, "validationPlots_example2.png"),
-       bg = "white", height = 280, width = 220, dpi = 300, units = "mm")
+       bg = "white", height = 250, width = 230, dpi = 300, units = "mm")
