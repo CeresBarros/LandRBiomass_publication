@@ -40,7 +40,7 @@ if (FALSE) {  ## run this part manually.
   devtools::install_github("PredictiveEcology/SpaDES.core@development")
   devtools::install_github("PredictiveEcology/LandR@c9b07db756fc9d5d8beeef6b005b84652ab41785")
   devtools::install_github("ianmseddy/LandR.CS")
-  devtools::install_github("CeresBarros/reproducible@DotsBugFix")
+  devtools::install_github("PredictiveEcology/reproducible@development")
   devtools::install_github("PredictiveEcology/SpaDES.install")
   devtools::install_github("PredictiveEcology/SpaDES.experiment@development")
 
@@ -52,7 +52,7 @@ Require(c("SpaDES",
           "raster", "dplyr", "data.table", "future",
           "PredictiveEcology/SpaDES.experiment",
           "PredictiveEcology/LandR@development (>= 1.0.5.9003)",
-          "CeresBarros/reproducible@DotsBugFix (>= 1.2.7.9011)"), upgrade = FALSE)
+          "PredictiveEcology/reproducible (>= 1.2.7.9011)"), upgrade = FALSE)
 
 ## -----------------------------------------------
 ## SIMULATION SETUP
