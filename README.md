@@ -30,7 +30,7 @@ install.packages("devtools")
 3. Getting the code
 
 ```bash
-git clone --recurse-submodules -j8 https://github.com/PredictiveEcology/LandWeb
+git clone --recurse-submodules -j8 https://github.com/CeresBarros/LandRBiomass_publication.git
 ```
 
 4. Run simulations
