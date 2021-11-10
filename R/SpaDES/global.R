@@ -20,8 +20,8 @@ if (!exists("pkgDir")) {
   if (!dir.exists(pkgDir)) {
     dir.create(pkgDir, recursive = TRUE)
   }
-  .libPaths(pkgDir)
 }
+.libPaths(pkgDir)
 
 if (!require("devtools")) {
   install.packages("devtools", lib = pkgDir)
