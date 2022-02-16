@@ -20,8 +20,8 @@ if (!exists("pkgDir")) {
   if (!dir.exists(pkgDir)) {
     dir.create(pkgDir, recursive = TRUE)
   }
-  .libPaths(pkgDir)
 }
+.libPaths(pkgDir)
 
 if (!require("devtools")) {
   install.packages("devtools", lib = pkgDir)
@@ -88,7 +88,7 @@ simPaths <- list(cachePath = file.path("R/SpaDES/cache", simDirName)
                  , outputPath = file.path("R/SpaDES/outputs", simDirName, runName))
 
 figDir <- "R/SpaDES/outputs/GeneralFigs"
-dir.create(figDir)
+dir.create(figDir, recursive = TRUE)
 
 ## Get necessary objects -----------------------
 source("R/SpaDES/1_simObjects.R")
