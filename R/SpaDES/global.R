@@ -32,16 +32,18 @@ if (!require("Require")) {
   library(Require)
 }
 
-if (!require("SpaDES")) {
-  install.packages("SpaDES", dependencies = TRUE, lib = pkgDir)
+if (FALSE) {
+  # install.packages("SpaDES", dependencies = TRUE, lib = pkgDir)
+  # devtools::install_github("PredictiveEcology/SpaDES.core@8a7886a6afd7f3b90df10ea6b87caae8661f8709")
+  # devtools::install_github("PredictiveEcology/LandR@093c39898912a6e89ac9b6e862733052a0fae407")
+  # devtools::install_github("ianmseddy/LandR.CS@b39c8c72d20189fa6b6aeb057cdc751a631e0efa")
+  # devtools::install_github("PredictiveEcology/reproducible@aedea49637a6ebd0db6897f1d33f53959f41bee2")
+  # devtools::install_github("PredictiveEcology/SpaDES.install@80c43dcb94d897d25545105a7b83111cf634a556")
+  # devtools::install_github("PredictiveEcology/SpaDES.experiment@5a23c40f8aa9a9efc6dc16e040f8771561059152")
+  Require::pkgSnapshot("packages/pkgSnapshot.txt")
+  # Much later on a different or same machine
+  Require::Require(pkgSnapshot = "packages/pkgSnapshot.txt")
 }
-
-devtools::install_github("PredictiveEcology/SpaDES.core@8a7886a6afd7f3b90df10ea6b87caae8661f8709")
-devtools::install_github("PredictiveEcology/LandR@093c39898912a6e89ac9b6e862733052a0fae407")
-devtools::install_github("ianmseddy/LandR.CS@b39c8c72d20189fa6b6aeb057cdc751a631e0efa")
-devtools::install_github("PredictiveEcology/reproducible@aedea49637a6ebd0db6897f1d33f53959f41bee2")
-devtools::install_github("PredictiveEcology/SpaDES.install@80c43dcb94d897d25545105a7b83111cf634a556")
-devtools::install_github("PredictiveEcology/SpaDES.experiment@5a23c40f8aa9a9efc6dc16e040f8771561059152")
 
 out <- SpaDES.install::makeSureAllPackagesInstalled(modulePath = "R/SpaDES/m")
 
