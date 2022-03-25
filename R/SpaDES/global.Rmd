@@ -253,7 +253,7 @@ saveSimList(LandRBiomass_simInit, file.path(simPaths$outputPath, paste0("simInit
 ```
 
 ```{r loadSimInit, include=FALSE, eval = !isInteractive, cache = FALSE}
-LandRBiomass_simInit <- loadSimList(file.path("GitHubActionsSims", simDirName, runName, paste0("simInit", runName)))
+LandRBiomass_simInit <- loadSimList(file.path("GitHubActionsSims", simDirName, runName, paste0("simInit", runName, ".qs")))
 ```
 
 ```{r objDiagram}
@@ -270,7 +270,7 @@ LandRBiomass_sim <- spades(LandRBiomass_simInit, .plotInitialTime = simTimes$sta
 ```
 
 ```{r loadSimulation, include=FALSE, eval = !isInteractive}
-LandRBiomass_sim <- qs::qread(file.path("GitHubActionsSims", simDirName, runName, paste0("simList_LandRBiomass_sim_", runName)))
+LandRBiomass_sim <- qs::qread(file.path("GitHubActionsSims", simDirName, runName, paste0("simList_LandRBiomass_sim_", runName, ".qs")))
 ```
 
 If we were to run several repetitions, this would be how:

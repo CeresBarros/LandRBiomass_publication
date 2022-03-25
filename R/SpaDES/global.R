@@ -66,7 +66,8 @@ options("reproducible.inputPaths" = file.path("R/SpaDES/inputs"))  ## store ever
 options("reproducible.destinationPath" = file.path("R/SpaDES/inputs"))
 options("reproducible.useGDAL" = FALSE)
 
-eventCaching <- c(".inputObjects", "init")
+# eventCaching <- c(".inputObjects", "init")
+eventCaching <- FALSE ## bug, not re-parsing  code
 useParallel <- FALSE
 
 ## use studyAreaS or L to parameterise AND run simualations in the SAME area
@@ -83,7 +84,8 @@ useParallel <- FALSE
 runName <- "altParameters"
 
 ## paths
-simDirName <- "sep2021Runs"
+# simDirName <- "sep2021Runs"
+simDirName <- "mar2022Runs"
 simPaths <- list(cachePath = file.path("R/SpaDES/cache", simDirName)
                  , modulePath = file.path("R/SpaDES/m")
                  , inputPath = file.path("R/SpaDES/inputs")
@@ -112,16 +114,17 @@ rm(toRm)
 sppEquivalencies_CA <- sppEquivalencies_CA[Boreal %in% names(simOutSpeciesLayers$speciesLayers)]
 
 ## Get land-cover raster now that we have a rasterToMatchLarge
-rstLCC2005 <- LandR::prepInputsLCC(
-  year = 2005L,
-  destinationPath = simPaths$inputPath,
-  studyArea = simOutSpeciesLayers$studyAreaLarge,   ## Ceres: makePixel table needs same no. pixels for this, RTM rawBiomassMap, LCC.. etc
-  rasterToMatch = simOutSpeciesLayers$rasterToMatchLarge,
-  filename2 = .suffix("rstLCC.tif", paste0("_", SAname)),
-  overwrite = TRUE,
-  cacheRepo = simPaths$cachePath,
-  userTags = c("rstLCC", SAname),
-  omitArgs = c("userTags"))
+rstLCC2005 <- Cache(prepInputs,
+                    targetFile = "NA_LandCover_2005_V3_25haMMU.tif",
+                    url = "http://www.cec.org/wp-content/uploads/wpallimport/files/Atlas/Files/Land_Cover_2005/Land_Cover_2005v3_TIFF.zip",
+                    destinationPath = simPaths$inputPath,
+                    studyArea = simOutSpeciesLayers$studyAreaLarge,   ## Ceres: makePixel table needs same no. pixels for this, RTM rawBiomassMap, LCC.. etc
+                    rasterToMatch = simOutSpeciesLayers$rasterToMatchLarge,
+                    filename2 = .suffix("rstLCC.tif", paste0("_", SAname)),
+                    overwrite = TRUE,
+                    cacheRepo = simPaths$cachePath,
+                    userTags = c("rstLCC", SAname),
+                    omitArgs = c("userTags"))
 
 ## simulation params
 simTimes <- list(start = 2001, end = 2031)
@@ -157,8 +160,6 @@ if (runName %in% c("baseCase", "studyAreaChange", "studyAreaS", "studyAreaL")) {
 simParams <- list(
   Biomass_borealDataPrep = list(
     "sppEquivCol" = sppEquivCol
-    , "forestedLCCClasses" = c(1:15, 34:35)
-    , "LCCClassesToReplaceNN" = c(34:35)
     , "fitDeciduousCoverDiscount" = TRUE
     , "subsetDataAgeModel" = FALSE
     , "subsetDataBiomassModel" = FALSE
@@ -249,7 +250,7 @@ LandRBiomass_simInit <- Cache(simInitAndSpades
                               , cacheRepo = simPaths$cachePath
                               , omitArgs = c("userTags", ".plotInitialTime"))
 
-saveSimList(LandRBiomass_simInit, file.path(simPaths$outputPath, paste0("simInit", runName)))   ## only save in first runs
+saveSimList(LandRBiomass_simInit, file.path(simPaths$outputPath, paste0("simInit", runName, ".qs")))   ## only save in first runs
 
 amc::.gc()  ## clean ws
 if (Sys.info()["sysname"] == "Windows") {
@@ -264,7 +265,7 @@ LandRBiomass_sim <- experiment2(
 future:::ClusterRegistry("stop")
 
 ## save simLists object.
-qs::qsave(LandRBiomass_sim, file.path(simPaths$outputPath, paste0("simList_LandRBiomass_sim_", runName)))
+qs::qsave(LandRBiomass_sim, file.path(simPaths$outputPath, paste0("simList_LandRBiomass_sim_", runName, ".qs")))
 
 ## VALIDATION
 ## get the  land-cover change map (needed to have an RTM first, so get it from the simInitList)
@@ -335,7 +336,7 @@ LandRBiomass_validation <- simInitAndSpades(times = validationTimes
                                             , paths = validationPaths
                                             , .studyAreaName = SAname)
 
-saveSimList(LandRBiomass_validation, file.path(validationPaths$outputPath, paste0("simValid", runName)))   ## only save in first runs
+saveSimList(LandRBiomass_validation, file.path(validationPaths$outputPath, paste0("simValid", runName, ".qs")))   ## only save in first runs
 
 ## -----------------------------------------------
 ## POST-HOC ANALYSIS - figures

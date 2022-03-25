@@ -5,7 +5,7 @@
 ## ------------------------------------------------------
 
 ## this script should be sourced
-Require::Require(c("SpaDES", "raster", "sf", "data.table", "ggplot2",
+Require::Require(c("SpaDES", "raster", "sf", "data.table", "ggplot2", "LandR",
                    "ggspatial", "ggpubr", "reproducible", "cowplot", "qs"),
                  upgrade = FALSE)
 
@@ -15,24 +15,24 @@ runNames <- c("baseCase", "studyAreaChange", "altParameters")
 ## species layers simLists
 for (runName in runNames) {
   eval(parse(text = paste0("speciesLayersSimList", runName, " <- loadSimList(file.path('R/SpaDES/outputs',",
-                           "simDirName, runName, paste0('simList_speciesLayers', runName)))")))
+                           "simDirName, runName, paste0('simList_speciesLayers', runName, '.qs')))")))
 }
 
 ## pre simulation simLists
 for (runName in runNames) {
   eval(parse(text = paste0("preSimList", runName, " <- loadSimList(file.path('R/SpaDES/outputs',",
-                           "simDirName, runName, paste0('simInit', runName)))")))
+                           "simDirName, runName, paste0('simInit', runName, '.qs')))")))
 }
 
 ## post-simulation simLists
 for (runName in runNames) {
   eval(parse(text = paste0("simList", runName, " <- qs::qread(file.path('R/SpaDES/outputs',",
-                           "simDirName, runName, paste0('simList_LandRBiomass_sim_', runName)))")))
+                           "simDirName, runName, paste0('simList_LandRBiomass_sim_', runName, '.qs')))")))
 }
 
 ## post-validation simLists
 for (runName in runNames) {
-  eval(parse(text = paste0("validSimList", runName, " <- qs::qread(file.path('R/SpaDES/validation', simDirName, runName, paste0('simValid', runName)))")))
+  eval(parse(text = paste0("validSimList", runName, " <- qs::qread(file.path('R/SpaDES/validation', simDirName, runName, paste0('simValid', runName, '.qs')))")))
 }
 
 plotTheme <- function(majorYlines = TRUE, ...) {
@@ -46,33 +46,39 @@ plotTheme <- function(majorYlines = TRUE, ...) {
 
 ## ELAPSED TIMES ----------------------------------
 ## in minutes
+## Biomass_speciesData
 sum(as.numeric(elapsedTime(speciesLayersSimListbaseCase)$elapsedTime))/60
 sum(as.numeric(elapsedTime(speciesLayersSimListstudyAreaChange)$elapsedTime))/60
 sum(as.numeric(elapsedTime(speciesLayersSimListaltParameters)$elapsedTime))/60
 
+## Biomass_borealDataPrep + speciesParams
 elapsedTime(preSimListbaseCase)
 elapsedTime(preSimListstudyAreaChange)
 elapsedTime(preSimListaltParameters)
 
-elapsedTime(validSimListbaseCase)[, sum(as.numeric(elapsedTime))]
-elapsedTime(validSimListstudyAreaChange)[, sum(as.numeric(elapsedTime))]
-elapsedTime(validSimListaltParameters)[, sum(as.numeric(elapsedTime))]
+## Biomass_validationKNN
+elapsedTime(validSimListbaseCase)[, sum(as.numeric(elapsedTime))]/60
+elapsedTime(validSimListstudyAreaChange)[, sum(as.numeric(elapsedTime))]/60
+elapsedTime(validSimListaltParameters)[, sum(as.numeric(elapsedTime))]/60
 
 ## for biomass_core use clocktimes as elapsed time seems to underestimate
 timesbaseCase <- rbindlist(lapply(simListbaseCase, completed), idcol = "rep")
+timesbaseCase <- timesbaseCase[eventTime %in% seq(start(preSimListbaseCase), end(preSimListbaseCase))] ## exclude the spinup (will have a very differet eventTime in this case)
 timesbaseCase <- timesbaseCase[eventType != "init", max(clockTime) - min(clockTime), by = .(rep, moduleName)]
-timesbaseCase[, sum(as.integer(V1)), by = rep]
-timesbaseCase[, mean(as.integer(V1))]
+timesbaseCase[, sum(as.integer(V1)), by = .(rep, moduleName)]
+timesbaseCase[, mean(as.integer(V1))/60, by = moduleName]
 
 timesstudyAreaChange <- rbindlist(lapply(simListstudyAreaChange, completed), idcol = "rep")
+timesstudyAreaChange <- timesstudyAreaChange[eventTime %in% seq(start(preSimListstudyAreaChange), end(preSimListstudyAreaChange))] ## exclude the spinup (will have a very differet eventTime in this case)
 timesstudyAreaChange <- timesstudyAreaChange[eventType != "init", max(clockTime) - min(clockTime), by = .(rep, moduleName)]
-timesstudyAreaChange[, sum(as.integer(V1)), by = rep]
-timesstudyAreaChange[, mean(as.integer(V1))]
+timesstudyAreaChange[, sum(as.integer(V1)), by = .(rep, moduleName)]
+timesstudyAreaChange[, mean(as.integer(V1))/60, by = moduleName]
 
 timesaltParameters <- rbindlist(lapply(simListaltParameters, completed), idcol = "rep")
+timesaltParameters <- timesaltParameters[eventTime %in% seq(start(preSimListaltParameters), end(preSimListaltParameters))] ## exclude the spinup (will have a very differet eventTime in this case)
 timesaltParameters <- timesaltParameters[eventType != "init", max(clockTime) - min(clockTime), by = .(rep, moduleName)]
-timesaltParameters[, sum(as.integer(V1)), by = rep]
-timesaltParameters[, mean(as.integer(V1))]
+timesaltParameters[, sum(as.integer(V1)), by = .(rep, moduleName)]
+timesaltParameters[, mean(as.integer(V1))/60, by = moduleName]
 
 ## OBJECT DIAGRAM
 objectDiagram(preSimListbaseCase, width = 1000, height = 2500)
@@ -154,7 +160,7 @@ ggplot(plotData, aes(x = year, y = B, colour = speciesCode, fill = speciesCode))
   scale_y_continuous(breaks = scales::pretty_breaks()) +
   theme_pubr(base_size = 12, legend = "right") +
   labs(y = expression(Total~~biomass~~(g/m^2)), x = "Year", colour = "", fill = "")
-ggsave(file.path(figDir, "baseCase_altParameters_ensemble.png"), width = 7, height = 5, units = "in", dpi = 300)
+ggsave(file.path(figDir, "baseCase_altParameters_ensemble.png"), width = 7, height = 4, units = "in", dpi = 300)
 
 
 ## GENERAL FIGURES ----------------------------------------
@@ -464,22 +470,26 @@ ggsave(plot = allPlotsSim, filename = file.path(figDir, "simulationPlots_studyAr
 
 ## Simulation plots for example 2
 ## base case
+speciesB_BC <- qread(file.path(outputPath(simListbaseCase$sim1_rep01), "figures", "biomass_by_species_gg.qs"))
 speciesBoverstory_BC <- qread(file.path(outputPath(simListbaseCase$sim1_rep01), "figures", "overstory_biomass_gg.qs"))
 speciesAge_BC <- qread(file.path(outputPath(simListbaseCase$sim1_rep01), "figures", "biomass-weighted_species_age_gg.qs"))
 speciesDom_BC <- qread(file.path(outputPath(simListbaseCase$sim1_rep01), "figures", "N_pixels_leading_gg.qs"))
 speciesANPP_BC <- qread(file.path(outputPath(simListbaseCase$sim1_rep01), "figures", "total_aNPP_by_species_gg.qs"))
 
+speciesB_BC <- speciesB_BC + labs(title = "Total biomass", y = expression(g/m^2), x = "Year", fill = "")
 speciesBoverstory_BC <- speciesBoverstory_BC + labs(title = "Overstory biomass", y = expression(g/m^2), x = "Year", fill = "")
 speciesAge_BC <- speciesAge_BC + labs(title = "Species age", y = "Years", x = "Year", colour = "")
 speciesDom_BC <- speciesDom_BC + labs(title = "Species dominance", y = "No. of pixels", x = "Year", fill = "")
 speciesANPP_BC <- speciesANPP_BC + labs(title = "Total aNPP", y = expression(g/m^2), x = "Year", colour = "")
 
 ## alternative params.
+speciesB_AP <- qread(file.path(outputPath(simListaltParameters$sim1_rep01), "figures", "biomass_by_species_gg.qs"))
 speciesBoverstory_AP <- qread(file.path(outputPath(simListaltParameters$sim1_rep01), "figures", "overstory_biomass_gg.qs"))
 speciesAge_AP <- qread(file.path(outputPath(simListaltParameters$sim1_rep01), "figures", "biomass-weighted_species_age_gg.qs"))
 speciesDom_AP <- qread(file.path(outputPath(simListaltParameters$sim1_rep01), "figures", "N_pixels_leading_gg.qs"))
 speciesANPP_AP <- qread(file.path(outputPath(simListaltParameters$sim1_rep01), "figures", "total_aNPP_by_species_gg.qs"))
 
+speciesB_AP <- speciesB_AP + labs(title = "Total biomass", y = expression(g/m^2), x = "Year", fill = "")
 speciesBoverstory_AP <- speciesBoverstory_AP + labs(title = "Overstory biomass", y = expression(g/m^2), x = "Year", fill = "")
 speciesAge_AP <- speciesAge_AP + labs(title = "Species age", y = "Years", x = "Year", colour = "")
 speciesDom_AP <- speciesDom_AP + labs(title = "Species dominance", y = "No. of pixels", x = "Year", fill = "")
@@ -504,7 +514,6 @@ allPlotsSim_BC_AP <- plot_grid(
   ncol = 1, rel_heights = c(1, 0, 0.1))
 ggsave(plot = allPlotsSim_BC_AP, filename = file.path(figDir, "simulationPlots_example2.png"),
        bg = "white", height = 290, width = 180, dpi = 300, units = "mm")
-
 
 ## VALIDATION FIGURES ----------------------------------------
 ## Full suite of validation plots from study area change
@@ -606,10 +615,10 @@ landPixelMAD_BC_AP[, variableFacet := factor(variable,
                                                         "g/m^2"))]
 
 speciesLabels <- validSimListbaseCase@.envir$.mods$Biomass_validationKNN$.objects$speciesLabels
-MADLabels <- list("meanAbsDevRelAbund" = "rel. abundance",
-                  "meanAbsDevCount" = "presences",
-                  "meanAbsDevCountDom" = "dominance",
-                  "meanAbsDevDeltaB" = bquote(paste(Delta, B)))
+MADLabels <- list("meanAbsDevRelAbund" = "species rel. abundance",
+                  "meanAbsDevCount" = "species presences",
+                  "meanAbsDevCountDom" = "species dominance",
+                  "meanAbsDevDeltaB" = bquote(paste("species", Delta, B)))
 
 cols <- c("speciesCode", "relAbund", "dataType", "year", "simulation")
 plotLandRelB_BC_AP <- ggplot(na.omit(landscapeVars_BC_AP[dataType == "simulated", ..cols]),
@@ -753,10 +762,6 @@ plotPixelMAD_BC_AP <- ggplot(landPixelMAD_BC_AP[level == "pixel" & variable != "
              strip.position = "left")
 
 ## make a plot with all plots
-alignedPlots <- align_plots(plotLandDom_BC_AP + theme(legend.position = "none", text = element_text(size = 10)),
-                            plotLandMAD_BC_AP + theme(legend.position = "none", text = element_text(size = 10)),
-                            align = "h", axis = "b")
-
 allPlotsValid_BC_AP <- plot_grid(
   plotLandRelB_BC_AP + theme(legend.position = "none", text = element_text(size = 10)),
   plotLandDom_BC_AP + theme(legend.position = "none", text = element_text(size = 10)),
@@ -778,3 +783,36 @@ allPlotsValid_BC_AP <- plot_grid(
 
 ggsave(plot = allPlotsValid_BC_AP, filename = file.path(figDir, "validationPlots_example2.png"),
        bg = "white", height = 250, width = 230, dpi = 300, units = "mm")
+
+## SIMULATION & VALIDATION FIGURES
+## only total biomass and MAD
+yMax <- max(speciesB_BC$data[, sum(BiomassBySpecies), by = year]$V1, speciesB_AP$data[, sum(BiomassBySpecies), by = year]$V1)
+
+alignedPlots <- align_plots(speciesB_BC + scale_y_continuous(limits = c(0, yMax)) +
+                              labs(title = "Base case simulation", y = expression(atop("Total biomass", g/m^2))) +
+                              theme(plot.margin = margin(b = 0), legend.position = "none", text = element_text(size = 10)),
+                            speciesB_AP + scale_y_continuous(limits = c(0, yMax)) +
+                              labs(title = "Alternative param. simulation", y = "") +
+                              theme(plot.margin = margin(b = 0), legend.position = "none", text = element_text(size = 10)),
+                            plotLandMAD_BC_AP + labs(title = "Landscape-level MAD") +
+                              theme(plot.margin = margin(t = 0), legend.position = "none", text = element_text(size = 10)),
+                            plotPixelMAD_BC_AP + labs(title = "Pixel-level MAD") +
+                              theme(plot.margin = margin(t = 0), legend.position = "none", text = element_text(size = 10)),
+            align = "hv", axis = "bl")
+B_MAD_PlotsSim_BC_AP <- ggarrange(
+  ggarrange(alignedPlots[[1]],
+            alignedPlots[[2]],
+            ncol = 2, labels = c("a)", "b)")),
+  get_legend(speciesB_BC +
+               theme(legend.direction = "vertical", text = element_text(size = 10))),
+  ggarrange(alignedPlots[[3]],
+            alignedPlots[[4]],
+            ncol = 2, labels = c("c)", "d)")),
+  get_legend(plotLandMAD_BC_AP +
+               theme(legend.direction = "vertical", legend.box.just = "left",
+                     legend.spacing = unit(0, units = "mm"), legend.box = "vertical", text = element_text(size = 10))),
+  nrow = 2, ncol = 2, heights = c(1, 1), widths = c(1, 0.2)
+)
+ggsave(plot = B_MAD_PlotsSim_BC_AP, filename = file.path(figDir, "simValidPlots_B_MAD_example2.png"),
+       bg = "white", height = 160, width = 230, dpi = 300, units = "mm")
+
