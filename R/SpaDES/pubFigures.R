@@ -111,6 +111,23 @@ SNLLdif <- SNLL[, list("delta2001" = y2001[simulation == "altParameters"] - y200
                        "delta2011-2001" = y2011_2001[simulation == "altParameters"] - y2011_2001[simulation == "basecase"]),
                 by = variable2]
 
+## assume a penalisation of 80 for base case
+AIC <- SNLL[simulation == "basecase", list(simulation = simulation,
+                                           y2001 = 80 + 2*y2001,
+                                           y2011 = 80 + 2*y2011,
+                                           y2011_2001 = 80 + 2*y2011_2001,
+                                           variable2 = variable2)]
+AIC <- rbind(AIC, SNLL[simulation == "altParameters", list(simulation = simulation,
+                                                           y2001 = 2*y2001,
+                                                           y2011 = 2*y2011,
+                                                           y2011_2001 = 2*y2011_2001,
+                                                           variable2 = variable2)])
+AICdiff <- AIC[, list("delta2001" = y2001[simulation == "altParameters"] - y2001[simulation == "basecase"],
+                      "delta2011" = y2011[simulation == "altParameters"] - y2011[simulation == "basecase"],
+                      "delta2011-2001" = y2011_2001[simulation == "altParameters"] - y2011_2001[simulation == "basecase"]),
+               by = variable2]
+
+
 ## "ENSEMBLE" OF TWO INITIAL CONDITIONS ----------------------------------
 ## get data:
 cohortDataOutputs <- rbindlist(lapply(simListbaseCase, FUN = function(sim) as.data.table(outputs(sim))[objectName == "cohortData"]),
@@ -139,7 +156,7 @@ allCohortData <- rbindlist(list("base case" = baseCase_allCohortData,
 
 
 plotData <- allCohortData[, list(B = sum(B)), by = .(speciesCode, year, rep, scenario)]
-plotData <- plotData[, list(B = mean(B)), by = .(speciesCode, year, scenario)]
+# plotData <- plotData[, list(B = mean(B)), by = .(speciesCode, year, scenario)]
 
 sppColoursVect <- preSimListbaseCase$sppColorVect
 sppLabels <- equivalentName(names(sppColoursVect), preSimListbaseCase$sppEquiv, column = "EN_generic_short")
@@ -148,19 +165,45 @@ sppLabels <- sppLabels[!is.na(sppLabels)]
 
 sppColoursVect <- sppColoursVect[names(sppLabels)]
 
-ggplot(plotData, aes(x = year, y = B, colour = speciesCode, fill = speciesCode)) +
-  stat_summary(fun.data = mean_sdl, geom = "ribbon",
+ggplot() +
+  ## mean across reps per scenario
+  stat_summary(data = plotData[scenario == "Example 2"],
+               aes(x = year, y = B, colour = speciesCode, fill = speciesCode),
+               fun.data = mean_sdl, geom = "ribbon",
                alpha = 0.5, colour = "transparent") +
-  stat_summary(fun = mean, geom = "line", size = 1) +
+  stat_summary(data = plotData[scenario == "Example 2"],
+               aes(x = year, y = B, colour = speciesCode,
+                   linetype = "alternative param."),
+               fun = mean, geom = "line", size = 1, alpha = 0.8) +
+  stat_summary(data = plotData[scenario == "base case"],
+               aes(x = year, y = B, colour = speciesCode, fill = speciesCode),
+               fun.data = mean_sdl, geom = "ribbon",
+               alpha = 0.5, colour = "transparent") +
+  stat_summary(data = plotData[scenario == "base case"],
+               aes(x = year, y = B, colour = speciesCode,
+                   linetype = "base case"),
+               fun = mean, geom = "line", size = 1, alpha = 0.8) +
+  ## mean across scenarios and reps (ensemble)
+  # stat_summary(data = plotData,
+  #              aes(x = year, y = B, colour = speciesCode, fill = speciesCode),
+  #              fun.data = mean_sdl, geom = "ribbon",
+  #              alpha = 0.5, colour = "transparent") +
+  stat_summary(data = plotData,
+               aes(x = year, y = B, colour = speciesCode,
+                   linetype = "ensemble"),
+               fun = mean, geom = "line", size = 1) +
   scale_colour_manual(values = sppColoursVect,
                       labels = sppLabels) +
   scale_fill_manual(values = sppColoursVect,
                     labels = sppLabels) +
+  scale_linetype_manual(values = c("ensemble" = 1, "base case" = 2, "alternative param." = 3)) +
   scale_x_continuous(breaks = scales::pretty_breaks()) +
   scale_y_continuous(breaks = scales::pretty_breaks()) +
   theme_pubr(base_size = 12, legend = "right") +
-  labs(y = expression(Total~~biomass~~(g/m^2)), x = "Year", colour = "", fill = "")
-ggsave(file.path(figDir, "baseCase_altParameters_ensemble.png"), width = 7, height = 4, units = "in", dpi = 300)
+  labs(y = expression(Average~~total~~biomass~~(g/m^2)), x = "Year", colour = "",
+       fill = "", linetype = "")
+ggsave(file.path(figDir, "baseCase_altParameters_ensemble.png"),
+       width = 8, height = 4.5, units = "in", dpi = 300)
 
 
 ## GENERAL FIGURES ----------------------------------------
@@ -798,7 +841,7 @@ alignedPlots <- align_plots(speciesB_BC + scale_y_continuous(limits = c(0, yMax)
                               theme(plot.margin = margin(t = 0), legend.position = "none", text = element_text(size = 10)),
                             plotPixelMAD_BC_AP + labs(title = "Pixel-level MAD") +
                               theme(plot.margin = margin(t = 0), legend.position = "none", text = element_text(size = 10)),
-            align = "hv", axis = "bl")
+                            align = "hv", axis = "bl")
 B_MAD_PlotsSim_BC_AP <- ggarrange(
   ggarrange(alignedPlots[[1]],
             alignedPlots[[2]],
