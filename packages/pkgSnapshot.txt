@@ -1,0 +1,287 @@
+"Package","LibPath","Version","GithubRepo","GithubUsername","GithubRef","GithubSHA1"
+"abind","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","1.4-5",NA,NA,NA,NA
+"amc","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","0.2.1","amc","achubaty","development","15c5229951700f9a638fd186f176f0e793d76c10"
+"arm","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","1.11-2",NA,NA,NA,NA
+"askpass","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","1.1",NA,NA,NA,NA
+"assertthat","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","0.2.1",NA,NA,NA,NA
+"backports","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","1.2.1",NA,NA,NA,NA
+"base64enc","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","0.1-3",NA,NA,NA,NA
+"bibtex","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","0.4.2.3",NA,NA,NA,NA
+"bit","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","4.0.4",NA,NA,NA,NA
+"bit64","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","4.0.5",NA,NA,NA,NA
+"bitops","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","1.0-7",NA,NA,NA,NA
+"blme","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","1.0-5",NA,NA,NA,NA
+"blob","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","1.2.2",NA,NA,NA,NA
+"bookdown","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","0.24",NA,NA,NA,NA
+"brew","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","1.0-6",NA,NA,NA,NA
+"brio","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","1.1.2",NA,NA,NA,NA
+"broom","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","0.7.9",NA,NA,NA,NA
+"broom.mixed","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","0.2.7",NA,NA,NA,NA
+"bslib","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","0.3.1",NA,NA,NA,NA
+"cachem","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","1.0.5",NA,NA,NA,NA
+"callr","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","3.7.0",NA,NA,NA,NA
+"car","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","3.0-11",NA,NA,NA,NA
+"carData","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","3.0-4",NA,NA,NA,NA
+"cellranger","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","1.1.0",NA,NA,NA,NA
+"checkmate","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","2.0.0",NA,NA,NA,NA
+"CircStats","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","0.2-6",NA,NA,NA,NA
+"citr","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","0.3.2","citr","crsh","HEAD","0e8243d55676888546a383b98adbfd454603f547"
+"classInt","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","0.4-3",NA,NA,NA,NA
+"cli","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","3.0.1",NA,NA,NA,NA
+"clipr","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","0.7.1",NA,NA,NA,NA
+"coda","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","0.19-4",NA,NA,NA,NA
+"colorspace","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","2.0-2",NA,NA,NA,NA
+"commonmark","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","1.7",NA,NA,NA,NA
+"conquer","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","1.0.2",NA,NA,NA,NA
+"corrplot","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","0.90",NA,NA,NA,NA
+"covr","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","3.5.1",NA,NA,NA,NA
+"cowplot","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","1.1.1",NA,NA,NA,NA
+"cpp11","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","0.4.2",NA,NA,NA,NA
+"crayon","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","1.5.0",NA,NA,NA,NA
+"credentials","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","1.3.1",NA,NA,NA,NA
+"curl","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","4.3.2",NA,NA,NA,NA
+"data.table","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","1.14.0",NA,NA,NA,NA
+"DBI","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","1.1.1",NA,NA,NA,NA
+"DEoptim","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","2.2-6",NA,NA,NA,NA
+"desc","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","1.3.0",NA,NA,NA,NA
+"devtools","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","2.4.2",NA,NA,NA,NA
+"diffobj","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","0.3.4",NA,NA,NA,NA
+"digest","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","0.6.27",NA,NA,NA,NA
+"dismo","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","1.3-3",NA,NA,NA,NA
+"downlit","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","0.4.0",NA,NA,NA,NA
+"dplyr","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","1.0.7",NA,NA,NA,NA
+"e1071","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","1.7-8",NA,NA,NA,NA
+"ellipsis","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","0.3.2",NA,NA,NA,NA
+"evaluate","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","0.14",NA,NA,NA,NA
+"fansi","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","0.5.0",NA,NA,NA,NA
+"farver","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","2.1.0",NA,NA,NA,NA
+"fastdigest","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","0.6-3",NA,NA,NA,NA
+"fasterize","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","1.0.3",NA,NA,NA,NA
+"fastmap","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","1.1.0",NA,NA,NA,NA
+"fastmatch","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","1.1-3",NA,NA,NA,NA
+"fontawesome","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","0.2.2",NA,NA,NA,NA
+"forcats","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","0.5.1",NA,NA,NA,NA
+"foreach","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","1.5.1",NA,NA,NA,NA
+"Formula","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","1.2-4",NA,NA,NA,NA
+"fpCompare","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","0.2.3",NA,NA,NA,NA
+"fs","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","1.5.0",NA,NA,NA,NA
+"future","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","1.21.0",NA,NA,NA,NA
+"future.apply","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","1.7.0",NA,NA,NA,NA
+"gargle","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","1.2.0",NA,NA,NA,NA
+"gdalUtilities","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","1.1.2",NA,NA,NA,NA
+"gdalUtils","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","2.0.3.2",NA,NA,NA,NA
+"generics","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","0.1.2",NA,NA,NA,NA
+"gert","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","1.3.1",NA,NA,NA,NA
+"ggplot2","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","3.3.5",NA,NA,NA,NA
+"ggpubr","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","0.4.0",NA,NA,NA,NA
+"ggrepel","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","0.9.1",NA,NA,NA,NA
+"ggsci","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","2.9",NA,NA,NA,NA
+"ggsignif","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","0.6.2",NA,NA,NA,NA
+"ggspatial","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","1.1.5",NA,NA,NA,NA
+"gh","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","1.3.0",NA,NA,NA,NA
+"gitcreds","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","0.1.1",NA,NA,NA,NA
+"globals","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","0.14.0",NA,NA,NA,NA
+"glue","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","1.4.2",NA,NA,NA,NA
+"googledrive","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","2.0.0",NA,NA,NA,NA
+"gridBase","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","0.4-7",NA,NA,NA,NA
+"gridExtra","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","2.3",NA,NA,NA,NA
+"gtable","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","0.3.0",NA,NA,NA,NA
+"haven","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","2.4.2",NA,NA,NA,NA
+"hexbin","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","1.28.2",NA,NA,NA,NA
+"highr","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","0.9",NA,NA,NA,NA
+"Hmisc","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","4.5-0",NA,NA,NA,NA
+"hms","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","1.1.0",NA,NA,NA,NA
+"htmlTable","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","2.2.1",NA,NA,NA,NA
+"htmltools","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","0.5.2",NA,NA,NA,NA
+"htmlwidgets","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","1.5.3",NA,NA,NA,NA
+"httpuv","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","1.6.5",NA,NA,NA,NA
+"httr","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","1.4.2",NA,NA,NA,NA
+"hunspell","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","3.0.1",NA,NA,NA,NA
+"igraph","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","1.2.6",NA,NA,NA,NA
+"ini","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","0.3.1",NA,NA,NA,NA
+"isoband","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","0.2.5",NA,NA,NA,NA
+"iterators","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","1.0.13",NA,NA,NA,NA
+"jpeg","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","0.1-9",NA,NA,NA,NA
+"jquerylib","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","0.1.4",NA,NA,NA,NA
+"jsonlite","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","1.7.3",NA,NA,NA,NA
+"kableExtra","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","1.3.4",NA,NA,NA,NA
+"knitr","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","1.33",NA,NA,NA,NA
+"labeling","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","0.4.2",NA,NA,NA,NA
+"LandR","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","1.0.5.9006","LandR","PredictiveEcology","466836778f4050d752bc8348d021655226cd504e","466836778f4050d752bc8348d021655226cd504e"
+"LandR.CS","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","0.0.2.0002","LandR.CS","ianmseddy","HEAD","ad6c2cea634c44ffbdb8c077f2380c1f919a9c1e"
+"later","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","1.3.0",NA,NA,NA,NA
+"latticeExtra","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","0.6-29",NA,NA,NA,NA
+"lazyeval","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","0.2.2",NA,NA,NA,NA
+"lifecycle","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","1.0.1",NA,NA,NA,NA
+"listenv","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","0.8.0",NA,NA,NA,NA
+"lme4","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","1.1-27.1",NA,NA,NA,NA
+"lobstr","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","1.1.1",NA,NA,NA,NA
+"lubridate","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","1.8.0",NA,NA,NA,NA
+"magrittr","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","2.0.1",NA,NA,NA,NA
+"map","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","0.0.3","map","PredictiveEcology","development","9b401b88ac4d2ceef6de821d718f66a525599d74"
+"maptools","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","1.1-1",NA,NA,NA,NA
+"markdown","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","1.1",NA,NA,NA,NA
+"MatrixModels","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","0.5-0",NA,NA,NA,NA
+"matrixStats","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","0.60.0",NA,NA,NA,NA
+"mclust","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","5.4.7",NA,NA,NA,NA
+"memoise","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","2.0.0",NA,NA,NA,NA
+"merTools","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","0.5.2",NA,NA,NA,NA
+"mime","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","0.12",NA,NA,NA,NA
+"miniUI","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","0.1.1.1",NA,NA,NA,NA
+"minqa","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","1.2.4",NA,NA,NA,NA
+"MuMIn","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","1.43.17",NA,NA,NA,NA
+"munsell","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","0.5.0",NA,NA,NA,NA
+"mvtnorm","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","1.1-2",NA,NA,NA,NA
+"nloptr","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","1.2.2.2",NA,NA,NA,NA
+"numDeriv","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","2016.8-1.1",NA,NA,NA,NA
+"openssl","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","1.4.6",NA,NA,NA,NA
+"openxlsx","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","4.2.4",NA,NA,NA,NA
+"parallelly","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","1.27.0",NA,NA,NA,NA
+"pbkrtest","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","0.5.1",NA,NA,NA,NA
+"pemisc","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","0.0.3.9001","pemisc","PredictiveEcology","development","dd2be4a9a15981d0d6f3740d8b3d4de07f255b95"
+"peutils","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","0.1.0","peutils","PredictiveEcology","development","d40d97c594c01014101c1edacd48bcace89dcb97"
+"pillar","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","1.6.2",NA,NA,NA,NA
+"pkgbuild","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","1.2.0",NA,NA,NA,NA
+"pkgconfig","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","2.0.3",NA,NA,NA,NA
+"pkgload","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","1.2.1",NA,NA,NA,NA
+"plogr","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","0.2.0",NA,NA,NA,NA
+"plyr","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","1.8.6",NA,NA,NA,NA
+"png","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","0.1-7",NA,NA,NA,NA
+"polynom","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","1.4-0",NA,NA,NA,NA
+"praise","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","1.0.0",NA,NA,NA,NA
+"prettymapr","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","0.2.2",NA,NA,NA,NA
+"prettyunits","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","1.1.1",NA,NA,NA,NA
+"processx","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","3.5.2",NA,NA,NA,NA
+"progress","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","1.2.2",NA,NA,NA,NA
+"promises","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","1.2.0.1",NA,NA,NA,NA
+"proxy","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","0.4-26",NA,NA,NA,NA
+"pryr","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","0.1.4",NA,NA,NA,NA
+"ps","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","1.6.0",NA,NA,NA,NA
+"purrr","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","0.3.4",NA,NA,NA,NA
+"qs","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","0.25.1",NA,NA,NA,NA
+"quantreg","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","5.86",NA,NA,NA,NA
+"quickPlot","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","0.1.6",NA,NA,NA,NA
+"R.methodsS3","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","1.8.1",NA,NA,NA,NA
+"R.oo","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","1.24.0",NA,NA,NA,NA
+"R.utils","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","2.10.1",NA,NA,NA,NA
+"R6","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","2.5.1",NA,NA,NA,NA
+"RApiSerialize","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","0.1.0",NA,NA,NA,NA
+"rappdirs","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","0.3.3",NA,NA,NA,NA
+"raster","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","3.4-13",NA,NA,NA,NA
+"rasterVis","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","0.50.3",NA,NA,NA,NA
+"rcmdcheck","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","1.3.3",NA,NA,NA,NA
+"RColorBrewer","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","1.1-2",NA,NA,NA,NA
+"Rcpp","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","1.0.7",NA,NA,NA,NA
+"RcppArmadillo","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","0.10.6.0.0",NA,NA,NA,NA
+"RcppEigen","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","0.3.3.9.1",NA,NA,NA,NA
+"RcppParallel","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","5.1.4",NA,NA,NA,NA
+"RCurl","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","1.98-1.3",NA,NA,NA,NA
+"readr","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","2.0.0",NA,NA,NA,NA
+"readxl","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","1.3.1",NA,NA,NA,NA
+"RefManageR","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","1.3.0",NA,NA,NA,NA
+"rematch","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","1.0.1",NA,NA,NA,NA
+"rematch2","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","2.1.2",NA,NA,NA,NA
+"remotes","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","2.4.0",NA,NA,NA,NA
+"reproducible","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","1.2.8","reproducible","PredictiveEcology","development","2837c0520363a94df564afc921caa81596b2aa1b"
+"Require","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","0.0.13.9001","Require","PredictiveEcology","development","0b20f9116f9ebba23430e105f4706397f75bdf54"
+"rex","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","1.2.0",NA,NA,NA,NA
+"rgdal","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","1.5-23",NA,NA,NA,NA
+"rgeos","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","0.5-5",NA,NA,NA,NA
+"rio","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","0.5.27",NA,NA,NA,NA
+"rjson","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","0.2.20",NA,NA,NA,NA
+"rlang","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","0.4.11",NA,NA,NA,NA
+"rmarkdown","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","2.11",NA,NA,NA,NA
+"rmdformats","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","1.0.3",NA,NA,NA,NA
+"rosm","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","0.2.5",NA,NA,NA,NA
+"roxygen2","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","7.1.1",NA,NA,NA,NA
+"rprojroot","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","2.0.2",NA,NA,NA,NA
+"RSQLite","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","2.2.7",NA,NA,NA,NA
+"rstatix","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","0.7.0",NA,NA,NA,NA
+"rstudioapi","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","0.13",NA,NA,NA,NA
+"rversions","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","2.1.1",NA,NA,NA,NA
+"rvest","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","1.0.2",NA,NA,NA,NA
+"s2","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","1.0.7",NA,NA,NA,NA
+"sass","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","0.4.0",NA,NA,NA,NA
+"scales","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","1.1.1",NA,NA,NA,NA
+"selectr","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","0.4-2",NA,NA,NA,NA
+"sessioninfo","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","1.1.1",NA,NA,NA,NA
+"sf","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","1.0-2",NA,NA,NA,NA
+"shiny","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","1.7.1",NA,NA,NA,NA
+"shinyjs","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","2.1.0",NA,NA,NA,NA
+"sourcetools","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","0.1.7",NA,NA,NA,NA
+"sp","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","1.4-5",NA,NA,NA,NA
+"SpaDES","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","2.0.7",NA,NA,NA,NA
+"SpaDES.addins","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","0.1.3",NA,NA,NA,NA
+"SpaDES.core","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","1.0.8.9014","SpaDES.core","PredictiveEcology","development","8a7886a6afd7f3b90df10ea6b87caae8661f8709"
+"SpaDES.experiment","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","0.0.2.9002","SpaDES.experiment","PredictiveEcology","development","5a23c40f8aa9a9efc6dc16e040f8771561059152"
+"SpaDES.install","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","0.0.4.9001","SpaDES.install","PredictiveEcology","HEAD","80c43dcb94d897d25545105a7b83111cf634a556"
+"SpaDES.tools","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","0.3.8.9000","SpaDES.tools","PredictiveEcology","development","219e458134d6de78ca394842ed76a2e30e9ddb85"
+"SparseM","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","1.81",NA,NA,NA,NA
+"spelling","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","2.2",NA,NA,NA,NA
+"stringfish","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","0.15.2",NA,NA,NA,NA
+"stringi","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","1.7.6",NA,NA,NA,NA
+"stringr","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","1.4.0",NA,NA,NA,NA
+"svglite","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","2.1.0",NA,NA,NA,NA
+"sys","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","3.4",NA,NA,NA,NA
+"systemfonts","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","1.0.4",NA,NA,NA,NA
+"terra","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","1.3-4",NA,NA,NA,NA
+"testthat","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","3.0.4",NA,NA,NA,NA
+"thematic","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","0.1.2.1",NA,NA,NA,NA
+"tibble","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","3.1.3",NA,NA,NA,NA
+"tidyr","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","1.1.3",NA,NA,NA,NA
+"tidyselect","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","1.1.1",NA,NA,NA,NA
+"tiler","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","0.2.5",NA,NA,NA,NA
+"tinytex","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","0.32",NA,NA,NA,NA
+"tufte","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","0.12",NA,NA,NA,NA
+"tzdb","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","0.1.2",NA,NA,NA,NA
+"units","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","0.7-2",NA,NA,NA,NA
+"usethis","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","2.0.1",NA,NA,NA,NA
+"utf8","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","1.2.2",NA,NA,NA,NA
+"uuid","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","0.1-4",NA,NA,NA,NA
+"vctrs","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","0.3.8",NA,NA,NA,NA
+"viridis","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","0.6.1",NA,NA,NA,NA
+"viridisLite","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","0.4.0",NA,NA,NA,NA
+"vroom","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","1.5.4",NA,NA,NA,NA
+"waldo","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","0.2.5",NA,NA,NA,NA
+"webshot","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","0.5.2",NA,NA,NA,NA
+"whisker","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","0.4",NA,NA,NA,NA
+"withr","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","2.4.3",NA,NA,NA,NA
+"wk","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","0.5.0",NA,NA,NA,NA
+"xfun","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","0.25",NA,NA,NA,NA
+"XML","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","3.99-0.6",NA,NA,NA,NA
+"xml2","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","1.3.3",NA,NA,NA,NA
+"xopen","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","1.0.0",NA,NA,NA,NA
+"xtable","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","1.8-4",NA,NA,NA,NA
+"yaml","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","2.2.2",NA,NA,NA,NA
+"zip","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","2.2.0",NA,NA,NA,NA
+"zoo","D:/GitHub/LandRBiomass_publication/packages/x86_64-w64-mingw32/4.0","1.8-9",NA,NA,NA,NA
+"base","C:/Program Files/R/R-4.0.4/library","4.0.4",NA,NA,NA,NA
+"boot","C:/Program Files/R/R-4.0.4/library","1.3-27",NA,NA,NA,NA
+"class","C:/Program Files/R/R-4.0.4/library","7.3-18",NA,NA,NA,NA
+"cluster","C:/Program Files/R/R-4.0.4/library","2.1.1",NA,NA,NA,NA
+"codetools","C:/Program Files/R/R-4.0.4/library","0.2-18",NA,NA,NA,NA
+"compiler","C:/Program Files/R/R-4.0.4/library","4.0.4",NA,NA,NA,NA
+"datasets","C:/Program Files/R/R-4.0.4/library","4.0.4",NA,NA,NA,NA
+"foreign","C:/Program Files/R/R-4.0.4/library","0.8-81",NA,NA,NA,NA
+"graphics","C:/Program Files/R/R-4.0.4/library","4.0.4",NA,NA,NA,NA
+"grDevices","C:/Program Files/R/R-4.0.4/library","4.0.4",NA,NA,NA,NA
+"grid","C:/Program Files/R/R-4.0.4/library","4.0.4",NA,NA,NA,NA
+"KernSmooth","C:/Program Files/R/R-4.0.4/library","2.23-18",NA,NA,NA,NA
+"lattice","C:/Program Files/R/R-4.0.4/library","0.20-41",NA,NA,NA,NA
+"MASS","C:/Program Files/R/R-4.0.4/library","7.3-53.1",NA,NA,NA,NA
+"Matrix","C:/Program Files/R/R-4.0.4/library","1.3-2",NA,NA,NA,NA
+"methods","C:/Program Files/R/R-4.0.4/library","4.0.4",NA,NA,NA,NA
+"mgcv","C:/Program Files/R/R-4.0.4/library","1.8-34",NA,NA,NA,NA
+"nlme","C:/Program Files/R/R-4.0.4/library","3.1-152",NA,NA,NA,NA
+"nnet","C:/Program Files/R/R-4.0.4/library","7.3-15",NA,NA,NA,NA
+"parallel","C:/Program Files/R/R-4.0.4/library","4.0.4",NA,NA,NA,NA
+"rpart","C:/Program Files/R/R-4.0.4/library","4.1-15",NA,NA,NA,NA
+"spatial","C:/Program Files/R/R-4.0.4/library","7.3-13",NA,NA,NA,NA
+"splines","C:/Program Files/R/R-4.0.4/library","4.0.4",NA,NA,NA,NA
+"stats","C:/Program Files/R/R-4.0.4/library","4.0.4",NA,NA,NA,NA
+"stats4","C:/Program Files/R/R-4.0.4/library","4.0.4",NA,NA,NA,NA
+"survival","C:/Program Files/R/R-4.0.4/library","3.2-10",NA,NA,NA,NA
+"tcltk","C:/Program Files/R/R-4.0.4/library","4.0.4",NA,NA,NA,NA
+"tools","C:/Program Files/R/R-4.0.4/library","4.0.4",NA,NA,NA,NA
+"translations","C:/Program Files/R/R-4.0.4/library","4.0.4",NA,NA,NA,NA
+"utils","C:/Program Files/R/R-4.0.4/library","4.0.4",NA,NA,NA,NA
