@@ -40,7 +40,8 @@ if (FALSE) {
   # devtools::install_github("PredictiveEcology/reproducible@aedea49637a6ebd0db6897f1d33f53959f41bee2")
   # devtools::install_github("PredictiveEcology/SpaDES.install@80c43dcb94d897d25545105a7b83111cf634a556")
   # devtools::install_github("PredictiveEcology/SpaDES.experiment@5a23c40f8aa9a9efc6dc16e040f8771561059152")
-  Require::pkgSnapshot("packages/pkgSnapshot.txt")
+
+  # Require::pkgSnapshot("packages/pkgSnapshot.txt", libPaths = "packages/x86_64-w64-mingw32/4.0/")
   # Much later on a different or same machine
   Require::Require(pkgSnapshot = "packages/pkgSnapshot.txt")
 }
