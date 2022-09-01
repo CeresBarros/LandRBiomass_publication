@@ -13,9 +13,6 @@ data/
 data
 packages/*
 
-# Eliot and possibly others are using stand alone folder for packages
-Rpackages
-
 # don't ignore
 !.gitignore
 !packages/pkgSnapshot.txt
