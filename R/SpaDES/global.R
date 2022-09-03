@@ -4,14 +4,7 @@
 ## Ceres: June 2018
 ## ------------------------------------------------------
 
-## requires as of Jul 26 2021
-# reproducible 1.2.7.9011
-# quickPlot_0.1.7.9002
-# SpaDES.core 1.0.8.9014
-# SpaDES.tools_0.3.8.9000
-# SpaDES.addins_0.1.2
-# SpaDES.experiment 0.0.2.9002
-# LandR 1.0.5
+## /!\ PLEASE MAKE SURE YOU ARE USING R v4.0.5 /!\
 
 ## set CRAN repos; use binary linux packages if on Ubuntu
 local({
@@ -40,45 +33,88 @@ local({
   }
 })
 
-                      paste0(version$major, ".", strsplit(version$minor, "[.]")[[1]][1]))
+## package installation location
+pkgDir <- file.path("packages", version$platform,
+                    paste0(version$major, ".", strsplit(version$minor, "[.]")[[1]][1]))
 
-  if (!dir.exists(pkgDir)) {
-    dir.create(pkgDir, recursive = TRUE)
-  }
-}
+
+dir.create(pkgDir, recursive = TRUE)
 .libPaths(pkgDir)
 
-if (!require("devtools")) {
-  install.packages("devtools", lib = pkgDir)
+## maybe restart with command here?
+
+if (!require("remotes")) {   ## had to remove libloc - that was what was causing the restart because remotes is loaded thanks to the ::
+  install.packages("remotes", lib = pkgDir)
+  library(remotes)
 }
 
-if (!require("Require")) {
-  install.packages("Require", lib = pkgDir)
-  library(Require)
-}
+remotes::install_github("PredictiveEcology/SpaDES.install@a120e301eed8e427dc10b1ac2cdb34156b50af28", lib = pkgDir, upgrade = FALSE) ## install this first, it brings Require along
+remotes::install_github("PredictiveEcology/Require@6f2276ca64eee8365045363ccb8fc6f7935225a8", lib = pkgDir, upgrade = FALSE) ## change to sha
 
-if (FALSE) {
-  # install.packages("SpaDES", dependencies = TRUE, lib = pkgDir)
-  # devtools::install_github("PredictiveEcology/SpaDES.core@8a7886a6afd7f3b90df10ea6b87caae8661f8709")
-  # devtools::install_github("PredictiveEcology/LandR@093c39898912a6e89ac9b6e862733052a0fae407")
-  # devtools::install_github("ianmseddy/LandR.CS@b39c8c72d20189fa6b6aeb057cdc751a631e0efa")
-  # devtools::install_github("PredictiveEcology/reproducible@aedea49637a6ebd0db6897f1d33f53959f41bee2")
-  # devtools::install_github("PredictiveEcology/SpaDES.install@80c43dcb94d897d25545105a7b83111cf634a556")
-  # devtools::install_github("PredictiveEcology/SpaDES.experiment@5a23c40f8aa9a9efc6dc16e040f8771561059152")
+options("Require.unloadNamespaces" = FALSE)
+Require::Require("checkpoint")
+checkpoint("2022-06-01", checkpoint_location = pkgDir, r_version = "4.2.1",
+           scan_now = FALSE, scan_rprofile = FALSE)
+.libPaths(c(.libPaths(), pkgDir))    ## we need SpaDES.install, and not a bad idea to take advantage of other installed deps. This also seems to prevent issus with Rcpp/rgdal/magrittr install
 
-  # Require::pkgSnapshot("packages/pkgSnapshot.txt", libPaths = "packages/x86_64-w64-mingw32/4.0/")
-  # Much later on a different or same machine
-  Require::Require(pkgSnapshot = "packages/pkgSnapshot.txt")
-}
+## SpaDES/LandR pkg installation:
+install.packages(c("magrittr", "pryr"))   ## need to be separate, too finicky and fail to install in subsequent calls
+Require::Require("SpaDES", require = FALSE)
 
-out <- SpaDES.install::makeSureAllPackagesInstalled(modulePath = "R/SpaDES/m")
+SpaDES.install::makeSureAllPackagesInstalled(modulePath = "R/SpaDES/m")
+
+## some packages need specific versions -- a restart may be needed, if so rerun lines 1-58
+Require::Require("PredictiveEcology/reproducible@ed25a8024d71b4ffa931a2e58e7a919257eec7e1", require = FALSE)
+Require::Require("PredictiveEcology/LandR@65f3b8e8da8df22f3cf0168e2d505d5da49067c8", require = FALSE)
+Require::Require("ianmseddy/LandR.CS@02b5610366f1cac53011a72a43805a906c2437e0", require = FALSE)
+Require::Require("ianmseddy/PSPclean@3c3f0e7082e14c111a607c3ba803abf0396343e6", require = FALSE)
+Require::Require("PredictiveEcology/SpaDES.experiment@5a23c40f8aa9a9efc6dc16e040f8771561059152", require = FALSE)
+
+## after installing everything, please restart R again.
+## when you do so rerun lines 1-58
+
+# install.packages("SpaDES", dependencies = TRUE, lib = pkgDir) # yes restart if need be, yes install from soruce
+# remotes::install_github("PredictiveEcology/SpaDES.core@8a7886a6afd7f3b90df10ea6b87caae8661f8709", lib = pkgDir)
+# remotes::install_github("PredictiveEcology/LandR@093c39898912a6e89ac9b6e862733052a0fae407", lib = pkgDir)
+# remotes::install_github("ianmseddy/LandR.CS@b39c8c72d20189fa6b6aeb057cdc751a631e0efa", lib = pkgDir)
+# remotes::install_github("PredictiveEcology/reproducible@aedea49637a6ebd0db6897f1d33f53959f41bee2", lib = pkgDir)
+# remotes::install_github("PredictiveEcology/SpaDES.install@80c43dcb94d897d25545105a7b83111cf634a556", lib = pkgDir)
+# remotes::install_github("PredictiveEcology/SpaDES.experiment@5a23c40f8aa9a9efc6dc16e040f8771561059152", lib = pkgDir)
+
+# Require::pkgSnapshot("packages/pkgSnapshot.txt", libPaths = "packages/x86_64-w64-mingw32/4.0/")
+# Much later on a different or same machine:
+# options("Require.unloadNamespaces" = FALSE)
+# Require::Require(packageVersionFile = "packages/pkgSnapshot.txt", libPaths = pkgDir)
+# Require::Require(packageVersionFile = "packages/pkgSnapshot.txt", libPaths = pkgDir)  ## run a second time -- some pkgs may fail to install the first time around
+# sink(type = "message")
+# sink()
+
+# isRstudio <- Sys.getenv("RSTUDIO") == 1 ||
+#   .Platform$GUI == "RStudio" ||
+#   if (suppressWarnings(requireNamespace("rstudioapi", quietly = TRUE))) {
+#     rstudioapi::isAvailable()
+#   } else {
+#     FALSE
+#   }
+# if (isRstudio)
+#   rstudioapi::restartSession(command = paste0(".libPaths('", pkgDir, "')"))   ## this is not fixing the pkg loading at start-up issue
+
+## the previous line may result in a few errors on Windows when installing packages from scratch
+## PLEASE RESTART R HERE, and re-run all code up to this point again. All errors should be resolved and
+## any packages missing should be installed the second time around.
+
+## Try running sim without this:
+# out <- SpaDES.install::makeSureAllPackagesInstalled(modulePath = "R/SpaDES/m")
+## the previous line may result in a few errors on Windows when installing packages from scratch
+## PLEASE RESTART R HERE, and re-run all code up to this point again. All errors should be resolved and
+## any packages missing should be installed the second time around.
 
 ## load packages and make sure minimum versions are installed.
-Require(c("SpaDES",
-          "raster", "dplyr", "data.table", "future",
-          "PredictiveEcology/SpaDES.experiment",
-          "PredictiveEcology/LandR@development (>= 1.0.5.9003)",
-          "PredictiveEcology/reproducible (>= 1.2.7.9011)"), upgrade = FALSE)
+Require::Require(c("SpaDES",
+                   "raster", "dplyr", "data.table", "future",
+                   "SpaDES.experiment",
+                   "LandR",
+                   "reproducible"), upgrade = FALSE, install = FALSE)
 
 ## -----------------------------------------------
 ## SIMULATION SETUP
@@ -91,26 +127,27 @@ options("reproducible.useCache" = TRUE)
 options("reproducible.inputPaths" = file.path("R/SpaDES/inputs"))  ## store everything in inputs/ so that there are no duplicated files across modules
 options("reproducible.destinationPath" = file.path("R/SpaDES/inputs"))
 options("reproducible.useGDAL" = FALSE)
+options("spades.useRequire" = FALSE)
 
-# eventCaching <- c(".inputObjects", "init")
-eventCaching <- FALSE ## bug, not re-parsing  code
+eventCaching <- c(".inputObjects", "init")
 useParallel <- FALSE
 
+## TEST STUDY AREAS
 ## use studyAreaS or L to parameterise AND run simualations in the SAME area
 ## one study area from set A
 # runName <- "studyAreaS"
 # runName <- "studyAreaL"
 
+## SIMULATIONS IN BARROS ET AL 2022 MEE
 ## use one of the following to parameterise the model in a larger study area than the simulation area
 ## baseCase uses set A of study areas, parameterises using Biomass_borealDataPrep and Biomass_speciesParameters
 ## studyAreaChange uses set B of study areas, parameterises using Biomass_borealDataPrep and Biomass_speciesParameters
 ## altParameterisation uses set A of study areas, parameterises using Biomass_borealDataPrep only
-# runName <- "baseCase"
+runName <- "baseCase"
 # runName <- "studyAreaChange"
-runName <- "altParameters"
+# runName <- "altParameters"
 
 ## paths
-# simDirName <- "sep2021Runs"
 simDirName <- "mar2022Runs"
 simPaths <- list(cachePath = file.path("R/SpaDES/cache", simDirName)
                  , modulePath = file.path("R/SpaDES/m")
@@ -120,18 +157,19 @@ simPaths <- list(cachePath = file.path("R/SpaDES/cache", simDirName)
 figDir <- "R/SpaDES/outputs/GeneralFigs"
 dir.create(figDir, recursive = TRUE)
 
-## Get necessary objects -----------------------
+## Get necessary objects like the study area.
 source("R/SpaDES/1_simObjects.R")
 
 ## Run Biomass_speciesData to get species layers
 ## running this separately from other modules makes switching
 ## between using a large and a smaller study area easier when the smaller SA is within the large one,
 ## as it keeps the data in separate folders that can be used across simulations/scenarios
+# httr::set_config(httr::config(ssl_verifypeer = 0L, ssl_verifyhost = 0L))
 source("R/SpaDES/2_speciesLayers.R")
 
 ## check species layers:
 # plot(simOutSpeciesLayers$speciesLayers)
-## Populus grandidentata shouldn't be inin SK (and has only v. few pixels in the layer) and will be excluded
+## Populus grandidentata shouldn't be in Saskatchewan (and has only v. few pixels in the layer) and will be excluded
 toRm <- which(names(simOutSpeciesLayers$speciesLayers) %in% c("Popu_Gra"))
 simOutSpeciesLayers$speciesLayers <- dropLayer(simOutSpeciesLayers$speciesLayers, i = toRm)
 rm(toRm)
@@ -157,6 +195,7 @@ simTimes <- list(start = 2001, end = 2031)
 vegLeadingProportion <- 0 # indicates what proportion the stand must be in one species group for it to be leading.
 successionTimestep <- 10L  # for dispersal and age reclass.
 
+## list of values of species shade tolerance traits
 speciesParams <- list(
   "shadetolerance" = list(
     Betu_Pap = 1,
@@ -294,7 +333,7 @@ future:::ClusterRegistry("stop")
 qs::qsave(LandRBiomass_sim, file.path(simPaths$outputPath, paste0("simList_LandRBiomass_sim_", runName, ".qs")))
 
 ## VALIDATION
-## get the  land-cover change map (needed to have an RTM first, so get it from the simInitList)
+## get the  land-cover change map (need to have a rasterToMatch first, so get it from the simInitList)
 ## /!\ it is assumed that the filename of the raster in the simList corresponds to the raster found in disk.
 ## this may not be the case if the simulations were run in another machine and saved rasters were not imported.
 
