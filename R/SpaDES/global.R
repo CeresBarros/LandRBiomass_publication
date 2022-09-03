@@ -13,8 +13,33 @@
 # SpaDES.experiment 0.0.2.9002
 # LandR 1.0.5
 
-if (!exists("pkgDir")) {
-  pkgDir <- file.path("packages", version$platform,
+## set CRAN repos; use binary linux packages if on Ubuntu
+local({
+  options("repos" = c(CRAN = "https://cran.rstudio.com"))
+
+  if (Sys.info()["sysname"] == "Linux" && grepl("Ubuntu", utils::osVersion)) {
+    .os.version <- strsplit(system("lsb_release -c", intern = TRUE), ":\t")[[1]][[2]]
+    .user.agent <- paste0(
+      "R/", getRversion(), " R (",
+      paste(getRversion(), R.version["platform"], R.version["arch"], R.version["os"]),
+      ")"
+    )
+
+    .os.version <- system("lsb_release -cs", intern = TRUE)
+    options(
+      repos = c(
+        CRAN = if (!grepl("R Under development", R.version.string) && getRversion() >= "4.1") {
+          paste0("https://packagemanager.rstudio.com/all/__linux__/", .os.version, "/latest")
+        } else {
+          "https://cloud.r-project.org"
+        }
+      )
+    )
+
+    options(HTTPUserAgent = .user.agent)
+  }
+})
+
                       paste0(version$major, ".", strsplit(version$minor, "[.]")[[1]][1]))
 
   if (!dir.exists(pkgDir)) {
