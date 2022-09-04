@@ -58,17 +58,18 @@ checkpoint("2022-06-01", checkpoint_location = pkgDir, r_version = "4.2.1",
 .libPaths(c(.libPaths(), pkgDir))    ## we need SpaDES.install, and not a bad idea to take advantage of other installed deps. This also seems to prevent issus with Rcpp/rgdal/magrittr install
 
 ## SpaDES/LandR pkg installation:
-install.packages(c("magrittr", "pryr"))   ## need to be separate, too finicky and fail to install in subsequent calls
-Require::Require("SpaDES", require = FALSE)
+install.packages(c("magrittr", "pryr", "RCurl", "XML"))   ## need to be separate, too finicky and fail to install in subsequent calls
+Require::Require(c("SpaDES"), require = FALSE)
 
 SpaDES.install::makeSureAllPackagesInstalled(modulePath = "R/SpaDES/m")
 
 ## some packages need specific versions -- a restart may be needed, if so rerun lines 1-58
-Require::Require("PredictiveEcology/reproducible@ed25a8024d71b4ffa931a2e58e7a919257eec7e1", require = FALSE)
-Require::Require("PredictiveEcology/LandR@65f3b8e8da8df22f3cf0168e2d505d5da49067c8", require = FALSE)
-Require::Require("ianmseddy/LandR.CS@02b5610366f1cac53011a72a43805a906c2437e0", require = FALSE)
-Require::Require("ianmseddy/PSPclean@3c3f0e7082e14c111a607c3ba803abf0396343e6", require = FALSE)
-Require::Require("PredictiveEcology/SpaDES.experiment@5a23c40f8aa9a9efc6dc16e040f8771561059152", require = FALSE)
+## make sure the appropriate RTools is installed and the path added to your .Renviron (see https://stackoverflow.com/a/71751606/11969696)
+remotes::install_github("PredictiveEcology/reproducible@ed25a8024d71b4ffa931a2e58e7a919257eec7e1")
+remotes::install_github("PredictiveEcology/LandR@65f3b8e8da8df22f3cf0168e2d505d5da49067c8")
+remotes::install_github("ianmseddy/LandR.CS@02b5610366f1cac53011a72a43805a906c2437e0")
+remotes::install_github("ianmseddy/PSPclean@3c3f0e7082e14c111a607c3ba803abf0396343e6")
+remotes::install_github("PredictiveEcology/SpaDES.experiment@5a23c40f8aa9a9efc6dc16e040f8771561059152")
 
 ## after installing everything, please restart R again.
 ## when you do so rerun lines 1-58
