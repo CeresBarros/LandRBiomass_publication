@@ -129,6 +129,7 @@ options("reproducible.inputPaths" = file.path("R/SpaDES/inputs"))  ## store ever
 options("reproducible.destinationPath" = file.path("R/SpaDES/inputs"))
 options("reproducible.useGDAL" = FALSE)
 options("spades.useRequire" = FALSE)
+options("reproducible.useTerra" = FALSE)
 
 eventCaching <- c(".inputObjects", "init")
 useParallel <- FALSE
