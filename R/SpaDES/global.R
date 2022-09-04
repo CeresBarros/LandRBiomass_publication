@@ -166,7 +166,7 @@ source("R/SpaDES/1_simObjects.R")
 ## running this separately from other modules makes switching
 ## between using a large and a smaller study area easier when the smaller SA is within the large one,
 ## as it keeps the data in separate folders that can be used across simulations/scenarios
-# httr::set_config(httr::config(ssl_verifypeer = 0L, ssl_verifyhost = 0L))
+httr::set_config(httr::config(ssl_verifypeer = 0L, ssl_verifyhost = 0L))
 source("R/SpaDES/2_speciesLayers.R")
 
 ## check species layers:
