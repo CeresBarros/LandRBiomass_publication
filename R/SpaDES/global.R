@@ -36,84 +36,33 @@ local({
 ## package installation location
 pkgDir <- file.path("packages", version$platform,
                     paste0(version$major, ".", strsplit(version$minor, "[.]")[[1]][1]))
-
-
 dir.create(pkgDir, recursive = TRUE)
-.libPaths(pkgDir)
+.libPaths(pkgDir, include.site = FALSE)
 
-## maybe restart with command here?
-
-if (!require("remotes")) {   ## had to remove libloc - that was what was causing the restart because remotes is loaded thanks to the ::
-  install.packages("remotes", lib = pkgDir)
-  library(remotes)
+if (!"remotes" %in% installed.packages()) {
+  install.packages("remotes")
 }
+remotes::install_github("PredictiveEcology/Require@archivedPkg", upgrade = FALSE)
+remotes::install_github("PredictiveEcology/SpaDES.install@development", upgrade = FALSE)
+options("Require.RPackageCache" = "~/.cache/RPackages/")
 
-remotes::install_github("PredictiveEcology/SpaDES.install@a120e301eed8e427dc10b1ac2cdb34156b50af28", lib = pkgDir, upgrade = FALSE) ## install this first, it brings Require along
-remotes::install_github("PredictiveEcology/Require@6f2276ca64eee8365045363ccb8fc6f7935225a8", lib = pkgDir, upgrade = FALSE) ## change to sha
+# options("Require.standAlone" = TRUE,
+#         "Require.unloadNamespaces" = FALSE)
+modulePath <- "R/SpaDES/m"
+SpaDES.install::getModule(modulePath = modulePath,
+                          c("CeresBarros/Biomass_speciesData@master",
+                            "CeresBarros/Biomass_borealDataPrep@master",
+                            "CeresBarros/Biomass_core@master",
+                            "CeresBarros/Biomass_validationKNN@master",
+                            "CeresBarros/Biomass_speciesParameters@temp"))
 
-options("Require.unloadNamespaces" = FALSE)
-Require::Require("checkpoint")
-checkpoint("2022-06-01", checkpoint_location = pkgDir, r_version = "4.2.1",
-           scan_now = FALSE, scan_rprofile = FALSE)
-.libPaths(c(.libPaths(), pkgDir))    ## we need SpaDES.install, and not a bad idea to take advantage of other installed deps. This also seems to prevent issus with Rcpp/rgdal/magrittr install
-
-## SpaDES/LandR pkg installation:
-install.packages(c("magrittr", "pryr", "RCurl", "XML"))   ## need to be separate, too finicky and fail to install in subsequent calls
-Require::Require(c("SpaDES"), require = FALSE)
-
-SpaDES.install::makeSureAllPackagesInstalled(modulePath = "R/SpaDES/m")
-
-## some packages need specific versions -- a restart may be needed, if so rerun lines 1-58
-## make sure the appropriate RTools is installed and the path added to your .Renviron (see https://stackoverflow.com/a/71751606/11969696)
-remotes::install_github("PredictiveEcology/reproducible@ed25a8024d71b4ffa931a2e58e7a919257eec7e1")
-remotes::install_github("PredictiveEcology/LandR@65f3b8e8da8df22f3cf0168e2d505d5da49067c8")
-remotes::install_github("ianmseddy/LandR.CS@02b5610366f1cac53011a72a43805a906c2437e0")
-remotes::install_github("ianmseddy/PSPclean@3c3f0e7082e14c111a607c3ba803abf0396343e6")
-remotes::install_github("PredictiveEcology/SpaDES.experiment@5a23c40f8aa9a9efc6dc16e040f8771561059152")
-
-## after installing everything, please restart R again.
-## when you do so rerun lines 1-58
-
-# install.packages("SpaDES", dependencies = TRUE, lib = pkgDir) # yes restart if need be, yes install from soruce
-# remotes::install_github("PredictiveEcology/SpaDES.core@8a7886a6afd7f3b90df10ea6b87caae8661f8709", lib = pkgDir)
-# remotes::install_github("PredictiveEcology/LandR@093c39898912a6e89ac9b6e862733052a0fae407", lib = pkgDir)
-# remotes::install_github("ianmseddy/LandR.CS@b39c8c72d20189fa6b6aeb057cdc751a631e0efa", lib = pkgDir)
-# remotes::install_github("PredictiveEcology/reproducible@aedea49637a6ebd0db6897f1d33f53959f41bee2", lib = pkgDir)
-# remotes::install_github("PredictiveEcology/SpaDES.install@80c43dcb94d897d25545105a7b83111cf634a556", lib = pkgDir)
-# remotes::install_github("PredictiveEcology/SpaDES.experiment@5a23c40f8aa9a9efc6dc16e040f8771561059152", lib = pkgDir)
-
-# Require::pkgSnapshot("packages/pkgSnapshot.txt", libPaths = "packages/x86_64-w64-mingw32/4.0/")
-# Much later on a different or same machine:
-# options("Require.unloadNamespaces" = FALSE)
-# Require::Require(packageVersionFile = "packages/pkgSnapshot.txt", libPaths = pkgDir)
-# Require::Require(packageVersionFile = "packages/pkgSnapshot.txt", libPaths = pkgDir)  ## run a second time -- some pkgs may fail to install the first time around
-# sink(type = "message")
-# sink()
-
-# isRstudio <- Sys.getenv("RSTUDIO") == 1 ||
-#   .Platform$GUI == "RStudio" ||
-#   if (suppressWarnings(requireNamespace("rstudioapi", quietly = TRUE))) {
-#     rstudioapi::isAvailable()
-#   } else {
-#     FALSE
-#   }
-# if (isRstudio)
-#   rstudioapi::restartSession(command = paste0(".libPaths('", pkgDir, "')"))   ## this is not fixing the pkg loading at start-up issue
-
-## the previous line may result in a few errors on Windows when installing packages from scratch
-## PLEASE RESTART R HERE, and re-run all code up to this point again. All errors should be resolved and
-## any packages missing should be installed the second time around.
-
-## Try running sim without this:
-# out <- SpaDES.install::makeSureAllPackagesInstalled(modulePath = "R/SpaDES/m")
-## the previous line may result in a few errors on Windows when installing packages from scratch
-## PLEASE RESTART R HERE, and re-run all code up to this point again. All errors should be resolved and
-## any packages missing should be installed the second time around.
+outs <- SpaDES.install::packagesInModules(modulePath = modulePath)
+Require::Require(c(unname(unlist(outs)), "PredictiveEcology/SpaDES.experiment@development"),
+                 require = FALSE, standAlone = TRUE)
 
 ## load packages and make sure minimum versions are installed.
-Require::Require(c("SpaDES",
-                   "raster", "dplyr", "data.table", "future",
-                   "SpaDES.experiment",
+Require::Require(c("raster", "dplyr", "data.table", "future",
+                   "SpaDES.core", "SpaDES.experiment",
                    "LandR",
                    "reproducible"), upgrade = FALSE, install = FALSE)
 
@@ -152,7 +101,7 @@ runName <- "baseCase"
 ## paths
 simDirName <- "mar2022Runs"
 simPaths <- list(cachePath = file.path("R/SpaDES/cache", simDirName)
-                 , modulePath = file.path("R/SpaDES/m")
+                 , modulePath = modulePath
                  , inputPath = file.path("R/SpaDES/inputs")
                  , outputPath = file.path("R/SpaDES/outputs", simDirName, runName))
 
