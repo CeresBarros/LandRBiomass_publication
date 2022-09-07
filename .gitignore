@@ -12,6 +12,7 @@ logR.txt
 data/
 data
 packages/*
+._AllPackages.rds
 
 # don't ignore
 !.gitignore
