@@ -174,9 +174,13 @@ if (runName %in% c("baseCase", "studyAreaChange", "studyAreaS", "studyAreaL")) {
 }
 
 simParams <- list(
+  .globals = list("dataYear" = 2001L    ## will not be used as the layers have been pre-preped, but just in case...
+                  , "initialB" = NA     ## use LANDIS approach to estimate initial cohort B
+                  , "sppEquivCol" = sppEquivCol
+                  , "vegLeadingProportion" = vegLeadingProportion
+                  , ".useCache" = eventCaching)
   Biomass_borealDataPrep = list(
-    "sppEquivCol" = sppEquivCol
-    , "fitDeciduousCoverDiscount" = TRUE
+    "fitDeciduousCoverDiscount" = TRUE
     , "subsetDataAgeModel" = FALSE
     , "subsetDataBiomassModel" = FALSE
     , "exportModels" = "all"
@@ -192,21 +196,16 @@ simParams <- list(
     , "useCloudCacheForStats" = FALSE
     , "cloudFolderID" = NA
     , ".plots" = c("object", "raw")
-    , ".useCache" = eventCaching
   )
   , Biomass_speciesParameters = list(
     "quantileAgeSubset" = list(Betu_Pap = 95, Lari_Lar = 95, Pice_Gla = 95, Pice_Mar = 95, Pinu_Ban = 99, Popu_Spp = 99)
-    , "sppEquivCol" = sppEquivCol
-    , ".useCache" = eventCaching
   )
   , Biomass_core = list(
     "calcSummaryBGM" = c("start")
     , "initialBiomassSource" = "cohortData"
     , "plotOverstory" = TRUE
     , "seedingAlgorithm" = "wardDispersal"
-    , "sppEquivCol" = sppEquivCol
     , "successionTimestep" = successionTimestep
-    , "vegLeadingProportion" = vegLeadingProportion
     , ".plotInitialTime" = simTimes$start
     , ".plotInterval" = 1L
     , ".plots" = c("object", "raw")
