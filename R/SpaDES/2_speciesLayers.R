@@ -30,6 +30,7 @@ speciesParameters <- list(
   Biomass_speciesData = list(
     "types" = c("KNN")
     , "sppEquivCol" = sppEquivCol
+    , ".sslVerify" = 0L
     , ".studyAreaName" = SAname
     , ".useCache" = eventCaching
   )
