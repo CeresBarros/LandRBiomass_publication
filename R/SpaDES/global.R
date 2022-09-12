@@ -178,7 +178,7 @@ simParams <- list(
                   , "sppEquivCol" = sppEquivCol
                   , "vegLeadingProportion" = vegLeadingProportion
                   , ".sslVerify" = 0L
-                  , ".useCache" = eventCaching)
+                  , ".useCache" = eventCaching),
   Biomass_borealDataPrep = list(
     "fitDeciduousCoverDiscount" = TRUE
     , "subsetDataAgeModel" = FALSE
