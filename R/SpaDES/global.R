@@ -6,32 +6,8 @@
 
 ## /!\ PLEASE MAKE SURE YOU ARE USING R v4.0.5 /!\
 
-## set CRAN repos; use binary linux packages if on Ubuntu
-local({
-  options("repos" = c(CRAN = "https://cran.rstudio.com"))
-
-  if (Sys.info()["sysname"] == "Linux" && grepl("Ubuntu", utils::osVersion)) {
-    .os.version <- strsplit(system("lsb_release -c", intern = TRUE), ":\t")[[1]][[2]]
-    .user.agent <- paste0(
-      "R/", getRversion(), " R (",
-      paste(getRversion(), R.version["platform"], R.version["arch"], R.version["os"]),
-      ")"
-    )
-
-    .os.version <- system("lsb_release -cs", intern = TRUE)
-    options(
-      repos = c(
-        CRAN = if (!grepl("R Under development", R.version.string) && getRversion() >= "4.1") {
-          paste0("https://packagemanager.rstudio.com/all/__linux__/", .os.version, "/latest")
-        } else {
-          "https://cloud.r-project.org"
-        }
-      )
-    )
-
-    options(HTTPUserAgent = .user.agent)
-  }
-})
+## set CRAN repo
+options(repos = c(CRAN = "https://cloud.r-project.org")
 
 ## package installation location
 pkgDir <- file.path("packages", version$platform,
@@ -43,11 +19,13 @@ if (!"remotes" %in% installed.packages()) {
   install.packages("remotes")
 }
 remotes::install_github("PredictiveEcology/Require@archivedPkg", upgrade = FALSE)
+## install .project instead.
 remotes::install_github("PredictiveEcology/SpaDES.install@development", upgrade = FALSE)
-options("Require.RPackageCache" = "~/.cache/RPackages/")
 
-# options("Require.standAlone" = TRUE,
-#         "Require.unloadNamespaces" = FALSE)
+options("Require.RPackageCache" = "~/.cache/RPackages/")
+##use binary linux packages if on Ubuntu
+SpaDES.install::setLinuxBinaryRepo()   ## to be moved to require
+
 modulePath <- "R/SpaDES/m"
 SpaDES.install::getModule(modulePath = modulePath,
                           c("CeresBarros/Biomass_speciesData@28-ssl-certificate-of-nfi-ftp-server-use",
@@ -56,7 +34,7 @@ SpaDES.install::getModule(modulePath = modulePath,
                             "CeresBarros/Biomass_validationKNN@2-ssl-certificate-of-nfi-ftp-server-used",
                             "CeresBarros/Biomass_speciesParameters@temp"))
 
-outs <- SpaDES.install::packagesInModules(modulePath = modulePath)
+outs <- SpaDES.install::packagesInModules(modulePath = modulePath) ## to be mv to .project
 Require::Require(c(unname(unlist(outs)),
                    "PredictiveEcology/SpaDES.experiment@development",
                    "CeresBarros/LandR@development"),   ## Sep 9th 2022  (bug fix statsModel) -- add to use remotes to update
