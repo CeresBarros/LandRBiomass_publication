@@ -50,14 +50,16 @@ options("Require.RPackageCache" = "~/.cache/RPackages/")
 #         "Require.unloadNamespaces" = FALSE)
 modulePath <- "R/SpaDES/m"
 SpaDES.install::getModule(modulePath = modulePath,
-                          c("CeresBarros/Biomass_speciesData@master",
-                            "CeresBarros/Biomass_borealDataPrep@master",
-                            "CeresBarros/Biomass_core@master",
-                            "CeresBarros/Biomass_validationKNN@master",
+                          c("CeresBarros/Biomass_speciesData@28-ssl-certificate-of-nfi-ftp-server-use",
+                            "CeresBarros/Biomass_borealDataPrep@71-ssl-certificate-of-nfi-ftp-server-use",
+                            "CeresBarros/Biomass_core@69-ssl-certificate-of-nfi-ftp-server-use",
+                            "CeresBarros/Biomass_validationKNN@2-ssl-certificate-of-nfi-ftp-server-used",
                             "CeresBarros/Biomass_speciesParameters@temp"))
 
 outs <- SpaDES.install::packagesInModules(modulePath = modulePath)
-Require::Require(c(unname(unlist(outs)), "PredictiveEcology/SpaDES.experiment@development"),
+Require::Require(c(unname(unlist(outs)),
+                   "PredictiveEcology/SpaDES.experiment@development",
+                   "CeresBarros/LandR@development"),   ## Sep 9th 2022  (bug fix statsModel) -- add to use remotes to update
                  require = FALSE, standAlone = TRUE)
 
 ## load packages and make sure minimum versions are installed.
