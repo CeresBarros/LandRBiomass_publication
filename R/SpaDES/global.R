@@ -269,10 +269,12 @@ saveSimList(LandRBiomass_simInit, file.path(simPaths$outputPath, paste0("simInit
 
 amc::.gc()  ## clean ws
 if (Sys.info()["sysname"] == "Windows") {
-  plan("multisession", workers = 2)   ## each worker consuming roughly 6Gb
+  # plan("multisession", workers = 2) ## not working, options not passed to futures
+  plan("sequential") ## not working, options not passed to futures
 } else {
   plan("multicore", workers = 2)
 }
+
 LandRBiomass_sim <- experiment2(
   sim1 = LandRBiomass_simInit,
   clearSimEnv = TRUE,
