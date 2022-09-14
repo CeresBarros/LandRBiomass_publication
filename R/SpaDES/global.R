@@ -4,7 +4,7 @@
 ## Ceres: June 2018
 ## ------------------------------------------------------
 
-## /!\ PLEASE MAKE SURE YOU ARE USING R v4.0.5 /!\
+## /!\ PLEASE MAKE SURE YOU ARE USING R v4.2 /!\
 
 ## set CRAN repo
 options(repos = c(CRAN = "https://cloud.r-project.org")
