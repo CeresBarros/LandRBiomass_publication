@@ -7,7 +7,7 @@
 ## /!\ PLEASE MAKE SURE YOU ARE USING R v4.2 /!\
 
 ## set CRAN repo
-options(repos = c(CRAN = "https://cloud.r-project.org")
+options(repos = c(CRAN = "https://cloud.r-project.org"))
 
 ## package installation location
 pkgDir <- file.path("packages", version$platform,
@@ -19,26 +19,26 @@ if (!"remotes" %in% installed.packages()) {
   install.packages("remotes")
 }
 remotes::install_github("PredictiveEcology/Require@archivedPkg", upgrade = FALSE)
-## install .project instead.
-remotes::install_github("PredictiveEcology/SpaDES.install@development", upgrade = FALSE)
+Require::Require("PredictiveEcology/SpaDES.project@development",
+                 upgrade = FALSE, standAlone = TRUE)
 
-options("Require.RPackageCache" = "~/.cache/RPackages/")
 ##use binary linux packages if on Ubuntu
-SpaDES.install::setLinuxBinaryRepo()   ## to be moved to require
+Require::setLinuxBinaryRepo()
 
 modulePath <- "R/SpaDES/m"
 SpaDES.install::getModule(modulePath = modulePath,
-                          c("CeresBarros/Biomass_speciesData@28-ssl-certificate-of-nfi-ftp-server-use",
-                            "CeresBarros/Biomass_borealDataPrep@71-ssl-certificate-of-nfi-ftp-server-use",
-                            "CeresBarros/Biomass_core@69-ssl-certificate-of-nfi-ftp-server-use",
+                          c("PredictiveEcology/Biomass_speciesData@master",
+                            "PredictiveEcology/Biomass_borealDataPrep@master",
+                            "PredictiveEcology/Biomass_core@master",
                             "CeresBarros/Biomass_validationKNN@2-ssl-certificate-of-nfi-ftp-server-used",
-                            "CeresBarros/Biomass_speciesParameters@temp"))
+                            "PredictiveEcology/Biomass_speciesParameters@master"))
 
 outs <- SpaDES.install::packagesInModules(modulePath = modulePath) ## to be mv to .project
 Require::Require(c(unname(unlist(outs)),
-                   "PredictiveEcology/SpaDES.experiment@development",
-                   "CeresBarros/LandR@development"),   ## Sep 9th 2022  (bug fix statsModel) -- add to use remotes to update
+                   "PredictiveEcology/SpaDES.experiment@development"),
                  require = FALSE, standAlone = TRUE)
+
+Require::Require("CeresBarros/LandR@development", require = FALSE, standAlone = TRUE)  ## workaround for now
 
 ## load packages and make sure minimum versions are installed.
 Require::Require(c("raster", "dplyr", "data.table", "future",
