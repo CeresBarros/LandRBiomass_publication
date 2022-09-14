@@ -98,11 +98,7 @@ source("R/SpaDES/1_simObjects.R")
 source("R/SpaDES/2_speciesLayers.R")
 
 ## check species layers:
-# plot(simOutSpeciesLayers$speciesLayers)
-## Populus grandidentata shouldn't be in Saskatchewan (and has only v. few pixels in the layer) and will be excluded
-toRm <- which(names(simOutSpeciesLayers$speciesLayers) %in% c("Popu_Gra"))
-simOutSpeciesLayers$speciesLayers <- dropLayer(simOutSpeciesLayers$speciesLayers, i = toRm)
-rm(toRm)
+plot(simOutSpeciesLayers$speciesLayers)
 
 ## subset sppEquivalencies
 sppEquivalencies_CA <- sppEquivalencies_CA[Boreal %in% names(simOutSpeciesLayers$speciesLayers)]
