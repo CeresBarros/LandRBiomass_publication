@@ -175,6 +175,7 @@ simParams <- list(
   )
   , Biomass_speciesParameters = list(
     "quantileAgeSubset" = list(Betu_Pap = 95, Lari_Lar = 95, Pice_Gla = 95, Pice_Mar = 95, Pinu_Ban = 99, Popu_Spp = 99)
+    , "speciesFittingApproach" = "single"
   )
   , Biomass_core = list(
     "calcSummaryBGM" = c("start")
