@@ -18,8 +18,8 @@ dir.create(pkgDir, recursive = TRUE)
 if (!"remotes" %in% installed.packages()) {
   install.packages("remotes")
 }
-remotes::install_github("PredictiveEcology/Require@archivedPkg", upgrade = FALSE)
-Require::Require("PredictiveEcology/SpaDES.project@development",
+remotes::install_github("PredictiveEcology/Require@archivedPkg", upgrade = FALSE, force = TRUE)
+Require::Require("PredictiveEcology/SpaDES.install@development",
                  upgrade = FALSE, standAlone = TRUE)
 
 ##use binary linux packages if on Ubuntu
