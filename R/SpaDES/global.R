@@ -45,9 +45,8 @@ Require::Require(c(unname(unlist(outs)),
 
 ## load packages
 Require::Require(c("raster", "dplyr", "data.table", "future",
-                   "SpaDES.core", "SpaDES.experiment",
-                   "LandR",
-                   "reproducible"), upgrade = FALSE, install = FALSE)
+                   "SpaDES.core", "LandR", "reproducible"),
+                 upgrade = FALSE, install = FALSE)
 
 ## -----------------------------------------------
 ## SIMULATION SETUP
@@ -259,7 +258,7 @@ if (Sys.info()["sysname"] == "Windows") {
   plan("multicore", workers = 2)
 }
 
-LandRBiomass_sim <- experiment2(
+LandRBiomass_sim <- SpaDES.experiment::experiment2(
   sim1 = LandRBiomass_simInit,
   clearSimEnv = TRUE,
   replicates = 10)
