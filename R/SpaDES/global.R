@@ -156,7 +156,6 @@ if (runName %in% c("baseCase", "studyAreaChange", "studyAreaS", "studyAreaL")) {
 
 simParams <- list(
   .globals = list("dataYear" = 2001L    ## will not be used as the layers have been pre-preped, but just in case...
-                  , "initialB" = NA     ## use LANDIS approach to estimate initial cohort B
                   , "sppEquivCol" = sppEquivCol
                   , "vegLeadingProportion" = vegLeadingProportion
                   , ".sslVerify" = 0L
