@@ -93,14 +93,14 @@ dir.create(figPath, recursive = TRUE)
 
 ## Get necessary objects like the study area.
 devtools::source_url(paste0("https://raw.githubusercontent.com/CeresBarros/",
-                            "LandRBiomass_publication/master/R/SpaDES/",
+                            "LandRBiomass_publication/repPkgInstall/R/SpaDES/",
                             "1_simObjects.R?raw=TRUE"))
 ## Run Biomass_speciesData to get species layers
 ## running this separately from other modules makes switching
 ## between using a large and a smaller study area easier when the smaller SA is within the large one,
 ## as it keeps the data in separate folders that can be used across simulations/scenarios
 devtools::source_url(paste0("https://raw.githubusercontent.com/CeresBarros/",
-                            "LandRBiomass_publication/master/R/SpaDES/",
+                            "LandRBiomass_publication/repPkgInstall/R/SpaDES/",
                             "2_speciesLayers.R?raw=TRUE"))
 
 ## check species layers:
