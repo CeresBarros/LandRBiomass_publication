@@ -39,7 +39,8 @@ SpaDES.project::getModule(modulePath = modulePath,
 
 outs <- SpaDES.project::packagesInModules(modulePath = modulePath) ## to be mv to .project
 Require::Require(c(unname(unlist(outs)),
-                   "PredictiveEcology/SpaDES.experiment@development"),
+                   "PredictiveEcology/SpaDES.experiment@development",
+                   "devtools"),
                  require = FALSE, standAlone = TRUE)
 
 Require::Require("CeresBarros/LandR@development", require = FALSE, standAlone = TRUE)  ## workaround for now
@@ -93,13 +94,16 @@ figPath <- "R/SpaDES/outputs/GeneralFigs"
 dir.create(figPath, recursive = TRUE)
 
 ## Get necessary objects like the study area.
-source("R/SpaDES/1_simObjects.R")
-
+devtools::source_url(paste0("https://raw.githubusercontent.com/CeresBarros/",
+                            "LandRBiomass_publication/master/R/SpaDES/",
+                            "1_simObjects.R?raw=TRUE"))
 ## Run Biomass_speciesData to get species layers
 ## running this separately from other modules makes switching
 ## between using a large and a smaller study area easier when the smaller SA is within the large one,
 ## as it keeps the data in separate folders that can be used across simulations/scenarios
-source("R/SpaDES/2_speciesLayers.R")
+devtools::source_url(paste0("https://raw.githubusercontent.com/CeresBarros/",
+                            "LandRBiomass_publication/master/R/SpaDES/",
+                            "2_speciesLayers.R?raw=TRUE"))
 
 ## check species layers:
 plot(simOutSpeciesLayers$speciesLayers)
@@ -275,7 +279,9 @@ validationPaths <- list(cachePath = file.path("R/SpaDES/cache", simPathName)
                         , inputPath = file.path("R/SpaDES/inputs")
                         , outputPath = file.path("R/SpaDES/validation", simPathName, runName))
 
-source("R/SpaDES/3_simObjects4Valid.R")
+devtools::source_url(paste0("https://raw.githubusercontent.com/CeresBarros/",
+                            "LandRBiomass_publication/master/R/SpaDES/",
+                            "3_simObjects4Valid.R?raw=TRUE"))
 
 ## PARAMETERS FOR VALIDATION MODULE
 ## in this case all reps have the same parameters, so we can use the first rep to get the values
