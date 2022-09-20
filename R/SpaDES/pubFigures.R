@@ -12,24 +12,25 @@ runNames <- c("baseCase", "studyAreaChange", "altParameters")
 ## species layers simLists
 for (runName in runNames) {
   eval(parse(text = paste0("speciesLayersSimList", runName, " <- loadSimList(file.path('R/SpaDES/outputs',",
-                           "simDirName, runName, paste0('simList_speciesLayers', runName, '.qs')))")))
+                           "simPathName, runName, paste0('simList_speciesLayers', runName, '.qs')))")))
 }
 
 ## pre simulation simLists
 for (runName in runNames) {
   eval(parse(text = paste0("preSimList", runName, " <- loadSimList(file.path('R/SpaDES/outputs',",
-                           "simDirName, runName, paste0('simInit', runName, '.qs')))")))
+                           "simPathName, runName, paste0('simInit', runName, '.qs')))")))
 }
 
 ## post-simulation simLists
 for (runName in runNames) {
   eval(parse(text = paste0("simList", runName, " <- qs::qread(file.path('R/SpaDES/outputs',",
-                           "simDirName, runName, paste0('simList_LandRBiomass_sim_', runName, '.qs')))")))
+                           "simPathName, runName, paste0('simList_LandRBiomass_sim_', runName, '.qs')))")))
 }
 
 ## post-validation simLists
 for (runName in runNames) {
-  eval(parse(text = paste0("validSimList", runName, " <- qs::qread(file.path('R/SpaDES/validation', simDirName, runName, paste0('simValid', runName, '.qs')))")))
+  eval(parse(text = paste0("validSimList", runName, " <- loadSimList(file.path('R/SpaDES/validation',",
+                           "simPathName, runName, paste0('simValid', runName, '.qs')))")))
 }
 
 plotTheme <- function(majorYlines = TRUE, ...) {
@@ -80,7 +81,7 @@ timesaltParameters[, mean(as.integer(V1))/60, by = moduleName]
 ## OBJECT DIAGRAM
 objectDiagram(preSimListbaseCase, width = 1000, height = 2500)
 webshot("http://localhost:20581/session/viewhtml6aec1852565c/index.html",
-        file = file.path(figDir, "objectDiagram_baseCase.png"))
+        file = file.path(figPath, "objectDiagram_baseCase.png"))
 
 ## INSPECT MODEL BIOMASS AND MODEL COVER ----------------------------------
 ## two statistical models used to derive spatially-varying species traits (maxB, maxANPP and SEP)
@@ -199,7 +200,7 @@ ggplot() +
   theme_pubr(base_size = 12, legend = "right") +
   labs(y = expression(Average~~total~~biomass~~(g/m^2)), x = "Year", colour = "",
        fill = "", linetype = "")
-ggsave(file.path(figDir, "baseCase_altParameters_ensemble.png"),
+ggsave(file.path(figPath, "baseCase_altParameters_ensemble.png"),
        width = 8, height = 4.5, units = "in", dpi = 300)
 
 
@@ -234,7 +235,7 @@ plotStudyAreasSK <- ggplot() +
 insetMap <- ggdraw() +
   draw_plot(plotStudyAreasSK) +
   draw_plot(plotStudyAreasCanada, x = 0.60, y = 0.65, width = 0.4, height = 0.4)
-ggsave(plot = insetMap, filename = file.path(figDir, "studyAreas_setsAB.png"), bg = "white",
+ggsave(plot = insetMap, filename = file.path(figPath, "studyAreas_setsAB.png"), bg = "white",
        width = 6, height = 7, units = "in", dpi = 300)
 
 
@@ -392,7 +393,7 @@ allPlots <- ggarrange(biomassPlots,
                                  "NFI kNN stand age",
                                  "land-cover",
                                  "ecodistricts"))
-ggsave(plot = allPlots, filename = file.path(figDir, "inputMaps.png"),
+ggsave(plot = allPlots, filename = file.path(figPath, "inputMaps.png"),
        width = 14, height = 10, units = "in", dpi = 300, bg = "white")
 
 
@@ -419,7 +420,7 @@ Plot(speciesLayersSetA,
      title = c(paste(names(speciesLayersSetA), "- set A"),
                paste(names(speciesLayersSetB), "- set B")),
      new = TRUE)
-savePlot(file.path(figDir, "speciesLayers.tiff"), type =  "tiff")
+savePlot(file.path(figPath, "speciesLayers.tiff"), type =  "tiff")
 dev.off()
 
 
@@ -473,7 +474,7 @@ runTimePlot2 <- ggplot(plotData[model != "Faster_Mag"],
 
 savePlot <- ggarrange(runTimePlot1, runTimePlot2 + theme(legend.position = "none"),
                       ncol = 1, align = "v", labels = "auto")
-ggsave(plot = savePlot, filename = file.path(figDir, "runTimePlots.png"), device = "png",
+ggsave(plot = savePlot, filename = file.path(figPath, "runTimePlots.png"), device = "png",
        width = 6, height = 8, dpi = 300)
 
 ## SIMULATION FIGURES ----------------------------------------
@@ -505,7 +506,7 @@ speciesPlots <- plot_grid(landscapePlots[[1]],
 allPlotsSim <- plot_grid(speciesPlots, landscapePlots[[3]], ncol = 1,
                          labels = c("a)", "b)"),
                          rel_heights = c(0.7, 0.3))
-ggsave(plot = allPlotsSim, filename = file.path(figDir, "simulationPlots_studyAreaChange.png"),
+ggsave(plot = allPlotsSim, filename = file.path(figPath, "simulationPlots_studyAreaChange.png"),
        bg = "white", width = 14, height = 10, dpi = 300)
 
 ## Simulation plots for example 2
@@ -552,7 +553,7 @@ allPlotsSim_BC_AP <- plot_grid(
   NULL,
   get_legend(speciesBoverstory_BC + theme(legend.direction = "horizontal", text = element_text(size = 10))),
   ncol = 1, rel_heights = c(1, 0, 0.1))
-ggsave(plot = allPlotsSim_BC_AP, filename = file.path(figDir, "simulationPlots_example2.png"),
+ggsave(plot = allPlotsSim_BC_AP, filename = file.path(figPath, "simulationPlots_example2.png"),
        bg = "white", height = 290, width = 180, dpi = 300, units = "mm")
 
 ## VALIDATION FIGURES ----------------------------------------
@@ -612,7 +613,7 @@ allPlotsValid <- plot_grid(
   rel_heights = c(1, -0.01, 0.05, 0.05, 0.5, -0.01, 0.1), ncol = 2,
 )
 
-ggsave(plot = allPlotsValid, filename = file.path(figDir, "validationPlots_studyAreaChange.png"),
+ggsave(plot = allPlotsValid, filename = file.path(figPath, "validationPlots_studyAreaChange.png"),
        bg = "white", height = 250, width = 210, dpi = 300, units = "mm")
 
 
@@ -821,7 +822,7 @@ allPlotsValid_BC_AP <- plot_grid(
   align = "hv", axis = "bl"
 )
 
-ggsave(plot = allPlotsValid_BC_AP, filename = file.path(figDir, "validationPlots_example2.png"),
+ggsave(plot = allPlotsValid_BC_AP, filename = file.path(figPath, "validationPlots_example2.png"),
        bg = "white", height = 250, width = 230, dpi = 300, units = "mm")
 
 ## SIMULATION & VALIDATION FIGURES
@@ -853,6 +854,6 @@ B_MAD_PlotsSim_BC_AP <- ggarrange(
                      legend.spacing = unit(0, units = "mm"), legend.box = "vertical", text = element_text(size = 10))),
   nrow = 2, ncol = 2, heights = c(1, 1), widths = c(1, 0.2)
 )
-ggsave(plot = B_MAD_PlotsSim_BC_AP, filename = file.path(figDir, "simValidPlots_B_MAD_example2.png"),
+ggsave(plot = B_MAD_PlotsSim_BC_AP, filename = file.path(figPath, "simValidPlots_B_MAD_example2.png"),
        bg = "white", height = 160, width = 230, dpi = 300, units = "mm")
 
