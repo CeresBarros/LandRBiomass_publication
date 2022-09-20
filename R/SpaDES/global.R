@@ -10,10 +10,10 @@
 options(repos = c(CRAN = "https://cloud.r-project.org"))
 
 ## package installation location
-pkgDir <- file.path("packages", version$platform,
-                    paste0(version$major, ".", strsplit(version$minor, "[.]")[[1]][1]))
-dir.create(pkgDir, recursive = TRUE)
-.libPaths(pkgDir, include.site = FALSE)
+pkgPath <- file.path("packages", version$platform,
+                     paste0(version$major, ".", strsplit(version$minor, "[.]")[[1]][1]))
+dir.create(pkgPath, recursive = TRUE)
+.libPaths(pkgPath, include.site = FALSE)
 
 if (!"remotes" %in% installed.packages()) {
   install.packages("remotes")
@@ -79,14 +79,14 @@ runName <- "baseCase"
 # runName <- "altParameters"
 
 ## paths
-simDirName <- "mar2022Runs"
-simPaths <- list(cachePath = file.path("R/SpaDES/cache", simDirName)
+simPathName <- "mar2022Runs"
+simPaths <- list(cachePath = file.path("R/SpaDES/cache", simPathName)
                  , modulePath = modulePath
                  , inputPath = file.path("R/SpaDES/inputs")
-                 , outputPath = file.path("R/SpaDES/outputs", simDirName, runName))
+                 , outputPath = file.path("R/SpaDES/outputs", simPathName, runName))
 
-figDir <- "R/SpaDES/outputs/GeneralFigs"
-dir.create(figDir, recursive = TRUE)
+figPath <- "R/SpaDES/outputs/GeneralFigs"
+dir.create(figPath, recursive = TRUE)
 
 ## Get necessary objects like the study area.
 source("R/SpaDES/1_simObjects.R")
@@ -266,10 +266,10 @@ qs::qsave(LandRBiomass_sim, file.path(simPaths$outputPath, paste0("simList_LandR
 ## /!\ it is assumed that the filename of the raster in the simList corresponds to the raster found in disk.
 ## this may not be the case if the simulations were run in another machine and saved rasters were not imported.
 
-validationPaths <- list(cachePath = file.path("R/SpaDES/cache", simDirName)
+validationPaths <- list(cachePath = file.path("R/SpaDES/cache", simPathName)
                         , modulePath = file.path("R/SpaDES/m")
                         , inputPath = file.path("R/SpaDES/inputs")
-                        , outputPath = file.path("R/SpaDES/validation", simDirName, runName))
+                        , outputPath = file.path("R/SpaDES/validation", simPathName, runName))
 
 source("R/SpaDES/3_simObjects4Valid.R")
 
