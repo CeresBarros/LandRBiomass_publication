@@ -40,12 +40,13 @@ SpaDES.project::getModule(modulePath = modulePath,
 outs <- SpaDES.project::packagesInModules(modulePath = modulePath) ## to be mv to .project
 Require::Require(c(unname(unlist(outs)),
                    "PredictiveEcology/SpaDES.experiment@development",
-                   "devtools"),
+                   "devtools", "ggspatial", "ggpubr", "cowplot"),
                  require = FALSE, standAlone = TRUE)
 
 ## load packages
 Require::Require(c("raster", "dplyr", "data.table", "future",
-                   "SpaDES.core", "LandR", "reproducible"),
+                   "SpaDES.core", "LandR", "reproducible",
+                   "ggspatial", "ggpubr", "cowplot"),
                  upgrade = FALSE, install = FALSE)
 
 ## -----------------------------------------------

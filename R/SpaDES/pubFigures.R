@@ -5,9 +5,6 @@
 ## ------------------------------------------------------
 
 ## this script should be sourced
-Require::Require(c("SpaDES", "raster", "sf", "data.table", "ggplot2", "LandR",
-                   "ggspatial", "ggpubr", "reproducible", "cowplot", "qs"),
-                 upgrade = FALSE)
 
 ## GET ALL SIMLISTS ------------------------------------
 runNames <- c("baseCase", "studyAreaChange", "altParameters")
