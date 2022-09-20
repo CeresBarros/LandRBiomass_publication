@@ -43,9 +43,7 @@ Require::Require(c(unname(unlist(outs)),
                    "devtools"),
                  require = FALSE, standAlone = TRUE)
 
-Require::Require("CeresBarros/LandR@development", require = FALSE, standAlone = TRUE)  ## workaround for now
-
-## load packages and make sure minimum versions are installed.
+## load packages
 Require::Require(c("raster", "dplyr", "data.table", "future",
                    "SpaDES.core", "SpaDES.experiment",
                    "LandR",
@@ -257,7 +255,7 @@ saveSimList(LandRBiomass_simInit, file.path(simPaths$outputPath, paste0("simInit
 amc::.gc()  ## clean ws
 if (Sys.info()["sysname"] == "Windows") {
   # plan("multisession", workers = 2) ## not working, options not passed to futures
-  plan("sequential") ## not working, options not passed to futures
+  plan("sequential")
 } else {
   plan("multicore", workers = 2)
 }
