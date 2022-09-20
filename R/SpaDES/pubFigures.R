@@ -109,6 +109,9 @@ SNLLdif <- SNLL[, list("delta2001" = y2001[simulation == "altParameters"] - y200
                        "delta2011-2001" = y2011_2001[simulation == "altParameters"] - y2011_2001[simulation == "basecase"]),
                 by = variable2]
 
+SNLLdif[variable2 %in% c("landscape_presences", "landscape_dominance", "landscape_biomass", "pixel_biomass"),
+        .(variable2, round(delta2011, 0))]
+
 ## assume a penalisation of 80 for base case
 AIC <- SNLL[simulation == "basecase", list(simulation = simulation,
                                            y2001 = 80 + 2*y2001,
@@ -124,7 +127,8 @@ AICdiff <- AIC[, list("delta2001" = y2001[simulation == "altParameters"] - y2001
                       "delta2011" = y2011[simulation == "altParameters"] - y2011[simulation == "basecase"],
                       "delta2011-2001" = y2011_2001[simulation == "altParameters"] - y2011_2001[simulation == "basecase"]),
                by = variable2]
-
+AICdiff[variable2 %in% c("landscape_presences", "landscape_dominance", "landscape_biomass", "pixel_biomass"),
+        .(variable2, round(delta2011, 0))]
 
 ## "ENSEMBLE" OF TWO INITIAL CONDITIONS ----------------------------------
 ## get data:

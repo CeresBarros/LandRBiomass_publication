@@ -67,7 +67,7 @@ eventCaching <- c(".inputObjects", "init")
 useParallel <- FALSE
 
 ## TEST STUDY AREAS
-## use studyAreaS or L to parameterise AND run simualations in the SAME area
+## use studyAreaS or L to parameterise AND run simulations in the SAME area
 ## one study area from set A
 # runName <- "studyAreaS"
 # runName <- "studyAreaL"
