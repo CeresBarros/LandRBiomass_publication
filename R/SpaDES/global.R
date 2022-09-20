@@ -23,20 +23,21 @@ if (!"Require" %in% installed.packages(lib.loc = pkgPath) ||
     packageVersion("Require", lib.loc = pkgPath) < "0.1.2") {
   remotes::install_github("PredictiveEcology/Require@development", upgrade = FALSE, force = TRUE)
 }
+Require::Require("PredictiveEcology/SpaDES.project@transition",
                  upgrade = FALSE, standAlone = TRUE)
 
 ##use binary linux packages if on Ubuntu
 Require::setLinuxBinaryRepo()
 
 modulePath <- "R/SpaDES/m"
-SpaDES.install::getModule(modulePath = modulePath,
+SpaDES.project::getModule(modulePath = modulePath,
                           c("PredictiveEcology/Biomass_speciesData@master",
                             "PredictiveEcology/Biomass_borealDataPrep@master",
                             "PredictiveEcology/Biomass_core@master",
                             "CeresBarros/Biomass_validationKNN@2-ssl-certificate-of-nfi-ftp-server-used",
                             "PredictiveEcology/Biomass_speciesParameters@master"))
 
-outs <- SpaDES.install::packagesInModules(modulePath = modulePath) ## to be mv to .project
+outs <- SpaDES.project::packagesInModules(modulePath = modulePath) ## to be mv to .project
 Require::Require(c(unname(unlist(outs)),
                    "PredictiveEcology/SpaDES.experiment@development"),
                  require = FALSE, standAlone = TRUE)
