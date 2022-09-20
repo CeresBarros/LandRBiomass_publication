@@ -279,7 +279,7 @@ validationPaths <- list(cachePath = file.path("R/SpaDES/cache", simPathName)
                         , outputPath = file.path("R/SpaDES/validation", simPathName, runName))
 
 devtools::source_url(paste0("https://raw.githubusercontent.com/CeresBarros/",
-                            "LandRBiomass_publication/master/R/SpaDES/",
+                            "LandRBiomass_publication/repPkgInstall/R/SpaDES/",
                             "3_simObjects4Valid.R?raw=TRUE"))
 
 ## PARAMETERS FOR VALIDATION MODULE
