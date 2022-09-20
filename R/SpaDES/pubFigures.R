@@ -479,12 +479,12 @@ ggsave(plot = savePlot, filename = file.path(figPath, "runTimePlots.png"), devic
 
 ## SIMULATION FIGURES ----------------------------------------
 ## Full suite of simulation plots from study area change
-speciesB <- qread(file.path(outputPath(simListstudyAreaChange$sim1_rep01), "figures", "biomass_by_species_gg.qs"))
-speciesBoverstory <- qread(file.path(outputPath(simListstudyAreaChange$sim1_rep01), "figures", "overstory_biomass_gg.qs"))
-speciesAge <- qread(file.path(outputPath(simListstudyAreaChange$sim1_rep01), "figures", "biomass-weighted_species_age_gg.qs"))
-speciesDom <- qread(file.path(outputPath(simListstudyAreaChange$sim1_rep01), "figures", "N_pixels_leading_gg.qs"))
-speciesANPP <- qread(file.path(outputPath(simListstudyAreaChange$sim1_rep01), "figures", "total_aNPP_by_species_gg.qs"))
-landscapeVars <- qread(file.path(outputPath(simListstudyAreaChange$sim1_rep01), "figures", "landscape_biomass_aNPP_max_age_gg.qs"))
+speciesB <- qs::qread(file.path(outputPath(simListstudyAreaChange$sim1_rep01), "figures", "biomass_by_species_gg.qs"))
+speciesBoverstory <- qs::qread(file.path(outputPath(simListstudyAreaChange$sim1_rep01), "figures", "overstory_biomass_gg.qs"))
+speciesAge <- qs::qread(file.path(outputPath(simListstudyAreaChange$sim1_rep01), "figures", "biomass-weighted_species_age_gg.qs"))
+speciesDom <- qs::qread(file.path(outputPath(simListstudyAreaChange$sim1_rep01), "figures", "N_pixels_leading_gg.qs"))
+speciesANPP <- qs::qread(file.path(outputPath(simListstudyAreaChange$sim1_rep01), "figures", "total_aNPP_by_species_gg.qs"))
+landscapeVars <- qs::qread(file.path(outputPath(simListstudyAreaChange$sim1_rep01), "figures", "landscape_biomass_aNPP_max_age_gg.qs"))
 
 speciesB <- speciesB + labs(title = "Total biomass", y = expression(g/m^2), x = "Year", fill = "")
 speciesBoverstory <- speciesBoverstory + labs(title = "Overstory biomass", y = expression(g/m^2), x = "Year", fill = "")
@@ -511,11 +511,11 @@ ggsave(plot = allPlotsSim, filename = file.path(figPath, "simulationPlots_studyA
 
 ## Simulation plots for example 2
 ## base case
-speciesB_BC <- qread(file.path(outputPath(simListbaseCase$sim1_rep01), "figures", "biomass_by_species_gg.qs"))
-speciesBoverstory_BC <- qread(file.path(outputPath(simListbaseCase$sim1_rep01), "figures", "overstory_biomass_gg.qs"))
-speciesAge_BC <- qread(file.path(outputPath(simListbaseCase$sim1_rep01), "figures", "biomass-weighted_species_age_gg.qs"))
-speciesDom_BC <- qread(file.path(outputPath(simListbaseCase$sim1_rep01), "figures", "N_pixels_leading_gg.qs"))
-speciesANPP_BC <- qread(file.path(outputPath(simListbaseCase$sim1_rep01), "figures", "total_aNPP_by_species_gg.qs"))
+speciesB_BC <- qs::qread(file.path(outputPath(simListbaseCase$sim1_rep01), "figures", "biomass_by_species_gg.qs"))
+speciesBoverstory_BC <- qs::qread(file.path(outputPath(simListbaseCase$sim1_rep01), "figures", "overstory_biomass_gg.qs"))
+speciesAge_BC <- qs::qread(file.path(outputPath(simListbaseCase$sim1_rep01), "figures", "biomass-weighted_species_age_gg.qs"))
+speciesDom_BC <- qs::qread(file.path(outputPath(simListbaseCase$sim1_rep01), "figures", "N_pixels_leading_gg.qs"))
+speciesANPP_BC <- qs::qread(file.path(outputPath(simListbaseCase$sim1_rep01), "figures", "total_aNPP_by_species_gg.qs"))
 
 speciesB_BC <- speciesB_BC + labs(title = "Total biomass", y = expression(g/m^2), x = "Year", fill = "")
 speciesBoverstory_BC <- speciesBoverstory_BC + labs(title = "Overstory biomass", y = expression(g/m^2), x = "Year", fill = "")
@@ -524,11 +524,11 @@ speciesDom_BC <- speciesDom_BC + labs(title = "Species dominance", y = "No. of p
 speciesANPP_BC <- speciesANPP_BC + labs(title = "Total aNPP", y = expression(g/m^2), x = "Year", colour = "")
 
 ## alternative params.
-speciesB_AP <- qread(file.path(outputPath(simListaltParameters$sim1_rep01), "figures", "biomass_by_species_gg.qs"))
-speciesBoverstory_AP <- qread(file.path(outputPath(simListaltParameters$sim1_rep01), "figures", "overstory_biomass_gg.qs"))
-speciesAge_AP <- qread(file.path(outputPath(simListaltParameters$sim1_rep01), "figures", "biomass-weighted_species_age_gg.qs"))
-speciesDom_AP <- qread(file.path(outputPath(simListaltParameters$sim1_rep01), "figures", "N_pixels_leading_gg.qs"))
-speciesANPP_AP <- qread(file.path(outputPath(simListaltParameters$sim1_rep01), "figures", "total_aNPP_by_species_gg.qs"))
+speciesB_AP <- qs::qread(file.path(outputPath(simListaltParameters$sim1_rep01), "figures", "biomass_by_species_gg.qs"))
+speciesBoverstory_AP <- qs::qread(file.path(outputPath(simListaltParameters$sim1_rep01), "figures", "overstory_biomass_gg.qs"))
+speciesAge_AP <- qs::qread(file.path(outputPath(simListaltParameters$sim1_rep01), "figures", "biomass-weighted_species_age_gg.qs"))
+speciesDom_AP <- qs::qread(file.path(outputPath(simListaltParameters$sim1_rep01), "figures", "N_pixels_leading_gg.qs"))
+speciesANPP_AP <- qs::qread(file.path(outputPath(simListaltParameters$sim1_rep01), "figures", "total_aNPP_by_species_gg.qs"))
 
 speciesB_AP <- speciesB_AP + labs(title = "Total biomass", y = expression(g/m^2), x = "Year", fill = "")
 speciesBoverstory_AP <- speciesBoverstory_AP + labs(title = "Overstory biomass", y = expression(g/m^2), x = "Year", fill = "")
@@ -559,17 +559,17 @@ ggsave(plot = allPlotsSim_BC_AP, filename = file.path(figPath, "simulationPlots_
 ## VALIDATION FIGURES ----------------------------------------
 ## Full suite of validation plots from study area change
 ## in this case we need the "data" with is the ggplot object
-landscapeRelB <- qread(file.path(outputPath(validSimListstudyAreaChange), "figures", "LandscapeComparisons_relB_data.qs"))
-landscapeDom <- qread(file.path(outputPath(validSimListstudyAreaChange), "figures", "LandscapeComparisons_Dom_data.qs"))
-landscapePresAbs <- qread(file.path(outputPath(validSimListstudyAreaChange), "figures", "LandscapeComparisons_PresAbs_data.qs"))
-landscapeDeltaB <- qread(file.path(outputPath(validSimListstudyAreaChange), "figures", "LandscapeComparisons_deltaB_data.qs"))
+landscapeRelB <- qs::qread(file.path(outputPath(validSimListstudyAreaChange), "figures", "LandscapeComparisons_relB_data.qs"))
+landscapeDom <- qs::qread(file.path(outputPath(validSimListstudyAreaChange), "figures", "LandscapeComparisons_Dom_data.qs"))
+landscapePresAbs <- qs::qread(file.path(outputPath(validSimListstudyAreaChange), "figures", "LandscapeComparisons_PresAbs_data.qs"))
+landscapeDeltaB <- qs::qread(file.path(outputPath(validSimListstudyAreaChange), "figures", "LandscapeComparisons_deltaB_data.qs"))
 
-pixelRelB <- qread(file.path(outputPath(validSimListstudyAreaChange), "figures", "PixelComparisons_relB_data.qs"))
-pixelDeltaB <- qread(file.path(outputPath(validSimListstudyAreaChange), "figures", "PixelComparisons_deltaB_data.qs"))
+pixelRelB <- qs::qread(file.path(outputPath(validSimListstudyAreaChange), "figures", "PixelComparisons_relB_data.qs"))
+pixelDeltaB <- qs::qread(file.path(outputPath(validSimListstudyAreaChange), "figures", "PixelComparisons_deltaB_data.qs"))
 
 ## for MAD its the GG output
-landscapeMAD <- qread(file.path(outputPath(validSimListstudyAreaChange), "figures", "landscapeMAD_gg.qs"))
-pixelMAD <- qread(file.path(outputPath(validSimListstudyAreaChange), "figures", "pixelMAD_gg.qs"))
+landscapeMAD <- qs::qread(file.path(outputPath(validSimListstudyAreaChange), "figures", "landscapeMAD_gg.qs"))
+pixelMAD <- qs::qread(file.path(outputPath(validSimListstudyAreaChange), "figures", "pixelMAD_gg.qs"))
 
 landscapeRelB <- landscapeRelB + labs(title = "Relative abundance")
 landscapePresAbs <- landscapePresAbs + labs(title = "Presences")
