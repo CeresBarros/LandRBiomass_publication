@@ -202,11 +202,13 @@ simParams <- list(
 )
 
 simObjects <- list(
-  "rstLCC" = rstLCC2005
+  "cohortDataFactorial" = cohortDataFactorial
+  , "rstLCC" = rstLCC2005
   , "sppEquiv" = sppEquivalencies_CA
   , "sppColorVect" = sppColorVect
   , "speciesLayers" = simOutSpeciesLayers$speciesLayers
   , "speciesParams" = speciesParams
+  , "speciesTableFactorial" = speciesTableFactorial
   , "treed" = simOutSpeciesLayers$treed
   , "numTreed" = simOutSpeciesLayers$numTreed
   , "nonZeroCover" = simOutSpeciesLayers$nonZeroCover
