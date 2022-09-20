@@ -344,7 +344,15 @@ saveSimList(LandRBiomass_validation, file.path(validationPaths$outputPath, paste
 ## -----------------------------------------------
 ## POST-HOC ANALYSIS - figures
 ## -----------------------------------------------
-source("R/SpaDES/pubFigures.R")
+
+## can only be run after all simulations are complete
+if (all(c("baseCase", "studyAreaChange", "altParameters") %in% dir(file.path(validationPaths$outputPath, "..")))) {
+  devtools::source_url(paste0("https://raw.githubusercontent.com/CeresBarros/",
+                              "LandRBiomass_publication/repPkgInstall/R/SpaDES/",
+                              "pubFigures.R?raw=TRUE"))
+} else {
+  warning("Not all simulations were complete and/or validated.")
+}
 
 q("no")
 
