@@ -67,3 +67,22 @@ sppEquivalencies_CA <- na.omit(sppEquivalencies_CA, sppEquivCol)
 sppColorVect <- sppColors(sppEquivalencies_CA, sppEquivCol,
                           newVals = "Mixed", palette = "Accent")
 
+
+## THEORETICAL SPECIES CURVE DATA FOR Biomass_speciesParameters ---------
+cohortDataFactorial <- prepInputs(targetFile = "cohortDataFactorial_medium_initialB10.rds",
+                                  destinationPath = simPaths$inputPath,
+                                  fun = "readRDS",
+                                  overwrite = TRUE,
+                                  url = "https://drive.google.com/file/d/1Y50o_UvKiCSpPq_92ZEeYi6KghH6D-Sl/view?usp=sharing",
+                                  cacheRepo = simPaths$cachePath,
+                                  userTags = c("cohortDataFactorial"))
+
+speciesTableFactorial <- prepInputs(targetFile = "speciesTableFactorial_medium_initialB10.rds",
+                                    destinationPath = simPaths$inputPath,
+                                    url = "https://drive.google.com/file/d/1Y7tQUpD20SSla4X9gDuCKcyR_nePDn3C/view?usp=sharing",
+                                    fun = "readRDS",
+                                    overwrite = TRUE,
+                                    cacheRepo = simPaths$cachePath,
+                                    userTags = c("speciesTableFactorial"))
+
+
