@@ -166,6 +166,7 @@ simParams <- list(
     , "subsetDataBiomassModel" = FALSE
     , "exportModels" = "all"
     , "fixModelBiomass" = TRUE
+    , "fireURL" = "https://drive.google.com/file/d/1YIc_BSkPKqW60SmfpR2vDpeRGrwOFKso/view?usp=sharing"  ## use a frozen version of fire perimeter data
     , "speciesTableAreas" = c("BSW", "BP")
     , "speciesUpdateFunction" = list(
       quote(LandR::speciesTableUpdate(sim$species, sim$speciesTable, sim$sppEquiv, P(sim)$sppEquivCol)),
