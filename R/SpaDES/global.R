@@ -180,7 +180,6 @@ simParams <- list(
   )
   , Biomass_speciesParameters = list(
     "quantileAgeSubset" = list(Betu_Pap = 95, Lari_Lar = 95, Pice_Gla = 95, Pice_Mar = 95, Pinu_Ban = 99, Popu_Spp = 99)
-    , "speciesFittingApproach" = "single"
   )
   , Biomass_core = list(
     "calcSummaryBGM" = c("start")
@@ -199,13 +198,12 @@ simParams <- list(
 )
 
 simObjects <- list(
-  "cohortDataFactorial" = cohortDataFactorial
-  , "rstLCC" = rstLCC2005
+  "rstLCC" = rstLCC2005
   , "sppEquiv" = sppEquivalencies_CA
   , "sppColorVect" = sppColorVect
   , "speciesLayers" = simOutSpeciesLayers$speciesLayers
   , "speciesParams" = speciesParams
-  , "speciesTableFactorial" = speciesTableFactorial
+  , "rasterToMatchLarge" = simOutSpeciesLayers$rasterToMatchLarge
   , "treed" = simOutSpeciesLayers$treed
   , "numTreed" = simOutSpeciesLayers$numTreed
   , "nonZeroCover" = simOutSpeciesLayers$nonZeroCover
