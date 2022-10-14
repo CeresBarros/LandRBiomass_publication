@@ -111,8 +111,9 @@ devtools::source_url(paste0("https://raw.githubusercontent.com/CeresBarros/",
 ## check species layers:
 plot(simOutSpeciesLayers$speciesLayers)
 
-## subset sppEquivalencies
+## subset sppEquivalencies and colorVector
 sppEquivalencies_CA <- sppEquivalencies_CA[Boreal %in% names(simOutSpeciesLayers$speciesLayers)]
+sppColorVect <- sppColorVect[c(names(simOutSpeciesLayers$speciesLayers), "Mixed")]
 
 ## Get land-cover raster now that we have a rasterToMatchLarge
 rstLCC2005 <- Cache(prepInputs,
