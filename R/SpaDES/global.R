@@ -57,8 +57,8 @@ Require::Require(c("raster", "dplyr", "data.table", "future",
 ## Set up modelling parameters  ---------------------------
 options("reproducible.useNewDigestAlgorithm" = 2)
 options("spades.moduleCodeChecks" = FALSE)
+options("spades.inputPath" = file.path("R/SpaDES/inputs"))  ## store everything in inputs/ so that there are no duplicated files across modules
 options("reproducible.useCache" = TRUE)
-options("reproducible.inputPaths" = file.path("R/SpaDES/inputs"))  ## store everything in inputs/ so that there are no duplicated files across modules
 options("reproducible.destinationPath" = file.path("R/SpaDES/inputs"))
 options("reproducible.useGDAL" = FALSE)
 options("spades.useRequire" = FALSE)
