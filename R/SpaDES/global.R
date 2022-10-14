@@ -35,8 +35,8 @@ SpaDES.project::getModule(modulePath = modulePath,
                           c("PredictiveEcology/Biomass_speciesData@master",
                             "PredictiveEcology/Biomass_borealDataPrep@master",
                             "PredictiveEcology/Biomass_core@master",
-                            "CeresBarros/Biomass_validationKNN@2-ssl-certificate-of-nfi-ftp-server-used",
-                            "PredictiveEcology/Biomass_speciesParameters@master"))
+                            "CeresBarros/Biomass_validationKNN@master",
+                            "CeresBarros/Biomass_speciesParameters@LandRPub"))
 
 outs <- SpaDES.project::packagesInModules(modulePath = modulePath)
 Require::Require(c(unname(unlist(outs)),
