@@ -223,6 +223,12 @@ if (grepl("studyArea(S|L)$", runName)) {
   simObjects$studyAreaLarge <- studyAreaL
 }
 
+## Make a rasterToMatch now that we have a rasterToMatchLarge and a studyArea
+RTM <- crop(simObjects$rasterToMatchLarge, simObjects$studyArea)
+RTM <- mask(RTM, simObjects$studyArea)
+
+simObjects$rasterToMatch <- RTM
+
 ## objects will be saved at the start of the simulation (so they reflect the previous year)
 simOutputs <- data.frame(expand.grid(objectName = "cohortData",
                                      saveTime = unique(seq(simTimes$start, simTimes$end, by = 1)),
