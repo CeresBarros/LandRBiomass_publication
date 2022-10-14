@@ -93,6 +93,9 @@ simPaths <- list(cachePath = file.path("R/SpaDES/cache", simPathName)
 figPath <- "R/SpaDES/outputs/GeneralFigs"
 dir.create(figPath, recursive = TRUE)
 
+## prompt googledrive authorization
+googledrive::drive_auth()
+
 ## Get necessary objects like the study area.
 devtools::source_url(paste0("https://raw.githubusercontent.com/CeresBarros/",
                             "LandRBiomass_publication/repPkgInstall/R/SpaDES/",
