@@ -1,10 +1,11 @@
 ## ------------------------------------------------------
 ## LandR Biomass PUBLICATION SIMULATIONS
 ##
-## Ceres: June 2018
+## Ceres Barros: last updated September 2022
 ## ------------------------------------------------------
 
-## /!\ PLEASE MAKE SURE YOU ARE USING R v4.2 /!\
+## /!\    PLEASE MAKE SURE YOU ARE USING R v4.2   /!\
+## /!\ PLEASE MAKE SURE YOU HAVE A GOOGLE ACCOUNT /!\
 
 ## set CRAN repo
 options(repos = c(CRAN = "https://cloud.r-project.org"))
@@ -37,7 +38,7 @@ SpaDES.project::getModule(modulePath = modulePath,
                             "CeresBarros/Biomass_validationKNN@2-ssl-certificate-of-nfi-ftp-server-used",
                             "PredictiveEcology/Biomass_speciesParameters@master"))
 
-outs <- SpaDES.project::packagesInModules(modulePath = modulePath) ## to be mv to .project
+outs <- SpaDES.project::packagesInModules(modulePath = modulePath)
 Require::Require(c(unname(unlist(outs)),
                    "PredictiveEcology/SpaDES.experiment@development",
                    "devtools", "ggspatial", "ggpubr", "cowplot"),
@@ -350,7 +351,7 @@ if (all(c("baseCase", "studyAreaChange", "altParameters") %in% dir(file.path(val
                               "LandRBiomass_publication/repPkgInstall/R/SpaDES/",
                               "pubFigures.R?raw=TRUE"))
 } else {
-  warning("Not all simulations were complete and/or validated.")
+  warning("Not all simulations were validated.")
 }
 
 q("no")
