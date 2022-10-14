@@ -24,7 +24,7 @@ if (!"Require" %in% installed.packages(lib.loc = pkgPath) ||
     packageVersion("Require", lib.loc = pkgPath) < "0.1.2") {
   remotes::install_github("PredictiveEcology/Require@development", upgrade = FALSE, force = TRUE)
 }
-##use binary linux packages if on Ubuntu
+## use binary linux packages if on Ubuntu
 Require::setLinuxBinaryRepo()
 
 Require::Require("PredictiveEcology/SpaDES.project@6d7de6ee12fc967c7c60de44f1aa3b04e6eeb5db",
