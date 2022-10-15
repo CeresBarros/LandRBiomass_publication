@@ -13,10 +13,10 @@ if (!runName %in% c("baseCase", "studyAreaChange", "altParameters", "studyAreaS"
   stop("runName must be one of 'baseCase', 'studyAreaChange', 'altParameters', 'studyAreaS' or 'studyAreaL'")
 }
 
-speciesPaths <- list(cachePath = file.path(simPaths$cachePath, "speciesLayers"),
-                     modulePath = file.path("R/SpaDES/m"),
-                     inputPath = file.path("R/SpaDES/inputs"),
-                     outputPath = file.path(simPaths$outputPath, "speciesLayers"))
+speciesPaths <- list(cachePath = Require::normPath(file.path(simPaths$cachePath, "speciesLayers"))
+                     , modulePath = Require::normPath(file.path("R/SpaDES/m"))
+                     , inputPath = Require::normPath(file.path("R/SpaDES/inputs"))
+                     , outputPath = Require::normPath(file.path(simPaths$outputPath, "speciesLayers")))
 
 speciesObjects <- list(
   "studyAreaLarge" = if (grepl("studyArea(S|L)$", runName)) get(runName) else studyAreaL

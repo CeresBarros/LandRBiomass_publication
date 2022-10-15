@@ -85,10 +85,10 @@ runName <- "baseCase"
 
 ## paths
 simPathName <- "mar2022Runs"
-simPaths <- list(cachePath = file.path("R/SpaDES/cache", simPathName)
-                 , modulePath = modulePath
-                 , inputPath = file.path("R/SpaDES/inputs")
-                 , outputPath = file.path("R/SpaDES/outputs", simPathName, runName))
+simPaths <- list(cachePath = Require::normPath(file.path("R/SpaDES/cache", simPathName))
+                 , modulePath = Require::normPath(modulePath)
+                 , inputPath = Require::normPath(file.path("R/SpaDES/inputs"))
+                 , outputPath = Require::normPath(file.path("R/SpaDES/outputs", simPathName, runName)))
 
 figPath <- "R/SpaDES/outputs/GeneralFigs"
 dir.create(figPath, recursive = TRUE)
@@ -284,10 +284,10 @@ qs::qsave(LandRBiomass_sim, file.path(simPaths$outputPath, paste0("simList_LandR
 ## /!\ it is assumed that the filename of the raster in the simList corresponds to the raster found in disk.
 ## this may not be the case if the simulations were run in another machine and saved rasters were not imported.
 
-validationPaths <- list(cachePath = file.path("R/SpaDES/cache", simPathName)
-                        , modulePath = file.path("R/SpaDES/m")
-                        , inputPath = file.path("R/SpaDES/inputs")
-                        , outputPath = file.path("R/SpaDES/validation", simPathName, runName))
+validationPaths <- list(cachePath = Require::normPath(file.path("R/SpaDES/cache", simPathName))
+                        , modulePath = Require::normPath(file.path("R/SpaDES/m"))
+                        , inputPath = Require::normPath(file.path("R/SpaDES/inputs"))
+                        , outputPath = Require::normPath(file.path("R/SpaDES/validation", simPathName, runName)))
 
 devtools::source_url(paste0("https://raw.githubusercontent.com/CeresBarros/",
                             "LandRBiomass_publication/repPkgInstall/R/SpaDES/",
