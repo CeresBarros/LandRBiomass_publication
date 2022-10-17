@@ -46,7 +46,7 @@ Require::Require(c(unname(unlist(outs)),
                  require = FALSE, standAlone = TRUE)
 
 ## load packages
-Require::Require(c("raster", "dplyr", "data.table", "future",
+Require::Require(c("raster", "terra", "dplyr", "data.table", "future",
                    "SpaDES.core", "LandR", "reproducible",
                    "ggspatial", "ggpubr", "cowplot"),
                  upgrade = FALSE, install = FALSE)
@@ -225,9 +225,9 @@ if (grepl("studyArea(S|L)$", runName)) {
   simObjects$studyAreaLarge <- studyAreaL
 }
 
-## Make a rasterToMatch now that we have a rasterToMatchLarge and a studyArea
-RTM <- terra::project(terra::rast(simObjects$rasterToMatchLarge), y = terra::crs(terra::vect(simObjects$studyArea)))
-RTM <- terra::crop(RTM, terra::vect(simObjects$studyArea), mask = TRUE)
+## Make a rasterToMatch now that we have a rasterToMatchLarge and a studyArea -- use terra here.
+RTM <- project(rast(simObjects$rasterToMatchLarge), y = crs(vect(simObjects$studyArea)))
+RTM <- crop(RTM, vect(simObjects$studyArea), mask = TRUE)
 RTM <- raster(RTM)
 RTM[!is.na(RTM[])] <- 1L
 
