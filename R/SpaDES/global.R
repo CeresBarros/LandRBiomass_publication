@@ -224,8 +224,10 @@ if (grepl("studyArea(S|L)$", runName)) {
 }
 
 ## Make a rasterToMatch now that we have a rasterToMatchLarge and a studyArea
-RTM <- crop(simObjects$rasterToMatchLarge, simObjects$studyArea)
-RTM <- mask(RTM, simObjects$studyArea)
+RTM <- terra::project(terra::rast(simObjects$rasterToMatchLarge), y = terra::crs(terra::vect(simObjects$studyArea)))
+RTM <- terra::crop(RTM, terra::vect(simObjects$studyArea), mask = TRUE)
+RTM <- raster(RTM)
+RTM[!is.na(RTM[])] <- 1L
 
 simObjects$rasterToMatch <- RTM
 
