@@ -93,8 +93,9 @@ simPaths <- list(cachePath = Require::normPath(file.path("R/SpaDES/cache", simPa
 figPath <- "R/SpaDES/outputs/GeneralFigs"
 dir.create(figPath, recursive = TRUE)
 
-## prompt googledrive authorization - provide your Google Account email after authorizing, so that this can be run non-interactively
-googledrive::drive_auth()
+## prompt googledrive authorization - you can replace NULL with your Google Account email, to run non-interactively
+GAemail <- NULL
+googledrive::drive_auth(email = GAemail)
 
 ## Get necessary objects like the study area.
 devtools::source_url(paste0("https://raw.githubusercontent.com/CeresBarros/",
