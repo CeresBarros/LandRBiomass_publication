@@ -80,8 +80,8 @@ timesaltParameters[, mean(as.integer(V1))/60, by = moduleName]
 
 ## OBJECT DIAGRAM
 objectDiagram(preSimListbaseCase, width = 1000, height = 2500)
-webshot("http://localhost:20581/session/viewhtml6aec1852565c/index.html",
-        file = file.path(figPath, "objectDiagram_baseCase.png"))
+webshot::webshot("http://localhost:23106/session/viewhtml69838c163a5/index.html",
+                 file = file.path(figPath, "objectDiagram_baseCase.png"))
 
 ## INSPECT MODEL BIOMASS AND MODEL COVER ----------------------------------
 ## two statistical models used to derive spatially-varying species traits (maxB, maxANPP and SEP)
@@ -403,14 +403,14 @@ ggsave(plot = allPlots, filename = file.path(figPath, "inputMaps.png"),
 
 ## species % cover
 speciesLayersSetA <- if (!inMemory(preSimListbaseCase$speciesLayers)) {
-  stack(file.path("R/SpaDES/outputs/jun2021Runs/baseCase",
+  stack(file.path(outputPath(preSimListbaseCase),
                   basename(filename(preSimListbaseCase$speciesLayers[[1]]))))
 } else {
   preSimListbaseCase$speciesLayers
 }
 
 speciesLayersSetB <- if (!inMemory(preSimListstudyAreaChange$speciesLayers)) {
-  stack(file.path("R/SpaDES/outputs/jun2021Runs/studyAreaChange",
+  stack(file.path(outputPath(preSimListstudyAreaChange),
                   basename(filename(preSimListstudyAreaChange$speciesLayers[[1]]))))
 } else {
   preSimListstudyAreaChange$speciesLayers
@@ -614,7 +614,7 @@ allPlotsValid <- plot_grid(
   get_legend(pixelRelB),
   get_legend(landscapeMAD + guides(colour = guide_legend(ncol = 2))),
   labels = c("a)", "", "", "", "", "", "", "", "b)", "", "", "", "",""),
-  rel_heights = c(1, -0.01, 0.05, 0.05, 0.5, -0.01, 0.1), ncol = 2,
+  rel_heights = c(1, -0.01, 0.05, 0.05, 0.5, -0.01, 0.1), ncol = 2
 )
 
 ggsave(plot = allPlotsValid, filename = file.path(figPath, "validationPlots_studyAreaChange.png"),

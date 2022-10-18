@@ -99,6 +99,7 @@ GAemail <- NULL
 googledrive::drive_auth(email = GAemail)
 
 ## Get necessary objects like the study area.
+x11() ## open a new plotting window - avoids errors if the current one is too small.
 devtools::source_url(paste0("https://raw.githubusercontent.com/CeresBarros/",
                             "LandRBiomass_publication/repPkgInstall/R/SpaDES/",
                             "1_simObjects.R?raw=TRUE"))
@@ -226,7 +227,7 @@ if (grepl("studyArea(S|L)$", runName)) {
 }
 
 ## Make a rasterToMatch now that we have a rasterToMatchLarge and a studyArea -- use terra here.
-RTM <- project(rast(simObjects$rasterToMatchLarge), y = crs(vect(simObjects$studyArea)))
+RTM <- try(project(rast(simObjects$rasterToMatchLarge), y = crs(vect(simObjects$studyArea))))
 RTM <- crop(RTM, vect(simObjects$studyArea), mask = TRUE)
 RTM <- raster(RTM)
 RTM[!is.na(RTM[])] <- 1L
@@ -346,13 +347,17 @@ validationOutputs <- rbind(validationOutputs, data.frame(objectName = "speciesLa
                                                          saveTime = c(validationTimes$start),
                                                          eventPriority = 1))
 SAname <- studyAreaName(validationObjects$studyArea)
-LandRBiomass_validation <- simInitAndSpades(times = validationTimes
-                                            , params = validationParams
-                                            , modules = "Biomass_validationKNN"
-                                            , objects = validationObjects
-                                            , outputs = validationOutputs
-                                            , paths = validationPaths
-                                            , .studyAreaName = SAname)
+LandRBiomass_validation <- Cache(simInitAndSpades
+                                 , times = validationTimes
+                                 , params = validationParams
+                                 , modules = "Biomass_validationKNN"
+                                 , objects = validationObjects
+                                 , outputs = validationOutputs
+                                 , paths = validationPaths
+                                 , .studyAreaName = SAname
+                                 , userTags = c("validation", SAname)
+                                 , cacheRepo = validationPaths$cachePath
+                                 , omitArgs = c("userTags"))
 
 saveSimList(LandRBiomass_validation, file.path(validationPaths$outputPath, paste0("simValid", runName, ".qs")))   ## only save in first runs
 
