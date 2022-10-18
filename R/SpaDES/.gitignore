@@ -3,7 +3,7 @@ cache/*
 cache
 outputs/*
 outputs
-inputs/*
+inputs*
 validation
 validation/*
 .httr-oath
