@@ -67,3 +67,6 @@ sppEquivalencies_CA <- na.omit(sppEquivalencies_CA, sppEquivCol)
 sppColorVect <- sppColors(sppEquivalencies_CA, sppEquivCol,
                           newVals = "Mixed", palette = "Accent")
 
+
+
+

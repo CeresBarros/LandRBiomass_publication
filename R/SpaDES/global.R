@@ -1,59 +1,66 @@
 ## ------------------------------------------------------
 ## LandR Biomass PUBLICATION SIMULATIONS
 ##
-## Ceres: June 2018
+## Ceres Barros: last updated September 2022
 ## ------------------------------------------------------
 
-## requires as of Jul 26 2021
-# reproducible 1.2.7.9011
-# quickPlot_0.1.7.9002
-# SpaDES.core 1.0.8.9014
-# SpaDES.tools_0.3.8.9000
-# SpaDES.addins_0.1.2
-# SpaDES.experiment 0.0.2.9002
-# LandR 1.0.5
+## /!\    PLEASE MAKE SURE YOU ARE USING R v4.2   /!\
+## /!\ PLEASE MAKE SURE YOU HAVE A GOOGLE ACCOUNT /!\
 
-if (!exists("pkgDir")) {
-  pkgDir <- file.path("packages", version$platform,
-                      paste0(version$major, ".", strsplit(version$minor, "[.]")[[1]][1]))
+## set CRAN repo
+options(repos = c(CRAN = "https://cloud.r-project.org"))
 
-  if (!dir.exists(pkgDir)) {
-    dir.create(pkgDir, recursive = TRUE)
-  }
-}
-.libPaths(pkgDir)
+## package installation location
+pkgPath <- file.path("packages", version$platform,
+                     paste0(version$major, ".", strsplit(version$minor, "[.]")[[1]][1]))
+dir.create(pkgPath, recursive = TRUE)
+.libPaths(pkgPath, include.site = FALSE)
 
-if (!require("devtools")) {
-  install.packages("devtools", lib = pkgDir)
+if (!"remotes" %in% installed.packages()) {
+  install.packages("remotes")
 }
 
-if (!require("Require")) {
-  install.packages("Require", lib = pkgDir)
-  library(Require)
+if (!"Require" %in% installed.packages(lib.loc = pkgPath) ||
+    packageVersion("Require", lib.loc = pkgPath) < "0.1.6.9005") {
+  remotes::install_github("PredictiveEcology/Require@8ac756d66bc145f226f39e703e3787d3aed159f2",
+                          upgrade = FALSE, force = TRUE)
+}
+## use binary linux packages if on Ubuntu
+Require::setLinuxBinaryRepo()
+
+Require::Require("PredictiveEcology/SpaDES.project@6d7de6ee12fc967c7c60de44f1aa3b04e6eeb5db",
+                 require = FALSE, upgrade = FALSE, standAlone = TRUE)
+
+modulePath <- "R/SpaDES/m"
+SpaDES.project::getModule(modulePath = modulePath,
+                          c("PredictiveEcology/Biomass_speciesData@master",
+                            "PredictiveEcology/Biomass_borealDataPrep@master",
+                            "PredictiveEcology/Biomass_core@master",
+                            "CeresBarros/Biomass_validationKNN@master",
+                            "CeresBarros/Biomass_speciesParameters@LandRPub"))
+
+outs <- SpaDES.project::packagesInModules(modulePath = modulePath)
+Require::Require(c(unname(unlist(outs)),
+                   "PredictiveEcology/SpaDES.experiment@development",
+                   "devtools", "ggspatial", "ggpubr", "cowplot"),
+                 require = FALSE, standAlone = TRUE)
+
+## load packages
+Require::Require(c("raster", "terra", "dplyr", "data.table", "future",
+                   "SpaDES.core", "LandR", "reproducible",
+                   "ggspatial", "ggpubr", "cowplot"),
+                 upgrade = FALSE, install = FALSE)
+
+if (FALSE) { ## don't run this unless pkgSnapshot MUST be updated
+  Require::pkgSnapshot(
+    file.path("packages",
+              paste0("pkgSnapshot_",
+                     paste0(version$major, "_", strsplit(version$minor, "[.]")[[1]][1]),
+                     ".txt")),
+    libPaths = pkgPath, standAlone = TRUE
+  )
 }
 
-if (FALSE) {
-  # install.packages("SpaDES", dependencies = TRUE, lib = pkgDir)
-  # devtools::install_github("PredictiveEcology/SpaDES.core@8a7886a6afd7f3b90df10ea6b87caae8661f8709")
-  # devtools::install_github("PredictiveEcology/LandR@093c39898912a6e89ac9b6e862733052a0fae407")
-  # devtools::install_github("ianmseddy/LandR.CS@b39c8c72d20189fa6b6aeb057cdc751a631e0efa")
-  # devtools::install_github("PredictiveEcology/reproducible@aedea49637a6ebd0db6897f1d33f53959f41bee2")
-  # devtools::install_github("PredictiveEcology/SpaDES.install@80c43dcb94d897d25545105a7b83111cf634a556")
-  # devtools::install_github("PredictiveEcology/SpaDES.experiment@5a23c40f8aa9a9efc6dc16e040f8771561059152")
-
-  # Require::pkgSnapshot("packages/pkgSnapshot.txt", libPaths = "packages/x86_64-w64-mingw32/4.0/")
-  # Much later on a different or same machine
-  Require::Require(pkgSnapshot = "packages/pkgSnapshot.txt")
-}
-
-out <- SpaDES.install::makeSureAllPackagesInstalled(modulePath = "R/SpaDES/m")
-
-## load packages and make sure minimum versions are installed.
-Require(c("SpaDES",
-          "raster", "dplyr", "data.table", "future",
-          "PredictiveEcology/SpaDES.experiment",
-          "PredictiveEcology/LandR@development (>= 1.0.5.9003)",
-          "PredictiveEcology/reproducible (>= 1.2.7.9011)"), upgrade = FALSE)
 
 ## -----------------------------------------------
 ## SIMULATION SETUP
@@ -62,57 +69,65 @@ Require(c("SpaDES",
 ## Set up modelling parameters  ---------------------------
 options("reproducible.useNewDigestAlgorithm" = 2)
 options("spades.moduleCodeChecks" = FALSE)
+options("spades.inputPath" = Require::normPath(file.path("R/SpaDES/inputs")))  ## store everything in inputs/ so that there are no duplicated files across modules
 options("reproducible.useCache" = TRUE)
-options("reproducible.inputPaths" = file.path("R/SpaDES/inputs"))  ## store everything in inputs/ so that there are no duplicated files across modules
-options("reproducible.destinationPath" = file.path("R/SpaDES/inputs"))
+options("reproducible.destinationPath" = Require::normPath(file.path("R/SpaDES/inputs")))
 options("reproducible.useGDAL" = FALSE)
+options("spades.useRequire" = FALSE)
+options("Require.unloadNamespaces" = FALSE)
+options("reproducible.useTerra" = FALSE)
 
-# eventCaching <- c(".inputObjects", "init")
-eventCaching <- FALSE ## bug, not re-parsing  code
+eventCaching <- c(".inputObjects", "init")
 useParallel <- FALSE
 
-## use studyAreaS or L to parameterise AND run simualations in the SAME area
+## TEST STUDY AREAS
+## use studyAreaS or L to parameterise AND run simulations in the SAME area
 ## one study area from set A
 # runName <- "studyAreaS"
 # runName <- "studyAreaL"
 
+## SIMULATIONS IN BARROS ET AL 2022 MEE
 ## use one of the following to parameterise the model in a larger study area than the simulation area
 ## baseCase uses set A of study areas, parameterises using Biomass_borealDataPrep and Biomass_speciesParameters
 ## studyAreaChange uses set B of study areas, parameterises using Biomass_borealDataPrep and Biomass_speciesParameters
 ## altParameterisation uses set A of study areas, parameterises using Biomass_borealDataPrep only
-# runName <- "baseCase"
+runName <- "baseCase"
 # runName <- "studyAreaChange"
-runName <- "altParameters"
+# runName <- "altParameters"
 
 ## paths
-# simDirName <- "sep2021Runs"
-simDirName <- "mar2022Runs"
-simPaths <- list(cachePath = file.path("R/SpaDES/cache", simDirName)
-                 , modulePath = file.path("R/SpaDES/m")
-                 , inputPath = file.path("R/SpaDES/inputs")
-                 , outputPath = file.path("R/SpaDES/outputs", simDirName, runName))
+simPathName <- "mar2022Runs"
+simPaths <- list(cachePath = Require::normPath(file.path("R/SpaDES/cache", simPathName))
+                 , modulePath = Require::normPath(modulePath)
+                 , inputPath = Require::normPath(file.path("R/SpaDES/inputs"))
+                 , outputPath = Require::normPath(file.path("R/SpaDES/outputs", simPathName, runName)))
 
-figDir <- "R/SpaDES/outputs/GeneralFigs"
-dir.create(figDir, recursive = TRUE)
+figPath <- "R/SpaDES/outputs/GeneralFigs"
+dir.create(figPath, recursive = TRUE)
 
-## Get necessary objects -----------------------
-source("R/SpaDES/1_simObjects.R")
+## prompt googledrive authorization - you can replace NULL with your Google Account email, to run non-interactively
+GAemail <- NULL
+googledrive::drive_auth(email = GAemail)
 
+## Get necessary objects like the study area.
+x11() ## open a new plotting window - avoids errors if the current one is too small.
+devtools::source_url(paste0("https://raw.githubusercontent.com/CeresBarros/",
+                            "LandRBiomass_publication/repPkgInstall/R/SpaDES/",
+                            "1_simObjects.R?raw=TRUE"))
 ## Run Biomass_speciesData to get species layers
 ## running this separately from other modules makes switching
 ## between using a large and a smaller study area easier when the smaller SA is within the large one,
 ## as it keeps the data in separate folders that can be used across simulations/scenarios
-source("R/SpaDES/2_speciesLayers.R")
+devtools::source_url(paste0("https://raw.githubusercontent.com/CeresBarros/",
+                            "LandRBiomass_publication/repPkgInstall/R/SpaDES/",
+                            "2_speciesLayers.R?raw=TRUE"))
 
 ## check species layers:
-# plot(simOutSpeciesLayers$speciesLayers)
-## Populus grandidentata shouldn't be inin SK (and has only v. few pixels in the layer) and will be excluded
-toRm <- which(names(simOutSpeciesLayers$speciesLayers) %in% c("Popu_Gra"))
-simOutSpeciesLayers$speciesLayers <- dropLayer(simOutSpeciesLayers$speciesLayers, i = toRm)
-rm(toRm)
+plot(simOutSpeciesLayers$speciesLayers)
 
-## subset sppEquivalencies
+## subset sppEquivalencies and colorVector
 sppEquivalencies_CA <- sppEquivalencies_CA[Boreal %in% names(simOutSpeciesLayers$speciesLayers)]
+sppColorVect <- sppColorVect[c(names(simOutSpeciesLayers$speciesLayers), "Mixed")]
 
 ## Get land-cover raster now that we have a rasterToMatchLarge
 rstLCC2005 <- Cache(prepInputs,
@@ -132,6 +147,7 @@ simTimes <- list(start = 2001, end = 2031)
 vegLeadingProportion <- 0 # indicates what proportion the stand must be in one species group for it to be leading.
 successionTimestep <- 10L  # for dispersal and age reclass.
 
+## list of values of species shade tolerance traits
 speciesParams <- list(
   "shadetolerance" = list(
     Betu_Pap = 1,
@@ -159,13 +175,18 @@ if (runName %in% c("baseCase", "studyAreaChange", "studyAreaS", "studyAreaL")) {
 }
 
 simParams <- list(
+  .globals = list("dataYear" = 2001L    ## will not be used as the layers have been pre-preped, but just in case...
+                  , "sppEquivCol" = sppEquivCol
+                  , "vegLeadingProportion" = vegLeadingProportion
+                  , ".sslVerify" = 0L
+                  , ".useCache" = eventCaching),
   Biomass_borealDataPrep = list(
-    "sppEquivCol" = sppEquivCol
-    , "fitDeciduousCoverDiscount" = TRUE
+    "fitDeciduousCoverDiscount" = TRUE
     , "subsetDataAgeModel" = FALSE
     , "subsetDataBiomassModel" = FALSE
     , "exportModels" = "all"
     , "fixModelBiomass" = TRUE
+    , "fireURL" = "https://drive.google.com/file/d/1YIc_BSkPKqW60SmfpR2vDpeRGrwOFKso/view?usp=sharing"  ## use a frozen version of fire perimeter data
     , "speciesTableAreas" = c("BSW", "BP")
     , "speciesUpdateFunction" = list(
       quote(LandR::speciesTableUpdate(sim$species, sim$speciesTable, sim$sppEquiv, P(sim)$sppEquivCol)),
@@ -177,21 +198,16 @@ simParams <- list(
     , "useCloudCacheForStats" = FALSE
     , "cloudFolderID" = NA
     , ".plots" = c("object", "raw")
-    , ".useCache" = eventCaching
   )
   , Biomass_speciesParameters = list(
     "quantileAgeSubset" = list(Betu_Pap = 95, Lari_Lar = 95, Pice_Gla = 95, Pice_Mar = 95, Pinu_Ban = 99, Popu_Spp = 99)
-    , "sppEquivCol" = sppEquivCol
-    , ".useCache" = eventCaching
   )
   , Biomass_core = list(
     "calcSummaryBGM" = c("start")
     , "initialBiomassSource" = "cohortData"
     , "plotOverstory" = TRUE
     , "seedingAlgorithm" = "wardDispersal"
-    , "sppEquivCol" = sppEquivCol
     , "successionTimestep" = successionTimestep
-    , "vegLeadingProportion" = vegLeadingProportion
     , ".plotInitialTime" = simTimes$start
     , ".plotInterval" = 1L
     , ".plots" = c("object", "raw")
@@ -208,6 +224,7 @@ simObjects <- list(
   , "sppColorVect" = sppColorVect
   , "speciesLayers" = simOutSpeciesLayers$speciesLayers
   , "speciesParams" = speciesParams
+  , "rasterToMatchLarge" = simOutSpeciesLayers$rasterToMatchLarge
   , "treed" = simOutSpeciesLayers$treed
   , "numTreed" = simOutSpeciesLayers$numTreed
   , "nonZeroCover" = simOutSpeciesLayers$nonZeroCover
@@ -219,6 +236,14 @@ if (grepl("studyArea(S|L)$", runName)) {
   simObjects$studyArea <- studyAreaS
   simObjects$studyAreaLarge <- studyAreaL
 }
+
+## Make a rasterToMatch now that we have a rasterToMatchLarge and a studyArea -- use terra here.
+RTM <- try(project(rast(simObjects$rasterToMatchLarge), y = crs(vect(simObjects$studyArea))))
+RTM <- crop(RTM, vect(simObjects$studyArea), mask = TRUE)
+RTM <- raster(RTM)
+RTM[!is.na(RTM[])] <- 1L
+
+simObjects$rasterToMatch <- RTM
 
 ## objects will be saved at the start of the simulation (so they reflect the previous year)
 simOutputs <- data.frame(expand.grid(objectName = "cohortData",
@@ -255,11 +280,13 @@ saveSimList(LandRBiomass_simInit, file.path(simPaths$outputPath, paste0("simInit
 
 amc::.gc()  ## clean ws
 if (Sys.info()["sysname"] == "Windows") {
-  plan("multisession", workers = 2)   ## each worker consuming roughly 6Gb
+  # plan("multisession", workers = 2) ## not working, options not passed to futures
+  plan("sequential")
 } else {
   plan("multicore", workers = 2)
 }
-LandRBiomass_sim <- experiment2(
+
+LandRBiomass_sim <- SpaDES.experiment::experiment2(
   sim1 = LandRBiomass_simInit,
   clearSimEnv = TRUE,
   replicates = 10)
@@ -269,16 +296,18 @@ future:::ClusterRegistry("stop")
 qs::qsave(LandRBiomass_sim, file.path(simPaths$outputPath, paste0("simList_LandRBiomass_sim_", runName, ".qs")))
 
 ## VALIDATION
-## get the  land-cover change map (needed to have an RTM first, so get it from the simInitList)
+## get the  land-cover change map (need to have a rasterToMatch first, so get it from the simInitList)
 ## /!\ it is assumed that the filename of the raster in the simList corresponds to the raster found in disk.
 ## this may not be the case if the simulations were run in another machine and saved rasters were not imported.
 
-validationPaths <- list(cachePath = file.path("R/SpaDES/cache", simDirName)
-                        , modulePath = file.path("R/SpaDES/m")
-                        , inputPath = file.path("R/SpaDES/inputs")
-                        , outputPath = file.path("R/SpaDES/validation", simDirName, runName))
+validationPaths <- list(cachePath = Require::normPath(file.path("R/SpaDES/cache", simPathName))
+                        , modulePath = Require::normPath(file.path("R/SpaDES/m"))
+                        , inputPath = Require::normPath(file.path("R/SpaDES/inputs"))
+                        , outputPath = Require::normPath(file.path("R/SpaDES/validation", simPathName, runName)))
 
-source("R/SpaDES/3_simObjects4Valid.R")
+devtools::source_url(paste0("https://raw.githubusercontent.com/CeresBarros/",
+                            "LandRBiomass_publication/repPkgInstall/R/SpaDES/",
+                            "3_simObjects4Valid.R?raw=TRUE"))
 
 ## PARAMETERS FOR VALIDATION MODULE
 ## in this case all reps have the same parameters, so we can use the first rep to get the values
@@ -329,20 +358,32 @@ validationOutputs <- rbind(validationOutputs, data.frame(objectName = "speciesLa
                                                          saveTime = c(validationTimes$start),
                                                          eventPriority = 1))
 SAname <- studyAreaName(validationObjects$studyArea)
-LandRBiomass_validation <- simInitAndSpades(times = validationTimes
-                                            , params = validationParams
-                                            , modules = "Biomass_validationKNN"
-                                            , objects = validationObjects
-                                            , outputs = validationOutputs
-                                            , paths = validationPaths
-                                            , .studyAreaName = SAname)
+LandRBiomass_validation <- Cache(simInitAndSpades
+                                 , times = validationTimes
+                                 , params = validationParams
+                                 , modules = "Biomass_validationKNN"
+                                 , objects = validationObjects
+                                 , outputs = validationOutputs
+                                 , paths = validationPaths
+                                 , .studyAreaName = SAname
+                                 , userTags = c("validation", SAname)
+                                 , cacheRepo = validationPaths$cachePath
+                                 , omitArgs = c("userTags"))
 
 saveSimList(LandRBiomass_validation, file.path(validationPaths$outputPath, paste0("simValid", runName, ".qs")))   ## only save in first runs
 
 ## -----------------------------------------------
 ## POST-HOC ANALYSIS - figures
 ## -----------------------------------------------
-source("R/SpaDES/pubFigures.R")
+
+## can only be run after all simulations are complete
+if (all(c("baseCase", "studyAreaChange", "altParameters") %in% dir(file.path(validationPaths$outputPath, "..")))) {
+  devtools::source_url(paste0("https://raw.githubusercontent.com/CeresBarros/",
+                              "LandRBiomass_publication/repPkgInstall/R/SpaDES/",
+                              "pubFigures.R?raw=TRUE"))
+} else {
+  warning("Not all simulations were validated.")
+}
 
 q("no")
 

@@ -13,10 +13,10 @@ if (!runName %in% c("baseCase", "studyAreaChange", "altParameters", "studyAreaS"
   stop("runName must be one of 'baseCase', 'studyAreaChange', 'altParameters', 'studyAreaS' or 'studyAreaL'")
 }
 
-speciesPaths <- list(cachePath = file.path(simPaths$cachePath, "speciesLayers"),
-                     modulePath = file.path("R/SpaDES/m"),
-                     inputPath = file.path("R/SpaDES/inputs"),
-                     outputPath = file.path(simPaths$outputPath, "speciesLayers"))
+speciesPaths <- list(cachePath = Require::normPath(file.path(simPaths$cachePath, "speciesLayers"))
+                     , modulePath = Require::normPath(file.path("R/SpaDES/m"))
+                     , inputPath = Require::normPath(file.path("R/SpaDES/inputs"))
+                     , outputPath = Require::normPath(file.path(simPaths$outputPath, "speciesLayers")))
 
 speciesObjects <- list(
   "studyAreaLarge" = if (grepl("studyArea(S|L)$", runName)) get(runName) else studyAreaL
@@ -30,6 +30,7 @@ speciesParameters <- list(
   Biomass_speciesData = list(
     "types" = c("KNN")
     , "sppEquivCol" = sppEquivCol
+    , ".sslVerify" = 0L
     , ".studyAreaName" = SAname
     , ".useCache" = eventCaching
   )
@@ -46,4 +47,4 @@ simOutSpeciesLayers <- Cache(simInitAndSpades
                              , cacheRepo = speciesPaths$cachePath
                              , userTags = c("speciesLayersSim", SAname)
                              , omitArgs = c("userTags", ".plotInitialTime", "debug"))
-saveSimList(simOutSpeciesLayers, file.path(simPaths$outputPath, paste0("simList_speciesLayers", runName)))   ## only save in first runs
+saveSimList(simOutSpeciesLayers, file.path(simPaths$outputPath, paste0("simList_speciesLayers", runName, ".qs")))   ## only save in first runs

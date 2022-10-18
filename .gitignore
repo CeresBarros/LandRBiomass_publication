@@ -12,7 +12,8 @@ logR.txt
 data/
 data
 packages/*
+._AllPackages.rds
 
 # don't ignore
 !.gitignore
-!packages/pkgSnapshot.txt
+!packages/pkgSnapshot*.txt
