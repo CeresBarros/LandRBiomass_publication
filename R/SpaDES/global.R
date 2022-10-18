@@ -51,6 +51,17 @@ Require::Require(c("raster", "terra", "dplyr", "data.table", "future",
                    "ggspatial", "ggpubr", "cowplot"),
                  upgrade = FALSE, install = FALSE)
 
+if (FALSE) { ## don't run this unless pkgSnapshot MUST be updated
+  Require::pkgSnapshot(
+    file.path("packages",
+              paste0("pkgSnapshot_",
+                     paste0(version$major, "_", strsplit(version$minor, "[.]")[[1]][1]),
+                     ".txt")),
+    libPaths = pkgPath, standAlone = TRUE
+  )
+}
+
+
 ## -----------------------------------------------
 ## SIMULATION SETUP
 ## -----------------------------------------------
