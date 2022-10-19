@@ -50,7 +50,7 @@ jobs:
 
       - name: Install remotes, knitr, rmarkdown, bookdown
         run: |
-          options(repos = c(CRAN = "https://cran.rstudio.com", RSPM = "https://packagemanager.rstudio.com/all/latest"))
+          options(repos = c(CRAN = "https://packagemanager.rstudio.com/all/latest", CRAN = "https://cran.rstudio.com"))
           install.packages("remotes")
           remotes::install_cran("rmarkdown")
           remotes::install_cran("knitr")
@@ -66,7 +66,7 @@ jobs:
 
       - name: Install module package dependencies
         run: |
-          options(repos = c(CRAN = "https://cran.rstudio.com", RSPM = "https://packagemanager.rstudio.com/all/latest"))
+          options(repos = c(CRAN = "https://packagemanager.rstudio.com/all/latest", CRAN = "https://cran.rstudio.com"))
           mods <- dir("R/SpaDES/m")
           pkgs <- sapply(mods, function(m) SpaDES.core::packages(modules = m, paths = "R/SpaDES/m"))
           pkgs <- unique(unlist(pkgs))
