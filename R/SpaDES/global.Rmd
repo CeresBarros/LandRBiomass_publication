@@ -85,11 +85,11 @@ eventCaching <- c(".inputObjects", "init")
 useParallel <- FALSE
 
 ## paths
-simDirName <- "sep2021Runs"
-simPaths <- list(cachePath = file.path("R/SpaDES/cache", simDirName)
-                 , modulePath = file.path("R/SpaDES/m")
-                 , inputPath = file.path("R/SpaDES/inputs")
-                 , outputPath = file.path("R/SpaDES/outputs", simDirName))
+simPathName <- "oct2022Runs"
+simPaths <- list(cachePath = Require::normPath(file.path("R/SpaDES/cache", simPathName))
+                 , modulePath = Require::normPath(modulePath)
+                 , inputPath = Require::normPath(file.path("R/SpaDES/inputs"))
+                 , outputPath = Require::normPath(file.path("R/SpaDES/outputs", simPathName, runName)))
 ```
 
 ## Simulation setup - part 1 
@@ -263,7 +263,7 @@ saveSimList(LandRBiomass_simInit, file.path(simPaths$outputPath, paste0("simInit
 ```
 
 ```{r loadSimInit, include=FALSE, eval = !isInteractive, cache = FALSE}
-LandRBiomass_simInit <- loadSimList(file.path("GitHubActionsSims", simDirName, runName, paste0("simInit", runName, ".qs")))
+LandRBiomass_simInit <- loadSimList(file.path("GitHubActionsSims", simPathName, runName, paste0("simInit", runName, ".qs")))
 ```
 
 ```{r objDiagram}
@@ -280,7 +280,8 @@ LandRBiomass_sim <- spades(LandRBiomass_simInit, .plotInitialTime = simTimes$sta
 ```
 
 ```{r loadSimulation, include=FALSE, eval = !isInteractive}
-LandRBiomass_sim <- qs::qread(file.path("GitHubActionsSims", simDirName, runName, paste0("simList_LandRBiomass_sim_", runName, ".qs")))
+## this has been commented because the simLists obj is not used at the moment.
+# LandRBiomass_sim <- qs::qread(file.path("GitHubActionsSims", simPathName, runName, paste0("simList_LandRBiomass_sim_", runName, ".qs")))
 ```
 
 If we were to run several repetitions, this would be how:
