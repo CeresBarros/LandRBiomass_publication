@@ -98,7 +98,9 @@ simPaths <- list(cachePath = Require::normPath(file.path("R/SpaDES/cache", simPa
 
 ```{r simulationSetup}
 ## Get necessary objects -----------------------
-source("R/SpaDES/1_simObjects.R")
+devtools::source_url(paste0("https://raw.githubusercontent.com/CeresBarros/",
+                            "LandRBiomass_publication/repPkgInstall/R/SpaDES/",
+                            "1_simObjects.R?raw=TRUE"))
 ```
 
 ## Simulation setup - part 2 - species layers
@@ -108,7 +110,9 @@ source("R/SpaDES/1_simObjects.R")
 ## running this separately from other modules makes switching
 ## between using a large and a smaller study area easier when the smaller SA is within the large one,
 ## as it keeps the data in separate folders thatn can be used across simulations/scenarios
-source("R/SpaDES/2_speciesLayers.R")
+devtools::source_url(paste0("https://raw.githubusercontent.com/CeresBarros/",
+                            "LandRBiomass_publication/repPkgInstall/R/SpaDES/",
+                            "2_speciesLayers.R?raw=TRUE"))
 
 ## check species layers:
 # plot(simOutSpeciesLayers$speciesLayers)
@@ -397,7 +401,9 @@ validationPaths <- list(cachePath = file.path("R/SpaDES/cache", simDirName)
                         , inputPath = file.path("R/SpaDES/inputs")
                         , outputPath = file.path("R/SpaDES/validation", simDirName))
 
-source("R/SpaDES/3_simObjects4Valid.R")
+devtools::source_url(paste0("https://raw.githubusercontent.com/CeresBarros/",
+                            "LandRBiomass_publication/repPkgInstall/R/SpaDES/",
+                            "3_simObjects4Valid.R?raw=TRUE"))
 
 ## PARAMETERS FOR VALIDATION MODULE
 ## in this case all reps have the same parameters, so we can use the first rep to get the values
