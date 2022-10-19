@@ -179,47 +179,53 @@ simModules <- list("Biomass_borealDataPrep"
 )
 
 simParams <- list(
+  .globals = list("dataYear" = 2001L
+                  , "sppEquivCol" = sppEquivCol
+                  , "vegLeadingProportion" = vegLeadingProportion
+                  , ".sslVerify" = 0L
+                  , ".useCache" = eventCaching),
   Biomass_borealDataPrep = list(
-    "sppEquivCol" = sppEquivCol
-    , "forestedLCCClasses" = c(1:15, 34:35)
-    , "LCCClassesToReplaceNN" = c(34:35)
-    , "fitDeciduousCoverDiscount" = TRUE
+    "fitDeciduousCoverDiscount" = TRUE
     , "subsetDataAgeModel" = FALSE
     , "subsetDataBiomassModel" = FALSE
     , "exportModels" = "all"
     , "fixModelBiomass" = TRUE
+    , "fireURL" = paste0("https://drive.google.com/file/d/",
+                         "1YIc_BSkPKqW60SmfpR2vDpeRGrwOFKso/view?usp=sharing")  
     , "speciesTableAreas" = c("BSW", "BP")
     , "speciesUpdateFunction" = list(
-      quote(LandR::speciesTableUpdate(sim$species, sim$speciesTable, sim$sppEquiv, P(sim)$sppEquivCol)),
-      quote(LandR::updateSpeciesTable(speciesTable = sim$species, params = sim$speciesParams)))
-    # next two are used when assigning pixelGroup membership; what resolution for
-    #   age and biomass
+      quote(LandR::speciesTableUpdate(sim$species, 
+                                      sim$speciesTable, 
+                                      sim$sppEquiv, 
+                                      P(sim)$sppEquivCol)),
+      quote(LandR::updateSpeciesTable(speciesTable = sim$species, 
+                                      params = sim$speciesParams)))
     , "pixelGroupAgeClass" = successionTimestep
     , "pixelGroupBiomassClass" = 100
     , "useCloudCacheForStats" = FALSE
     , "cloudFolderID" = NA
     , ".plots" = c("object", "raw")
-    , ".useCache" = eventCaching
   )
   , Biomass_speciesParameters = list(
-    "quantileAgeSubset" = list(Betu_Pap = 95, Lari_Lar = 95, Pice_Gla = 95, Pice_Mar = 95, Pinu_Ban = 99, Popu_Spp = 99)
-    , "sppEquivCol" = sppEquivCol
-    , ".useCache" = eventCaching
+    "quantileAgeSubset" = list(Betu_Pap = 95, 
+                               Lari_Lar = 95, 
+                               Pice_Gla = 95, 
+                               Pice_Mar = 95, 
+                               Pinu_Ban = 99, 
+                               Popu_Spp = 99)
   )
   , Biomass_core = list(
     "calcSummaryBGM" = c("start")
-    , "initialBiomassSource" = "cohortData" 
+    , "initialBiomassSource" = "cohortData"
     , "plotOverstory" = TRUE
     , "seedingAlgorithm" = "wardDispersal"
-    , "sppEquivCol" = sppEquivCol
     , "successionTimestep" = successionTimestep
-    , "vegLeadingProportion" = vegLeadingProportion
     , ".plotInitialTime" = simTimes$start
     , ".plotInterval" = 1L
     , ".plots" = c("object", "raw")
     , ".plotMaps" = FALSE
     , ".saveInitialTime" = NA
-    , ".useCache" = eventCaching[1] # experiment doesn't like when init is cached
+    , ".useCache" = eventCaching[1]
     , ".useParallel" = useParallel
   )
 )
