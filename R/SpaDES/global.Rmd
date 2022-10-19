@@ -15,7 +15,7 @@ For full code used in publication see `global.R`
 ```{r setup, include=FALSE}
 isInteractive <- interactive()
 knitr::opts_chunk$set(echo = TRUE, eval = isInteractive, results = "hold",
-                      cache = 2) ## TODO: set 'eval = TRUE'
+                      cache = 2)
 ```
 
 ## Package installation
@@ -424,7 +424,6 @@ validationObjects <- list(
   "biomassMap" = biomassMap
   , "rasterToMatch" = rasterToMatch
   , "rawBiomassMapStart" = rawBiomassMap
-  , "rstLCChange" = rstLCChangeAllbin
   , "simulationOutputs" = simulationOutputs
   , "speciesLayersStart" = speciesLayers
   , "sppColorVect" = LandRBiomass_simInit$sppColorVect
