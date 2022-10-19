@@ -313,8 +313,7 @@ saveSimList(LandRBiomass_sim, file.path(simPaths$outputPath, paste0("simList_Lan
 If we were to run several repetitions, this would be how:
 
 ```{r runExperiment}
-library(future)
-plan("multiprocess", workers = 1)   ## each worker consumes roughly 10Gb
+plan("sequential")    ## don't parallelize -- future is not passing `options` to the nodes
 LandRBiomass_sim <- experiment2(
   sim1 = LandRBiomass_sim,
   clearSimEnv = TRUE,
