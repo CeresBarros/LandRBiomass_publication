@@ -121,8 +121,9 @@ toRm <- which(names(simOutSpeciesLayers$speciesLayers) %in% c("Popu_Gra"))
 simOutSpeciesLayers$speciesLayers <- dropLayer(simOutSpeciesLayers$speciesLayers, i = toRm)
 rm(toRm)
 
-## subset sppEquivalencies
+## subset sppEquivalencies and colorVector
 sppEquivalencies_CA <- sppEquivalencies_CA[Boreal %in% names(simOutSpeciesLayers$speciesLayers)]
+sppColorVect <- sppColorVect[c(names(simOutSpeciesLayers$speciesLayers), "Mixed")]
 
 ## Get land-cover raster now that we have a rasterToMatchLarge
 rstLCC2005 <- Cache(prepInputs,
@@ -145,6 +146,7 @@ simOutSpeciesLayers <- loadSimList(file.path("GitHubActionsSims", simPathName, r
 
 ## subset sppEquivalencies
 sppEquivalencies_CA <- sppEquivalencies_CA[Boreal %in% names(simOutSpeciesLayers$speciesLayers)]
+sppColorVect <- sppColorVect[c(names(simOutSpeciesLayers$speciesLayers), "Mixed")]
 
 ## Get land-cover raster now that we have a rasterToMatchLarge
 rstLCC2005 <- raster(file.path("GitHubActionsSims", simPathName, runName, "rstLCC_966512e152b53d9b.tif"))
