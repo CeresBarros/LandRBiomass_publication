@@ -144,7 +144,7 @@ simOutSpeciesLayers <- loadSimList(file.path("GitHubActionsSims", simPathName, r
 sppEquivalencies_CA <- sppEquivalencies_CA[Boreal %in% names(simOutSpeciesLayers$speciesLayers)]
 
 ## Get land-cover raster now that we have a rasterToMatchLarge
-rstLCC2005 <- raster(file.path("GitHubActionsSims", simDirName, runName, "rstLCC_3cda4aed011c168c.tif"))
+rstLCC2005 <- raster(file.path("GitHubActionsSims", simPathName, runName, "rstLCC_966512e152b53d9b.tif"))
 ```
 
 ## Simulation setup - part 3 - module parameters and outputs
@@ -396,10 +396,10 @@ We begin by preparing all the inputs necessary for the `Biomass_validationKNN` m
 ## /!\ it is assumed that the filename of the raster in the simList corresponds to the raster found in disk.
 ## this may not be the case if the simulations were run in another machine and saved rasters were not imported.
 
-validationPaths <- list(cachePath = file.path("R/SpaDES/cache", simDirName)
+validationPaths <- list(cachePath = file.path("R/SpaDES/cache", simPathName)
                         , modulePath = file.path("R/SpaDES/m")
                         , inputPath = file.path("R/SpaDES/inputs")
-                        , outputPath = file.path("R/SpaDES/validation", simDirName))
+                        , outputPath = file.path("R/SpaDES/validation", simPathName))
 
 devtools::source_url(paste0("https://raw.githubusercontent.com/CeresBarros/",
                             "LandRBiomass_publication/repPkgInstall/R/SpaDES/",
