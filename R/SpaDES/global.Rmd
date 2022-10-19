@@ -64,7 +64,7 @@ Require::Require(packageVersionFile = pkgSnapshotFile,
 
 ## Package setup
 ```{r init, eval = TRUE, results = FALSE}
-library(Require)
+Require::Require(c("raster", "terra", "dplyr", "data.table", "future",
 Require(c("SpaDES",
           "raster", "dplyr", "data.table", "future",
           "PredictiveEcology/SpaDES.experiment",
