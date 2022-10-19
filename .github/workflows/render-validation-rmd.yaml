@@ -48,14 +48,9 @@ jobs:
             libxml2-dev \
             python3-gdal
 
-      - name: Set CRAN repos and other options
-        run: |
-          cat("\noptions(repos = c(CRAN = 'https://cran.rstudio.com', RSPM = 'https://packagemanager.rstudio.com/cran/latest'))\n", file = "~/.Rprofile", append = TRUE)
-        shell: Rscript {0}
-
       - name: Install remotes, knitr, rmarkdown, bookdown
         run: |
-          install.packages("remotes")
+          install.packages("remotes", repos = "https://cran.rstudio.com")
           remotes::install_cran("rmarkdown")
           remotes::install_cran("knitr")
           remotes::install_cran("bookdown")
