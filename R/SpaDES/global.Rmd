@@ -280,6 +280,7 @@ LandRBiomass_simInit <- Cache(simInitAndSpades
                               , outputs = simOutputs
                               , events = "init"
                               , .plotInitialTime = NA
+                              , .studyAreaName = SAname
                               , userTags = "simInitAndInits"
                               , omitArgs = c("userTags", ".plotInitialTime"))
 ## save the simList
