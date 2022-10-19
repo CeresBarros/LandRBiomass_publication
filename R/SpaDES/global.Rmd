@@ -151,7 +151,7 @@ rstLCC2005 <- raster(file.path("GitHubActionsSims", simPathName, runName, "rstLC
 ## Simulation setup - part 3 - module parameters and outputs
 
 * `vegLeadingProportion` indicates what proportion the stand must be in one species group for it to be leading.
-  If 0, then there is never a notion of "mixed" vegetation types and a species is a leading species if it has the highest relative biomass in the pixel.
+If 0, then there is never a notion of "mixed" vegetation types and a species is a leading species if it has the highest relative biomass in the pixel.
 * `successionTimestep` defines the frequency at which dispersal and age reclassification occurs - every 10 years is the default LANDIS behaviour. 
 
 ```{r simulationSetup3}
@@ -291,7 +291,7 @@ saveSimList(LandRBiomass_simInit, file.path(simPaths$outputPath, paste0("simInit
 LandRBiomass_simInit <- loadSimList(file.path("GitHubActionsSims", simPathName, runName, paste0("simInit", runName, ".qs")))
 ```
 
-```{r objDiagram}
+```{r objDiagram, eval = TRUE}
 # look at the model structure and object exchange
 objectDiagram(LandRBiomass_simInit, width = 1000, height = 2500)
 ```
@@ -378,8 +378,8 @@ plotEcodist <- ggplot() +
   theme_void()
 
 plot(stack(LandRBiomass_simInit$rawBiomassMap,
-     LandRBiomass_simInit$standAgeMap, 
-     LandRBiomass_simInit$rstLCC),
+           LandRBiomass_simInit$standAgeMap, 
+           LandRBiomass_simInit$rstLCC),
      main = c("kNN stand biomass - kNN stand age - land-cover"))
 
 plot(plotEcodist, main = "ecolocations")
