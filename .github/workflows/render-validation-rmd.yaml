@@ -59,7 +59,7 @@ jobs:
 
       - name: Install SpaDES packages
         run: |
-          options(repos = c(CRAN = "https://cran.rstudio.com", RSPM = "https://packagemanager.rstudio.com/all/latest"))
+          options(repos = c(CRAN = "https://packagemanager.rstudio.com/all/latest", CRAN = "https://cran.rstudio.com"))
           install.packages("SpaDES", dependencies = TRUE)
           remotes::install_github("PredictiveEcology/SpaDES.docs@development")
         shell: Rscript {0}
