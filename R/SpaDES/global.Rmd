@@ -69,12 +69,15 @@ Require::Require(c("raster", "terra", "dplyr", "data.table", "future",
                    "ggspatial", "ggpubr", "cowplot"),
                  upgrade = FALSE, install = FALSE)
 
-options("reproducible.useNewDigestAlgorith" = 2)
+options("reproducible.useNewDigestAlgorithm" = 2)
 options("spades.moduleCodeChecks" = FALSE)
+options("spades.inputPath" = Require::normPath(file.path("R/SpaDES/inputs")))  
 options("reproducible.useCache" = TRUE)
-options("reproducible.inputPaths" = file.path("R/SpaDES/inputs"))
-options("reproducible.destinationPath" = file.path("R/SpaDES/inputs"))
+options("reproducible.destinationPath" = Require::normPath(file.path("R/SpaDES/inputs")))
 options("reproducible.useGDAL" = FALSE)
+options("spades.useRequire" = FALSE)
+options("Require.unloadNamespaces" = FALSE)
+options("reproducible.useTerra" = FALSE)
 
 ## set run name and paths
 runName <- "baseCase"
