@@ -31,6 +31,8 @@ jobs:
 
       - uses: r-lib/actions/setup-r@v2
         with:
+          extra-repositories: 'https://cran.rstudio.com'
+          r-version: '4.2.1'
           use-public-rspm: true
 
       - name: Install additional system dependencies
@@ -78,5 +80,5 @@ jobs:
         run: |
           git config user.email "actions@github.com"
           git config user.name "GitHub Actions"
-          git commit Biomass_borealDataPrep.html -m 'Re-build Biomass_borealDataPrep.Rmd' || echo "No changes to commit"
+          git commit R/SpaDES/global.html -m 'Re-build R/SpaDES/global.Rmd' || echo "No changes to commit"
           git push https://${{github.actor}}:${{secrets.GITHUB_TOKEN}}@github.com/${{github.repository}}.git HEAD:${{github.ref}} || echo "No changes to commit"
