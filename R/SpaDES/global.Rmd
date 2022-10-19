@@ -134,7 +134,7 @@ rstLCC2005 <- LandR::prepInputsLCC(
 ```
 
 ```{r loadSppLayers, include=FALSE, eval = !isInteractive}
-simOutSpeciesLayers <- qs::qread(file.path("GitHubActionsSims", simDirName, runName, paste0("simList_speciesLayers", runName)))
+simOutSpeciesLayers <- loadSimList(file.path("GitHubActionsSims", simPathName, runName, paste0("simList_speciesLayers", runName, ".qs")))
 
 ## subset sppEquivalencies
 sppEquivalencies_CA <- sppEquivalencies_CA[Boreal %in% names(simOutSpeciesLayers$speciesLayers)]
@@ -277,6 +277,8 @@ Here we run just one repetition
 
 ```{r runSimulation}
 LandRBiomass_sim <- spades(LandRBiomass_simInit, .plotInitialTime = simTimes$start)
+## save
+saveSimList(LandRBiomass_sim, file.path(simPaths$outputPath, paste0("simList_LandRBiomass_sim_1rep_", runName, ".qs")))
 ```
 
 ```{r loadSimulation, include=FALSE, eval = !isInteractive}
@@ -293,6 +295,9 @@ LandRBiomass_sim <- experiment2(
   sim1 = LandRBiomass_sim,
   clearSimEnv = TRUE,
   replicates = 10)
+
+## save simLists object.
+qs::qsave(LandRBiomass_sim, file.path(simPaths$outputPath, paste0("simList_LandRBiomass_sim_", runName, ".qs")))
 ```
 
 ## Inspect simulation objects
@@ -454,4 +459,5 @@ LandRBiomass_validation <- simInitAndSpades(times = validationTimes
                                             , outputs = validationOutputs
                                             , paths = validationPaths
                                             , .plotInitialTime = validationTimes$start) 
+saveSimList(LandRBiomass_validation, file.path(validationPaths$outputPath, paste0("simValid", runName, ".qs")))
 ```
