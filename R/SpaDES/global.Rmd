@@ -20,37 +20,46 @@ knitr::opts_chunk$set(echo = TRUE, eval = isInteractive, results = "hold",
 
 ## Package installation
 ```{pkgInstall}
-if (!exists("pkgDir")) {
-  pkgDir <- file.path("packages", version$platform,
-                      paste0(version$major, ".", strsplit(version$minor, "[.]")[[1]][1]))
+## set CRAN repo
+options(repos = c(CRAN = "https://cloud.r-project.org"))
 
-  if (!dir.exists(pkgDir)) {
-    dir.create(pkgDir, recursive = TRUE)
-  }
-  .libPaths(pkgDir)
+## package installation location
+pkgPath <- file.path("packages", version$platform,
+                     paste0(version$major, ".", strsplit(version$minor, "[.]")[[1]][1]))
+dir.create(pkgPath, recursive = TRUE)
+.libPaths(pkgPath, include.site = FALSE)
+
+if (!"remotes" %in% installed.packages()) {
+  install.packages("remotes")
 }
 
-if (!require("devtools")) {
-  install.packages("devtools", lib = pkgDir)
+if (!"Require" %in% installed.packages(lib.loc = pkgPath) ||
+    packageVersion("Require", lib.loc = pkgPath) < "0.1.6.9005") {
+  remotes::install_github("PredictiveEcology/Require@8ac756d66bc145f226f39e703e3787d3aed159f2",
+                          upgrade = FALSE, force = TRUE)
 }
 
-if (!require("Require")) {
-  install.packages("Require", lib = pkgDir)
-  library(Require)
-}
+## use binary linux packages if on Ubuntu
+Require::setLinuxBinaryRepo()
 
-if (!require("SpaDES")) {
-  install.packages("SpaDES", dependencies = TRUE, lib = pkgDir)
-}
+Require::Require("PredictiveEcology/SpaDES.project@6d7de6ee12fc967c7c60de44f1aa3b04e6eeb5db",
+                 require = FALSE, upgrade = FALSE, standAlone = TRUE)
 
-devtools::install_github("PredictiveEcology/SpaDES.core@8a7886a6afd7f3b90df10ea6b87caae8661f8709")
-devtools::install_github("PredictiveEcology/LandR@093c39898912a6e89ac9b6e862733052a0fae407")
-devtools::install_github("ianmseddy/LandR.CS@b39c8c72d20189fa6b6aeb057cdc751a631e0efa")
-devtools::install_github("PredictiveEcology/reproducible@aedea49637a6ebd0db6897f1d33f53959f41bee2")
-devtools::install_github("PredictiveEcology/SpaDES.install@80c43dcb94d897d25545105a7b83111cf634a556")
-devtools::install_github("PredictiveEcology/SpaDES.experiment@5a23c40f8aa9a9efc6dc16e040f8771561059152")
+modulePath <- "R/SpaDES/m"
+SpaDES.project::getModule(modulePath = modulePath,
+                          c("PredictiveEcology/Biomass_speciesData@master",
+                            "PredictiveEcology/Biomass_borealDataPrep@master",
+                            "PredictiveEcology/Biomass_core@master",
+                            "CeresBarros/Biomass_validationKNN@master",
+                            "CeresBarros/Biomass_speciesParameters@LandRPub"))
 
-out <- SpaDES.install::makeSureAllPackagesInstalled(modulePath = "R/SpaDES/m")
+pkgSnapshotFile <- file.path("packages",
+                             paste0("pkgSnapshot_",
+                                    paste0(version$major, "_", strsplit(version$minor, "[.]")[[1]][1]),
+                                    ".txt"))
+
+Require::Require(packageVersionFile = pkgSnapshotFile,
+                 require = FALSE, standAlone = TRUE)
 ```
 
 ## Package setup
