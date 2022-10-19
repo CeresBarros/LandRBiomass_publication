@@ -65,11 +65,9 @@ Require::Require(packageVersionFile = pkgSnapshotFile,
 ## Package setup
 ```{r init, eval = TRUE, results = FALSE}
 Require::Require(c("raster", "terra", "dplyr", "data.table", "future",
-Require(c("SpaDES",
-          "raster", "dplyr", "data.table", "future",
-          "PredictiveEcology/SpaDES.experiment",
-          "PredictiveEcology/LandR@development (>= 1.0.5.9003)",
-          "PredictiveEcology/reproducible (>= 1.2.7.9011)"), upgrade = FALSE)
+                   "SpaDES.core", "LandR", "reproducible",
+                   "ggspatial", "ggpubr", "cowplot"),
+                 upgrade = FALSE, install = FALSE)
 
 options("reproducible.useNewDigestAlgorith" = 2)
 options("spades.moduleCodeChecks" = FALSE)
