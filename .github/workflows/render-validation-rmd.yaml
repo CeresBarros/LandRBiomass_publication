@@ -34,27 +34,13 @@ jobs:
           r-version: '4.2.1'
           use-public-rspm: true
 
-      - name: Install additional system dependencies
-        run: |
-          sudo apt-get install -y \
-            libcurl4-openssl-dev \
-            libgdal-dev \
-            libgeos-dev \
-            libgit2-dev \
-            libglpk-dev \
-            libmagick++-dev \
-            libproj-dev \
-            libudunits2-dev \
-            libxml2-dev \
-            python3-gdal
-
-      - name: Install remotes, knitr, rmarkdown, bookdown
-        run: |
-          install.packages("remotes", repos = "https://cran.rstudio.com")
-          remotes::install_cran("rmarkdown")
-          remotes::install_cran("knitr")
-          remotes::install_cran("bookdown")
-        shell: Rscript {0}
+      - uses: r-lib/actions/setup-r-dependencies@v2
+        with:
+          cache-version: 2
+          extra-packages: |
+            any::rmarkdown
+            any::knitr
+            any::bookdown
 
       - name: Install SpaDES packages
         run: |
