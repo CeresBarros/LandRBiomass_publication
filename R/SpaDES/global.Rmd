@@ -457,12 +457,16 @@ validationOutputs <- rbind(validationOutputs, data.frame(objectName = "speciesLa
 We can now run the validation:
 
 ```{r validationRun}
-LandRBiomass_validation <- simInitAndSpades(times = validationTimes
-                                            , params = validationParams
-                                            , modules = "Biomass_validationKNN"
-                                            , objects = validationObjects
-                                            , outputs = validationOutputs
-                                            , paths = validationPaths
-                                            , .plotInitialTime = validationTimes$start) 
+LandRBiomass_validation <- Cache(simInitAndSpades
+                                 , times = validationTimes
+                                 , params = validationParams
+                                 , modules = "Biomass_validationKNN"
+                                 , objects = validationObjects
+                                 , outputs = validationOutputs
+                                 , paths = validationPaths
+                                 , .studyAreaName = SAname
+                                 , userTags = c("validation", SAname)
+                                 , cacheRepo = validationPaths$cachePath
+                                 , omitArgs = c("userTags"))
 saveSimList(LandRBiomass_validation, file.path(validationPaths$outputPath, paste0("simValid", runName, ".qs")))
 ```
