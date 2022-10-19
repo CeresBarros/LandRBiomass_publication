@@ -75,6 +75,7 @@ jobs:
 
       - name: Render validation Rmd
         run: |
+          options(repos = c(CRAN = "https://packagemanager.rstudio.com/all/__linux__/focal/latest", CRAN = "https://cran.rstudio.com"))
           rmarkdown::render("R/SpaDES/global.Rmd", encoding = "UTF-8", output_dir = "R/SpaDES")
         shell: Rscript {0}
 
