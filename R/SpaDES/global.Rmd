@@ -435,6 +435,7 @@ validationParams <- list(
     , "sppEquivCol" = params(LandRBiomass_simInit)$Biomass_borealDataPrep$sppEquivCol
     , "validationReps" = as.integer(1:10)  ## or length of simLists
     , "validationYears" = as.integer(c(2001, 2011))
+    , ".plots" = c("png")
     , ".useCache" = eventCaching
   )
 )
