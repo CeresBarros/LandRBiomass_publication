@@ -228,6 +228,28 @@ simParams <- list(
   )
 )
 
+simObjects <- list(
+  "rstLCC" = rstLCC2005
+  , "sppEquiv" = sppEquivalencies_CA
+  , "sppColorVect" = sppColorVect
+  , "speciesLayers" = simOutSpeciesLayers$speciesLayers
+  , "speciesParams" = speciesParams
+  , "rasterToMatchLarge" = simOutSpeciesLayers$rasterToMatchLarge
+  , "studyArea" = studyAreaS
+  , "studyAreaLarge" = studyAreaL
+  , "treed" = simOutSpeciesLayers$treed
+  , "numTreed" = simOutSpeciesLayers$numTreed
+  , "nonZeroCover" = simOutSpeciesLayers$nonZeroCover
+)
+
+## Make a rasterToMatch now that we have a rasterToMatchLarge and a studyArea -- use terra here.
+RTM <- try(project(rast(simObjects$rasterToMatchLarge), y = crs(vect(simObjects$studyArea))))
+RTM <- crop(RTM, vect(simObjects$studyArea), mask = TRUE)
+RTM <- raster(RTM)
+RTM[!is.na(RTM[])] <- 1L
+
+simObjects$rasterToMatch <- RTM
+
 ## objects will be saved at the start of the simulation (so they reflect the previous year)
 simOutputs <- data.frame(expand.grid(objectName = "cohortData",
                                      saveTime = unique(seq(simTimes$start, simTimes$end, by = 1)),
@@ -242,19 +264,6 @@ simOutputs <- rbind(simOutputs, data.frame(objectName = "biomassMap",
 
 ## in the first year, eventPriorities need to be set to AFTER the init event (which has priority 1)
 simOutputs$eventPriority[simOutputs$saveTime == simTimes$start] <- 1.5
-
-simObjects <- list(
-  "rstLCC" = rstLCC2005
-  , "sppEquiv" = sppEquivalencies_CA
-  , "sppColorVect" = sppColorVect
-  , "speciesLayers" = simOutSpeciesLayers$speciesLayers
-  , "speciesParams" = speciesParams
-  , "treed" = simOutSpeciesLayers$treed
-  , "numTreed" = simOutSpeciesLayers$numTreed
-  , "nonZeroCover" = simOutSpeciesLayers$nonZeroCover
-  , "studyArea" = studyAreaS
-  , "studyAreaLarge" = studyAreaL
-)
 
 ## make a initialisation simList and run init events too
 LandRBiomass_simInit <- Cache(simInitAndSpades
