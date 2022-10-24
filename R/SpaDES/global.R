@@ -39,28 +39,30 @@ SpaDES.project::getModule(modulePath = modulePath,
                             "CeresBarros/Biomass_validationKNN@master",
                             "CeresBarros/Biomass_speciesParameters@LandRPub"))
 
-outs <- SpaDES.project::packagesInModules(modulePath = modulePath)
-Require::Require(c(unname(unlist(outs)),
-                   "PredictiveEcology/SpaDES.experiment@development",
-                   "devtools", "ggspatial", "ggpubr", "cowplot"),
-                 require = FALSE, standAlone = TRUE)
+pkgSnapshotFile <- file.path("packages",
+                             paste0("pkgSnapshot_",
+                                    paste0(version$major, "_", strsplit(version$minor, "[.]")[[1]][1]),
+                                    ".txt"))
+
+if (file.exists(pkgSnapshotFile)) {
+  Require::Require(packageVersionFile = pkgSnapshotFile,
+                   require = FALSE, standAlone = TRUE)
+} else {
+  outs <- SpaDES.project::packagesInModules(modulePath = modulePath)
+  Require::Require(c(unname(unlist(outs)),
+                     "PredictiveEcology/SpaDES.experiment@development",
+                     "devtools", "ggspatial", "ggpubr", "cowplot"),
+                   require = FALSE, standAlone = TRUE)
+
+  ## the next line is commented to prevent accidental execution, but can be run to generate a missing pkg snapshot
+  # Require::pkgSnapshot(pkgSnapshotFile, libPaths = pkgPath, standAlone = TRUE)
+}
 
 ## load packages
 Require::Require(c("raster", "terra", "dplyr", "data.table", "future",
                    "SpaDES.core", "LandR", "reproducible",
                    "ggspatial", "ggpubr", "cowplot"),
                  upgrade = FALSE, install = FALSE)
-
-if (FALSE) { ## don't run this unless pkgSnapshot MUST be updated
-  Require::pkgSnapshot(
-    file.path("packages",
-              paste0("pkgSnapshot_",
-                     paste0(version$major, "_", strsplit(version$minor, "[.]")[[1]][1]),
-                     ".txt")),
-    libPaths = pkgPath, standAlone = TRUE
-  )
-}
-
 
 ## -----------------------------------------------
 ## SIMULATION SETUP
