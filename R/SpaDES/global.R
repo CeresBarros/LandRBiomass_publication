@@ -33,34 +33,36 @@ Require::Require("PredictiveEcology/SpaDES.project@6d7de6ee12fc967c7c60de44f1aa3
 
 modulePath <- "R/SpaDES/m"
 SpaDES.project::getModule(modulePath = modulePath,
-                          c("PredictiveEcology/Biomass_speciesData@master",
-                            "PredictiveEcology/Biomass_borealDataPrep@master",
-                            "PredictiveEcology/Biomass_core@master",
-                            "CeresBarros/Biomass_validationKNN@master",
-                            "CeresBarros/Biomass_speciesParameters@LandRPub"))
+                          c("PredictiveEcology/Biomass_speciesData@505fa065399da93e817424373ee1160e46703ce3",
+                            "PredictiveEcology/Biomass_borealDataPrep@6cd0c1242cdb95f7432d37becfb2f8dd03642e76",
+                            "PredictiveEcology/Biomass_core@5f7691af755a651579408f37bf292a7274b7678f",
+                            "PredictiveEcology/Biomass_validationKNN@ec9b5362aa0d07eee844fcdb74e33abeeda89b4b",
+                            "CeresBarros/Biomass_speciesParameters@31b66f22f915cd8b5774e5b56359dc2406691895"))
 
-outs <- SpaDES.project::packagesInModules(modulePath = modulePath)
-Require::Require(c(unname(unlist(outs)),
-                   "PredictiveEcology/SpaDES.experiment@development",
-                   "devtools", "ggspatial", "ggpubr", "cowplot"),
-                 require = FALSE, standAlone = TRUE)
+pkgSnapshotFile <- file.path("packages",
+                             paste0("pkgSnapshot_",
+                                    paste0(version$major, "_", strsplit(version$minor, "[.]")[[1]][1]),
+                                    ".txt"))
+
+if (file.exists(pkgSnapshotFile)) {
+  Require::Require(packageVersionFile = pkgSnapshotFile,
+                   require = FALSE, standAlone = TRUE)
+} else {
+  outs <- SpaDES.project::packagesInModules(modulePath = modulePath)
+  Require::Require(c(unname(unlist(outs)),
+                     "PredictiveEcology/SpaDES.experiment@development",
+                     "devtools", "ggspatial", "ggpubr", "cowplot"),
+                   require = FALSE, standAlone = TRUE)
+
+  ## the next line is commented to prevent accidental execution, but can be run to generate a missing pkg snapshot
+  # Require::pkgSnapshot(pkgSnapshotFile, libPaths = pkgPath, standAlone = TRUE)
+}
 
 ## load packages
 Require::Require(c("raster", "terra", "dplyr", "data.table", "future",
                    "SpaDES.core", "LandR", "reproducible",
                    "ggspatial", "ggpubr", "cowplot"),
                  upgrade = FALSE, install = FALSE)
-
-if (FALSE) { ## don't run this unless pkgSnapshot MUST be updated
-  Require::pkgSnapshot(
-    file.path("packages",
-              paste0("pkgSnapshot_",
-                     paste0(version$major, "_", strsplit(version$minor, "[.]")[[1]][1]),
-                     ".txt")),
-    libPaths = pkgPath, standAlone = TRUE
-  )
-}
-
 
 ## -----------------------------------------------
 ## SIMULATION SETUP
@@ -96,7 +98,7 @@ runName <- "baseCase"
 # runName <- "altParameters"
 
 ## paths
-simPathName <- "mar2022Runs"
+simPathName <- "oct2022Runs"
 simPaths <- list(cachePath = Require::normPath(file.path("R/SpaDES/cache", simPathName))
                  , modulePath = Require::normPath(modulePath)
                  , inputPath = Require::normPath(file.path("R/SpaDES/inputs"))
