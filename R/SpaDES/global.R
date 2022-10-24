@@ -98,7 +98,7 @@ runName <- "baseCase"
 # runName <- "altParameters"
 
 ## paths
-simPathName <- "mar2022Runs"
+simPathName <- "oct2022Runs"
 simPaths <- list(cachePath = Require::normPath(file.path("R/SpaDES/cache", simPathName))
                  , modulePath = Require::normPath(modulePath)
                  , inputPath = Require::normPath(file.path("R/SpaDES/inputs"))
