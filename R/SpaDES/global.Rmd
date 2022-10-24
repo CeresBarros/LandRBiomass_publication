@@ -16,6 +16,10 @@ For full code used in publication see `global.R`
 isInteractive <- interactive()
 knitr::opts_chunk$set(echo = TRUE, eval = isInteractive, results = "hold",
                       cache = 2)
+pkgPath <- file.path("packages", version$platform,
+                     paste0(version$major, ".", strsplit(version$minor, "[.]")[[1]][1]))
+dir.create(pkgPath, recursive = TRUE)
+.libPaths(pkgPath, include.site = FALSE)
 ```
 
 ## Package installation
