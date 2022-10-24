@@ -33,11 +33,11 @@ Require::Require("PredictiveEcology/SpaDES.project@6d7de6ee12fc967c7c60de44f1aa3
 
 modulePath <- "R/SpaDES/m"
 SpaDES.project::getModule(modulePath = modulePath,
-                          c("PredictiveEcology/Biomass_speciesData@master",
-                            "PredictiveEcology/Biomass_borealDataPrep@master",
-                            "PredictiveEcology/Biomass_core@master",
-                            "CeresBarros/Biomass_validationKNN@master",
-                            "CeresBarros/Biomass_speciesParameters@LandRPub"))
+                          c("PredictiveEcology/Biomass_speciesData@505fa065399da93e817424373ee1160e46703ce3",
+                            "PredictiveEcology/Biomass_borealDataPrep@6cd0c1242cdb95f7432d37becfb2f8dd03642e76",
+                            "PredictiveEcology/Biomass_core@5f7691af755a651579408f37bf292a7274b7678f",
+                            "PredictiveEcology/Biomass_validationKNN@ec9b5362aa0d07eee844fcdb74e33abeeda89b4b",
+                            "CeresBarros/Biomass_speciesParameters@31b66f22f915cd8b5774e5b56359dc2406691895"))
 
 pkgSnapshotFile <- file.path("packages",
                              paste0("pkgSnapshot_",
