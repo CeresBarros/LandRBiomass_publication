@@ -60,6 +60,7 @@ Require::setLinuxBinaryRepo()
 Require::Require("PredictiveEcology/SpaDES.project@6d7de6ee12fc967c7c60de44f1aa3b04e6eeb5db",
                  require = FALSE, upgrade = FALSE, standAlone = TRUE)
 
+modulePath <- "R/SpaDES/m"
 SpaDES.project::getModule(modulePath = modulePath,
                           c("PredictiveEcology/Biomass_speciesData@master",
                             "PredictiveEcology/Biomass_borealDataPrep@master",
