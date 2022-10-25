@@ -79,7 +79,7 @@ Require::Require(packageVersionFile = pkgSnapshotFile,
 ## Package loading and options, folder directories setup
 ```{r init, eval = TRUE, results = FALSE, messages = FALSE, warnings = FALSE}
 Require::Require(c("raster", "terra", "dplyr", "data.table", "future",
-                   "SpaDES.core", "LandR", "reproducible",
+                   "SpaDES.core", "LandR", "reproducible", "ggplot2",
                    "ggspatial", "ggpubr", "cowplot"),
                  upgrade = FALSE, install = FALSE)
 
