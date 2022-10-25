@@ -53,11 +53,7 @@ jobs:
           options(repos = c(CRAN = "https://packagemanager.rstudio.com/all/__linux__/focal/latest", CRAN = "https://cran.rstudio.com"))
           pkgPath <- file.path("packages", version$platform, paste0(version$major, ".", strsplit(version$minor, "[.]")[[1]][1]))
           dir.create(dirname(pkgPath), recursive = TRUE)
-          out <- file.symlink(Sys.getenv("R_LIBS_USER"), pkgPath)
-          # stop(paste(paste("symlink", out),
-          #  paste(".libPaths", paste(.libPaths(), collapse =";  ")),
-          #  sep = ";  "))
-          # Error: symlink TRUE;  .libPaths /home/runner/work/_temp/Library;  /opt/R/4.2.1/lib/R/library
+          file.symlink(Sys.getenv("R_LIBS_USER"), pkgPath)
           install.packages("remotes")
           remotes::install_cran("rmarkdown")
           remotes::install_cran("knitr")
