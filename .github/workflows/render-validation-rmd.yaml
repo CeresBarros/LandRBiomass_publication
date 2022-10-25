@@ -66,6 +66,7 @@ jobs:
           install.packages("SpaDES", dependencies = TRUE)
           remotes::install_github("PredictiveEcology/SpaDES.docs@development")
           remotes::install_github("PredictiveEcology/Require@8ac756d66bc145f226f39e703e3787d3aed159f2")
+          remotes::install_cran("DiagrammeR")
         shell: Rscript {0}
 
       - name: Install module package dependencies
