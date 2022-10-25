@@ -1,16 +1,25 @@
 ---
 title: "LandR Publication Simulations"
 author: "Ceres Barros"
-date: "22/01/2021"
+date: "Last updated: `r Sys.Date()`"
 output:
-  html_document:
+  bookdown::html_document2:
+    toc: true
+    toc_float: true
+    toc_depth: 4
+    theme: sandstone
+    number_sections: false
+    df_print: paged
     keep_md: yes
 editor_options:
   chunk_output_type: console
+  markdown: 
+    wrap: 80
+always_allow_html: true
 ---
 
-# A simplified example of publication runs
-For full code used in publication see `global.R`
+This provides a simplified example of publication runs. For full code used in 
+publication see `global.R`
 
 ```{r setup, include = FALSE}
 isInteractive <- interactive()
@@ -20,9 +29,11 @@ pkgPath <- file.path("packages", version$platform,
                      paste0(version$major, ".", strsplit(version$minor, "[.]")[[1]][1]))
 dir.create(pkgPath, recursive = TRUE)
 .libPaths(pkgPath, include.site = FALSE)
+
+modulePath <- "R/SpaDES/m"
 ```
 
-## Package installation
+# Package installation and setup
 ```{pkgInstall}
 ## set CRAN repo
 options(repos = c(CRAN = "https://cloud.r-project.org"))
@@ -49,7 +60,6 @@ Require::setLinuxBinaryRepo()
 Require::Require("PredictiveEcology/SpaDES.project@6d7de6ee12fc967c7c60de44f1aa3b04e6eeb5db",
                  require = FALSE, upgrade = FALSE, standAlone = TRUE)
 
-modulePath <- "R/SpaDES/m"
 SpaDES.project::getModule(modulePath = modulePath,
                           c("PredictiveEcology/Biomass_speciesData@master",
                             "PredictiveEcology/Biomass_borealDataPrep@master",
@@ -66,8 +76,8 @@ Require::Require(packageVersionFile = pkgSnapshotFile,
                  require = FALSE, standAlone = TRUE)
 ```
 
-## Package setup
-```{r init, eval = TRUE, results = FALSE}
+## Package loading and options, folder directories setup
+```{r init, eval = TRUE, results = FALSE, messages = FALSE, warnings = FALSE}
 Require::Require(c("raster", "terra", "dplyr", "data.table", "future",
                    "SpaDES.core", "LandR", "reproducible",
                    "ggspatial", "ggpubr", "cowplot"),
@@ -96,9 +106,9 @@ simPaths <- list(cachePath = Require::normPath(file.path("R/SpaDES/cache", simPa
                  , outputPath = Require::normPath(file.path("R/SpaDES/outputs", simPathName, runName)))
 ```
 
-## Simulation setup - part 1 
+# Simulation setup
 
-### Get study area and other necessary objects 
+## Part 1 - Get study area and other necessary objects 
 
 ```{r simulationSetup}
 ## Get necessary objects -----------------------
@@ -107,7 +117,7 @@ devtools::source_url(paste0("https://raw.githubusercontent.com/CeresBarros/",
                             "1_simObjects.R?raw=TRUE"))
 ```
 
-## Simulation setup - part 2 - species layers
+## Part 2 - Species layers
 
 ```{r simulationSetup2}
 ## Run Biomass_speciesData to get species layers
@@ -143,16 +153,9 @@ rstLCC2005 <- Cache(prepInputs,
 
 ```{r loadSppLayers, include=FALSE, eval = !isInteractive}
 simOutSpeciesLayers <- loadSimList(file.path("GitHubActionsSims", simPathName, runName, paste0("simList_speciesLayers", runName, ".qs")))
-
-## subset sppEquivalencies
-sppEquivalencies_CA <- sppEquivalencies_CA[Boreal %in% names(simOutSpeciesLayers$speciesLayers)]
-sppColorVect <- sppColorVect[c(names(simOutSpeciesLayers$speciesLayers), "Mixed")]
-
-## Get land-cover raster now that we have a rasterToMatchLarge
-rstLCC2005 <- raster(file.path("GitHubActionsSims", simPathName, runName, "rstLCC_966512e152b53d9b.tif"))
 ```
 
-## Simulation setup - part 3 - module parameters and outputs
+## Part 3 - Module parameters and outputs
 
 * `vegLeadingProportion` indicates what proportion the stand must be in one species group for it to be leading.
 If 0, then there is never a notion of "mixed" vegetation types and a species is a leading species if it has the highest relative biomass in the pixel.
@@ -300,7 +303,7 @@ LandRBiomass_simInit <- loadSimList(file.path("GitHubActionsSims", simPathName, 
 objectDiagram(LandRBiomass_simInit, width = 1000, height = 2500)
 ```
 
-## Run simulation
+# Run simulation
 
 Here we run just one repetition
 
@@ -369,7 +372,7 @@ Plot(LandRBiomass_simInit$rawBiomassMap,
 ## species % cover
 clearPlot(force = TRUE)
 Plot(simOutSpeciesLayers$speciesLayers,
-     title = names(simOutSpeciesLayers$speciesLayers))
+     title = paste(names(simOutSpeciesLayers$speciesLayers), collapse = ", "))
 ```
 
 ```{r plots2, fig.show = 'asis', eval = !isInteractive, echo = FALSE}
@@ -388,10 +391,8 @@ plot(stack(LandRBiomass_simInit$rawBiomassMap,
 
 plot(plotEcodist, main = "ecolocations")
 ## species % cover
-plot(simOutSpeciesLayers$speciesLayers,
-     main = paste(names(simOutSpeciesLayers$speciesLayers), collapse = ", "))
+plot(simOutSpeciesLayers$speciesLayers)
 ```
-
 
 
 Similarly, we can have a look at the species traits values used in the simulation directly from the `simList` object (although we also chose to save them).
@@ -412,6 +413,8 @@ knitr::kable(LandRBiomass_simInit$species, caption = "Invariant species traits")
 # Validation
 
 Here we run the validation on the outputs of just one repetition.
+
+## Validation setup
 
 We begin by preparing all the inputs necessary for the `Biomass_validationKNN` module.
 
@@ -478,6 +481,8 @@ validationOutputs <- rbind(validationOutputs, data.frame(objectName = "speciesLa
                                                          saveTime = c(validationTimes$start),
                                                          eventPriority = 1))
 ```
+
+## Validation runs
 
 We can now run the validation:
 
