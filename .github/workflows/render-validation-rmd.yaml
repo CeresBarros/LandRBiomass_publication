@@ -59,12 +59,7 @@ jobs:
         with:
           GitTag: '8ac756d66bc145f226f39e703e3787d3aed159f2'
 
-      - name: Install markdown and others
-        run: |
-          remotes::install_cran("rmarkdown")
-          remotes::install_cran("knitr")
-          remotes::install_cran("bookdown")
-        shell: Rscript {0}
+      - uses: PredictiveEcology/actions/install-Rmd-pkgs@v0
 
       - name: Install SpaDES packages
         run: |
