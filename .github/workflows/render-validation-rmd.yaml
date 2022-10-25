@@ -48,13 +48,19 @@ jobs:
             libxml2-dev \
             python3-gdal
 
-      - name: Install remotes, knitr, rmarkdown, bookdown
+      - name: Set R library
         run: |
-          options(repos = c(CRAN = "https://packagemanager.rstudio.com/all/__linux__/focal/latest", CRAN = "https://cran.rstudio.com"))
           pkgPath <- file.path("packages", version$platform, paste0(version$major, ".", strsplit(version$minor, "[.]")[[1]][1]))
           dir.create(dirname(pkgPath), recursive = TRUE)
           file.symlink(Sys.getenv("R_LIBS_USER"), pkgPath)
-          install.packages("remotes")
+        shell: Rscript {0}
+
+      - uses: PredictiveEcology/actions/install-Require@v0
+        with:
+          GitTag: '8ac756d66bc145f226f39e703e3787d3aed159f2'
+
+      - name: Install markdown and others
+        run: |
           remotes::install_cran("rmarkdown")
           remotes::install_cran("knitr")
           remotes::install_cran("bookdown")
@@ -65,7 +71,6 @@ jobs:
           options(repos = c(CRAN = "https://packagemanager.rstudio.com/all/__linux__/focal/latest", CRAN = "https://cran.rstudio.com"))
           install.packages("SpaDES", dependencies = TRUE)
           remotes::install_github("PredictiveEcology/SpaDES.docs@development")
-          remotes::install_github("PredictiveEcology/Require@8ac756d66bc145f226f39e703e3787d3aed159f2")
           remotes::install_cran("DiagrammeR")
         shell: Rscript {0}
 
