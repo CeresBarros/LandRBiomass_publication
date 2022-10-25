@@ -30,11 +30,6 @@ pkgPath <- file.path("packages", version$platform,
 dir.create(pkgPath, recursive = TRUE)
 .libPaths(pkgPath, include.site = FALSE)
 
-stop(paste(paste("work dir", getwd()),
-           paste(".libPaths", paste(.libPaths(), collapse =";  ")), 
-        paste("Require installed?", "Require" %in% installed.packages(lib.loc = pkgPath)),
-           sep = ";  "))
-
 modulePath <- "R/SpaDES/m"
 ```
 
