@@ -21,7 +21,7 @@ always_allow_html: true
 This provides a simplified example of publication runs. For full code used in 
 publication see `global.R`
 
-```{r setup, include = FALSE}
+```{r setup, include = TRUE}
 isInteractive <- interactive()
 knitr::opts_chunk$set(echo = TRUE, eval = isInteractive, results = "hold",
                       cache = 2)
@@ -29,6 +29,10 @@ pkgPath <- file.path("packages", version$platform,
                      paste0(version$major, ".", strsplit(version$minor, "[.]")[[1]][1]))
 dir.create(pkgPath, recursive = TRUE)
 .libPaths(pkgPath, include.site = FALSE)
+
+stop(paste(.libPaths(), 
+        "Require" %in% installed.packages(lib.loc = pkgPath),
+           sep = ";  "))
 
 modulePath <- "R/SpaDES/m"
 ```
