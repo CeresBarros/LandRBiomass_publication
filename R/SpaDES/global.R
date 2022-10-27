@@ -55,7 +55,9 @@ if (file.exists(pkgSnapshotFile)) {
                    require = FALSE, standAlone = TRUE)
 
   ## the next line is commented to prevent accidental execution, but can be run to generate a missing pkg snapshot
-  # Require::pkgSnapshot(pkgSnapshotFile, libPaths = pkgPath, standAlone = TRUE)
+  Require::pkgSnapshot(pkgSnapshotFile, libPaths = pkgPath,
+                       standAlone = TRUE, exact = TRUE, purge = TRUE,
+                       includeBase = FALSE)
 }
 
 ## load packages
