@@ -45,8 +45,7 @@ pkgSnapshotFile <- file.path("packages",
                                     ".txt"))
 
 if (file.exists(pkgSnapshotFile)) {
-  Require::Require(packageVersionFile = pkgSnapshotFile,
-                   require = FALSE, standAlone = TRUE)
+  Require::Require(packageVersionFile = pkgSnapshotFile, require = FALSE, standAlone = TRUE)
 } else {
   outs <- SpaDES.project::packagesInModules(modulePath = modulePath)
   Require::Require(c(unname(unlist(outs)),
