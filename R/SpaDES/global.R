@@ -50,7 +50,7 @@ if (file.exists(pkgSnapshotFile)) {
 } else {
   outs <- SpaDES.project::packagesInModules(modulePath = modulePath)
   Require::Require(c(unname(unlist(outs)),
-                     "PredictiveEcology/SpaDES.experiment@development",
+                     "PredictiveEcology/SpaDES.experiment@91bfad98d67ea2b7fcee3ea0115f8746e47534ad",
                      "devtools", "ggspatial", "ggpubr", "cowplot"),
                    require = FALSE, standAlone = TRUE)
 
