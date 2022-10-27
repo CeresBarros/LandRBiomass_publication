@@ -21,7 +21,7 @@ always_allow_html: true
 This provides a simplified example of publication runs. For full code used in 
 publication see `global.R`
 
-```{r setup, include = TRUE}
+```{r setup, include = FALSE}
 isInteractive <- interactive()
 knitr::opts_chunk$set(echo = TRUE, eval = isInteractive, results = "hold",
                       cache = 2)
