@@ -73,8 +73,7 @@ pkgSnapshotFile <- file.path("packages",
                                     paste0(version$major, "_", strsplit(version$minor, "[.]")[[1]][1]),
                                     ".txt"))
 
-Require::Require(packageVersionFile = pkgSnapshotFile,
-                 require = FALSE, standAlone = TRUE)
+Require::Require(packageVersionFile = pkgSnapshotFile, require = FALSE, standAlone = TRUE)
 ```
 
 ## Package loading and options, folder directories setup
