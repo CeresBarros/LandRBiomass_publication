@@ -113,7 +113,6 @@ GAemail <- NULL
 googledrive::drive_auth(email = GAemail)
 
 ## Get necessary objects like the study area.
-x11() ## open a new plotting window - avoids errors if the current one is too small.
 devtools::source_url(paste0("https://raw.githubusercontent.com/CeresBarros/",
                             "LandRBiomass_publication/repPkgInstall/R/SpaDES/",
                             "1_simObjects.R?raw=TRUE"))
