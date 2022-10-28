@@ -33,7 +33,7 @@ modulePath <- "R/SpaDES/m"
 ```
 
 # Package installation and setup
-```{pkgInstall}
+```{r pkgInstall}
 ## set CRAN repo
 options(repos = c(CRAN = "https://cloud.r-project.org"))
 
