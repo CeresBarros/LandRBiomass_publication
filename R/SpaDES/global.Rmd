@@ -372,20 +372,20 @@ Plot(simOutSpeciesLayers$speciesLayers,
 ```{r plots2, fig.show = 'asis', eval = !isInteractive, echo = FALSE}
 plot(plotStudyAreas, main = " ")
 
-## input stand biomass and age, ecological zonation (ecodistricts) and land-cover (LCC 2005)
-plotEcodist <- ggplot() +
-  layer_spatial(LandRBiomass_simInit$ecoregionLayer, aes(fill = as.factor(ECODISTRIC))) + 
-  labs(fill = "") +
-  theme_void()
-
-plot(stack(LandRBiomass_simInit$rawBiomassMap,
-           LandRBiomass_simInit$standAgeMap, 
-           LandRBiomass_simInit$rstLCC),
-     main = c("kNN stand biomass - kNN stand age - land-cover"))
-
-plot(plotEcodist, main = "ecolocations")
-## species % cover
-plot(simOutSpeciesLayers$speciesLayers)
+# ## input stand biomass and age, ecological zonation (ecodistricts) and land-cover (LCC 2005)
+# plotEcodist <- ggplot() +
+#   layer_spatial(LandRBiomass_simInit$ecoregionLayer, aes(fill = as.factor(ECODISTRIC))) + 
+#   labs(fill = "") +
+#   theme_void()
+# 
+# plot(stack(LandRBiomass_simInit$rawBiomassMap,
+#            LandRBiomass_simInit$standAgeMap, 
+#            LandRBiomass_simInit$rstLCC),
+#      main = c("kNN stand biomass - kNN stand age - land-cover"))
+# 
+# plot(plotEcodist, main = "ecolocations")
+# ## species % cover
+# plot(simOutSpeciesLayers$speciesLayers)
 ```
 
 
