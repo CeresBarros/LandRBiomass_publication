@@ -377,15 +377,15 @@ plotEcodist <- ggplot() +
   layer_spatial(LandRBiomass_simInit$ecoregionLayer, aes(fill = as.factor(ECODISTRIC))) +
   labs(fill = "") +
   theme_void()
-# 
-# plot(stack(LandRBiomass_simInit$rawBiomassMap,
-#            LandRBiomass_simInit$standAgeMap, 
-#            LandRBiomass_simInit$rstLCC),
-#      main = c("kNN stand biomass - kNN stand age - land-cover"))
-# 
-# plot(plotEcodist, main = "ecolocations")
-# ## species % cover
-# plot(simOutSpeciesLayers$speciesLayers)
+
+plot(stack(file.path("GitHubActionsSims", simPathName, runName, "rawBiomassMap_966512e152b53d9b.tif"),
+           LandRBiomass_simInit$standAgeMap,
+           file.path("GitHubActionsSims", simPathName, runName, "rstLCC_966512e152b53d9b.tif"),
+     main = c("kNN stand biomass - kNN stand age - land-cover"))
+
+plot(plotEcodist, main = "ecolocations")
+## species % cover
+plot(simOutSpeciesLayers$speciesLayers)
 ```
 
 
