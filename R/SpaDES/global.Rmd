@@ -1,16 +1,25 @@
 ---
 title: "LandR Publication Simulations"
 author: "Ceres Barros"
-date: "22/01/2021"
+date: "Last updated: `r Sys.Date()`"
 output:
-  html_document:
+  bookdown::html_document2:
+    toc: true
+    toc_float: true
+    toc_depth: 4
+    theme: sandstone
+    number_sections: false
+    df_print: paged
     keep_md: yes
 editor_options:
   chunk_output_type: console
+  markdown: 
+    wrap: 80
+always_allow_html: true
 ---
 
-# A simplified example of publication runs
-For full code used in publication see `global.R`
+This provides a simplified example of publication runs. For full code used in 
+publication see `global.R`
 
 ```{r setup, include = FALSE}
 isInteractive <- interactive()
@@ -18,12 +27,13 @@ knitr::opts_chunk$set(echo = TRUE, eval = isInteractive, results = "hold",
                       cache = 2)
 pkgPath <- file.path("packages", version$platform,
                      paste0(version$major, ".", strsplit(version$minor, "[.]")[[1]][1]))
-dir.create(pkgPath, recursive = TRUE)
 .libPaths(pkgPath, include.site = FALSE)
+
+modulePath <- "R/SpaDES/m"
 ```
 
-## Package installation
-```{pkgInstall}
+# Package installation and setup
+```{r pkgInstall}
 ## set CRAN repo
 options(repos = c(CRAN = "https://cloud.r-project.org"))
 
@@ -38,8 +48,8 @@ if (!"remotes" %in% installed.packages()) {
 }
 
 if (!"Require" %in% installed.packages(lib.loc = pkgPath) ||
-    packageVersion("Require", lib.loc = pkgPath) < "0.1.6.9005") {
-  remotes::install_github("PredictiveEcology/Require@8ac756d66bc145f226f39e703e3787d3aed159f2",
+    packageVersion("Require", lib.loc = pkgPath) < "0.1.6.9014") {
+  remotes::install_github("PredictiveEcology/Require@5c44205bf407f613f53546be652a438ef1248147",
                           upgrade = FALSE, force = TRUE)
 }
 
@@ -62,14 +72,13 @@ pkgSnapshotFile <- file.path("packages",
                                     paste0(version$major, "_", strsplit(version$minor, "[.]")[[1]][1]),
                                     ".txt"))
 
-Require::Require(packageVersionFile = pkgSnapshotFile,
-                 require = FALSE, standAlone = TRUE)
+Require::Require(packageVersionFile = pkgSnapshotFile, require = FALSE, standAlone = TRUE)
 ```
 
-## Package setup
-```{r init, eval = TRUE, results = FALSE}
+## Package loading and options, folder directories setup
+```{r init, eval = TRUE, results = FALSE, messages = FALSE, warnings = FALSE}
 Require::Require(c("raster", "terra", "dplyr", "data.table", "future",
-                   "SpaDES.core", "LandR", "reproducible",
+                   "SpaDES.core", "LandR", "reproducible", "ggplot2",
                    "ggspatial", "ggpubr", "cowplot"),
                  upgrade = FALSE, install = FALSE)
 
@@ -96,9 +105,9 @@ simPaths <- list(cachePath = Require::normPath(file.path("R/SpaDES/cache", simPa
                  , outputPath = Require::normPath(file.path("R/SpaDES/outputs", simPathName, runName)))
 ```
 
-## Simulation setup - part 1 
+# Simulation setup
 
-### Get study area and other necessary objects 
+## Part 1 - Get study area and other necessary objects 
 
 ```{r simulationSetup}
 ## Get necessary objects -----------------------
@@ -107,7 +116,7 @@ devtools::source_url(paste0("https://raw.githubusercontent.com/CeresBarros/",
                             "1_simObjects.R?raw=TRUE"))
 ```
 
-## Simulation setup - part 2 - species layers
+## Part 2 - Species layers
 
 ```{r simulationSetup2}
 ## Run Biomass_speciesData to get species layers
@@ -143,16 +152,9 @@ rstLCC2005 <- Cache(prepInputs,
 
 ```{r loadSppLayers, include=FALSE, eval = !isInteractive}
 simOutSpeciesLayers <- loadSimList(file.path("GitHubActionsSims", simPathName, runName, paste0("simList_speciesLayers", runName, ".qs")))
-
-## subset sppEquivalencies
-sppEquivalencies_CA <- sppEquivalencies_CA[Boreal %in% names(simOutSpeciesLayers$speciesLayers)]
-sppColorVect <- sppColorVect[c(names(simOutSpeciesLayers$speciesLayers), "Mixed")]
-
-## Get land-cover raster now that we have a rasterToMatchLarge
-rstLCC2005 <- raster(file.path("GitHubActionsSims", simPathName, runName, "rstLCC_966512e152b53d9b.tif"))
 ```
 
-## Simulation setup - part 3 - module parameters and outputs
+## Part 3 - Module parameters and outputs
 
 * `vegLeadingProportion` indicates what proportion the stand must be in one species group for it to be leading.
 If 0, then there is never a notion of "mixed" vegetation types and a species is a leading species if it has the highest relative biomass in the pixel.
@@ -260,7 +262,7 @@ simOutputs <- data.frame(
               saveTime = unique(seq(simTimes$start, simTimes$end, by = 1)),
               eventPriority = 1,
               stringsAsFactors = FALSE)
-  )
+)
 simOutputs <- rbind(simOutputs, 
                     data.frame(objectName = "pixelGroupMap",
                                saveTime = unique(seq(simTimes$start, simTimes$end, by = 1)),
@@ -300,7 +302,7 @@ LandRBiomass_simInit <- loadSimList(file.path("GitHubActionsSims", simPathName, 
 objectDiagram(LandRBiomass_simInit, width = 1000, height = 2500)
 ```
 
-## Run simulation
+# Run simulation
 
 Here we run just one repetition
 
@@ -308,11 +310,6 @@ Here we run just one repetition
 LandRBiomass_sim <- spades(LandRBiomass_simInit, .plotInitialTime = simTimes$start)
 ## save
 saveSimList(LandRBiomass_sim, file.path(simPaths$outputPath, paste0("simList_LandRBiomass_sim_1rep_", runName, ".qs")))
-```
-
-```{r loadSimulation, include=FALSE, eval = !isInteractive}
-## this has been commented because the simLists obj is not used at the moment.
-# LandRBiomass_sim <- qs::qread(file.path("GitHubActionsSims", simPathName, runName, paste0("simList_LandRBiomass_sim_", runName, ".qs")))
 ```
 
 If we were to run several repetitions, this would be how:
@@ -369,7 +366,7 @@ Plot(LandRBiomass_simInit$rawBiomassMap,
 ## species % cover
 clearPlot(force = TRUE)
 Plot(simOutSpeciesLayers$speciesLayers,
-     title = names(simOutSpeciesLayers$speciesLayers))
+     title = paste(names(simOutSpeciesLayers$speciesLayers), collapse = ", "))
 ```
 
 ```{r plots2, fig.show = 'asis', eval = !isInteractive, echo = FALSE}
@@ -377,21 +374,21 @@ plot(plotStudyAreas, main = " ")
 
 ## input stand biomass and age, ecological zonation (ecodistricts) and land-cover (LCC 2005)
 plotEcodist <- ggplot() +
-  layer_spatial(LandRBiomass_simInit$ecoregionLayer, aes(fill = as.factor(ECODISTRIC))) + 
+  layer_spatial(LandRBiomass_simInit$ecoregionLayer, aes(fill = as.factor(ECODISTRIC))) +
   labs(fill = "") +
   theme_void()
 
-plot(stack(LandRBiomass_simInit$rawBiomassMap,
-           LandRBiomass_simInit$standAgeMap, 
-           LandRBiomass_simInit$rstLCC),
-     main = c("kNN stand biomass - kNN stand age - land-cover"))
+plot(stack(file.path("GitHubActionsSims", simPathName, runName, "rawBiomassMap_966512e152b53d9b.tif"),
+           LandRBiomass_simInit$standAgeMap,
+           file.path("GitHubActionsSims", simPathName, runName, "rstLCC_966512e152b53d9b.tif")),
+     main = "")
+
+text(1.2, labels =  "kNN stand biomass - kNN stand age - land-cover", xpd = NA, cex = 1, adj = 1.2)
 
 plot(plotEcodist, main = "ecolocations")
 ## species % cover
-plot(simOutSpeciesLayers$speciesLayers,
-     main = paste(names(simOutSpeciesLayers$speciesLayers), collapse = ", "))
+plot(simOutSpeciesLayers$speciesLayers)
 ```
-
 
 
 Similarly, we can have a look at the species traits values used in the simulation directly from the `simList` object (although we also chose to save them).
@@ -412,6 +409,8 @@ knitr::kable(LandRBiomass_simInit$species, caption = "Invariant species traits")
 # Validation
 
 Here we run the validation on the outputs of just one repetition.
+
+## Validation setup
 
 We begin by preparing all the inputs necessary for the `Biomass_validationKNN` module.
 
@@ -478,6 +477,8 @@ validationOutputs <- rbind(validationOutputs, data.frame(objectName = "speciesLa
                                                          saveTime = c(validationTimes$start),
                                                          eventPriority = 1))
 ```
+
+## Validation runs
 
 We can now run the validation:
 

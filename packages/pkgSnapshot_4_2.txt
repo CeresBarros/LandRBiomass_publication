@@ -1,6 +1,6 @@
 "Package","LibPath","Version","GithubRepo","GithubUsername","GithubRef","GithubSHA1"
 "abind","packages/x86_64-w64-mingw32/4.2","1.4-5",NA,NA,NA,NA
-"amc","packages/x86_64-w64-mingw32/4.2","0.2.1","amc","achubaty","development","15c5229951700f9a638fd186f176f0e793d76c10"
+"amc","packages/x86_64-w64-mingw32/4.2","0.2.1","amc","achubaty","development","3330753132d4dca15011e4e64db5ccea28e3b8c4"
 "arm","packages/x86_64-w64-mingw32/4.2","1.13-1",NA,NA,NA,NA
 "askpass","packages/x86_64-w64-mingw32/4.2","1.1",NA,NA,NA,NA
 "assertthat","packages/x86_64-w64-mingw32/4.2","0.2.1",NA,NA,NA,NA
@@ -81,8 +81,6 @@
 "gtable","packages/x86_64-w64-mingw32/4.2","0.3.1",NA,NA,NA,NA
 "hexbin","packages/x86_64-w64-mingw32/4.2","1.28.2",NA,NA,NA,NA
 "highr","packages/x86_64-w64-mingw32/4.2","0.9",NA,NA,NA,NA
-"Hmisc","packages/x86_64-w64-mingw32/4.2","4.7-1",NA,NA,NA,NA
-"htmlTable","packages/x86_64-w64-mingw32/4.2","2.4.1",NA,NA,NA,NA
 "htmltools","packages/x86_64-w64-mingw32/4.2","0.5.3",NA,NA,NA,NA
 "htmlwidgets","packages/x86_64-w64-mingw32/4.2","1.5.4",NA,NA,NA,NA
 "httpuv","packages/x86_64-w64-mingw32/4.2","1.6.6",NA,NA,NA,NA
@@ -97,7 +95,7 @@
 "jsonlite","packages/x86_64-w64-mingw32/4.2","1.8.2",NA,NA,NA,NA
 "knitr","packages/x86_64-w64-mingw32/4.2","1.40",NA,NA,NA,NA
 "labeling","packages/x86_64-w64-mingw32/4.2","0.4.2",NA,NA,NA,NA
-"LandR","packages/x86_64-w64-mingw32/4.2","1.0.9.9002","LandR","CeresBarros","development","125baa1416181e732d56557afc4debbd531eb64c"
+"LandR","packages/x86_64-w64-mingw32/4.2","1.1.0.9006","LandR","PredictiveEcology","development","d0df43e543abfeb0bca1c175b062288c10cb4dcb"
 "LandR.CS","packages/x86_64-w64-mingw32/4.2","0.0.3","LandR.CS","ianmseddy","HEAD","0952eedde6e100c2aae822b210756a697a04b61a"
 "later","packages/x86_64-w64-mingw32/4.2","1.3.0",NA,NA,NA,NA
 "latticeExtra","packages/x86_64-w64-mingw32/4.2","0.6-30",NA,NA,NA,NA
@@ -168,7 +166,7 @@
 "rematch2","packages/x86_64-w64-mingw32/4.2","2.1.2",NA,NA,NA,NA
 "remotes","packages/x86_64-w64-mingw32/4.2","2.4.2",NA,NA,NA,NA
 "reproducible","packages/x86_64-w64-mingw32/4.2","1.2.10.9001","reproducible","PredictiveEcology","development","c02c747da45f3c25ffe9894fcbe4a67a6da5de57"
-"Require","packages/x86_64-w64-mingw32/4.2","0.1.6.9005","Require","PredictiveEcology","8ac756d66bc145f226f39e703e3787d3aed159f2","8ac756d66bc145f226f39e703e3787d3aed159f2"
+"Require","packages/x86_64-w64-mingw32/4.2","0.1.6.9014","Require","PredictiveEcology","5c44205bf407f613f53546be652a438ef1248147","5c44205bf407f613f53546be652a438ef1248147"
 "rgdal","packages/x86_64-w64-mingw32/4.2","1.5-32",NA,NA,NA,NA
 "rgeos","packages/x86_64-w64-mingw32/4.2","0.5-9",NA,NA,NA,NA
 "rjson","packages/x86_64-w64-mingw32/4.2","0.2.21",NA,NA,NA,NA
@@ -189,10 +187,10 @@
 "shiny","packages/x86_64-w64-mingw32/4.2","1.7.2",NA,NA,NA,NA
 "sourcetools","packages/x86_64-w64-mingw32/4.2","0.1.7",NA,NA,NA,NA
 "sp","packages/x86_64-w64-mingw32/4.2","1.5-0",NA,NA,NA,NA
-"SpaDES.core","packages/x86_64-w64-mingw32/4.2","1.1.0.9001","SpaDES.core","CeresBarros","9613b6fff2cae5ab0f29d5f5c0b92db46c8932f8","9613b6fff2cae5ab0f29d5f5c0b92db46c8932f8"
-"SpaDES.experiment","packages/x86_64-w64-mingw32/4.2","0.0.2.9003","SpaDES.experiment","PredictiveEcology","development","91bfad98d67ea2b7fcee3ea0115f8746e47534ad"
+"SpaDES.core","packages/x86_64-w64-mingw32/4.2","1.1.0.9002","SpaDES.core","PredictiveEcology","development","365610a5283268231829d2cd4ce925377cf5bcf6"
+"SpaDES.experiment","packages/x86_64-w64-mingw32/4.2","0.0.2.9003","SpaDES.experiment","PredictiveEcology","91bfad98d67ea2b7fcee3ea0115f8746e47534ad","91bfad98d67ea2b7fcee3ea0115f8746e47534ad"
 "SpaDES.project","packages/x86_64-w64-mingw32/4.2","0.0.7.9003","SpaDES.project","PredictiveEcology","6d7de6ee12fc967c7c60de44f1aa3b04e6eeb5db","6d7de6ee12fc967c7c60de44f1aa3b04e6eeb5db"
-"SpaDES.tools","packages/x86_64-w64-mingw32/4.2","1.0.0","SpaDES.tools","PredictiveEcology","development","d8b83f285e136c5ff4505c29803ea3f39301f050"
+"SpaDES.tools","packages/x86_64-w64-mingw32/4.2","1.0.0.9001","SpaDES.tools","PredictiveEcology","development","3bc6207158f91eafac78ae34502276d85aefdb29"
 "SparseM","packages/x86_64-w64-mingw32/4.2","1.81",NA,NA,NA,NA
 "spatstat.data","packages/x86_64-w64-mingw32/4.2","2.2-0",NA,NA,NA,NA
 "spatstat.geom","packages/x86_64-w64-mingw32/4.2","2.4-0",NA,NA,NA,NA

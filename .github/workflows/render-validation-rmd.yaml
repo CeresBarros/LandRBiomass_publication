@@ -31,6 +31,7 @@ jobs:
 
       - uses: r-lib/actions/setup-r@v2
         with:
+          r-version: '4.2.1'
           use-public-rspm: true
 
       - name: Install additional system dependencies
@@ -47,36 +48,36 @@ jobs:
             libxml2-dev \
             python3-gdal
 
-      - name: Install remotes, knitr, rmarkdown, bookdown
+      - name: Set R library
         run: |
-          install.packages("remotes")
-          remotes::install_cran("rmarkdown")
-          remotes::install_cran("knitr")
-          remotes::install_cran("bookdown")
+          pkgPath <- file.path("packages", version$platform, paste0(version$major, ".", strsplit(version$minor, "[.]")[[1]][1]))
+          dir.create(dirname(pkgPath), recursive = TRUE)
+          file.symlink(Sys.getenv("R_LIBS_USER"), pkgPath)
         shell: Rscript {0}
 
-      - name: Install SpaDES packages
-        run: |
-          install.packages("SpaDES", dependencies = TRUE)
-          remotes::install_github("PredictiveEcology/SpaDES.docs@development")
-        shell: Rscript {0}
+      - uses: PredictiveEcology/actions/install-Require@v0
+        with:
+          GitTag: '5c44205bf407f613f53546be652a438ef1248147'
 
-      - name: Install module package dependencies
+      - uses: PredictiveEcology/actions/install-Rmd-pkgs@v0
+
+      - uses: PredictiveEcology/actions/install-SpaDES@v0
+
+      - name: Install additional packages
         run: |
-          mods <- dir("R/SpaDES/m")
-          pkgs <- sapply(mods, function(m) SpaDES.core::packages(modules = m, paths = "R/SpaDES/m"))
-          pkgs <- unique(unlist(pkgs))
-          Require::Require(pkgs)
+          options(repos = c(CRAN = "https://packagemanager.rstudio.com/all/__linux__/focal/latest", CRAN = "https://cran.rstudio.com"))
+          Require::Require(c("PredictiveEcology/LandR@development",
+                          "ggspatial", "ggpubr", "cowplot", "DiagrammeR"), require = FALSE)
         shell: Rscript {0}
 
       - name: Render validation Rmd
         run: |
-          rmarkdown::render("R/SpaDES/global.Rmd", encoding = "UTF-8", output_dir = "R/SpaDES")
+          rmarkdown::render("R/SpaDES/global.Rmd", encoding = "UTF-8", output_dir = "R/SpaDES", knit_root_dir = getwd())
         shell: Rscript {0}
 
       - name: Commit results
         run: |
           git config user.email "actions@github.com"
           git config user.name "GitHub Actions"
-          git commit Biomass_borealDataPrep.html -m 'Re-build Biomass_borealDataPrep.Rmd' || echo "No changes to commit"
+          git commit R/SpaDES/global.html -m 'Re-build R/SpaDES/global.Rmd' || echo "No changes to commit"
           git push https://${{github.actor}}:${{secrets.GITHUB_TOKEN}}@github.com/${{github.repository}}.git HEAD:${{github.ref}} || echo "No changes to commit"

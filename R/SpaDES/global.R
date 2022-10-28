@@ -21,8 +21,8 @@ if (!"remotes" %in% installed.packages()) {
 }
 
 if (!"Require" %in% installed.packages(lib.loc = pkgPath) ||
-    packageVersion("Require", lib.loc = pkgPath) < "0.1.6.9005") {
-  remotes::install_github("PredictiveEcology/Require@8ac756d66bc145f226f39e703e3787d3aed159f2",
+    packageVersion("Require", lib.loc = pkgPath) < "0.1.6.9014") {
+  remotes::install_github("PredictiveEcology/Require@5c44205bf407f613f53546be652a438ef1248147",
                           upgrade = FALSE, force = TRUE)
 }
 ## use binary linux packages if on Ubuntu
@@ -33,11 +33,11 @@ Require::Require("PredictiveEcology/SpaDES.project@6d7de6ee12fc967c7c60de44f1aa3
 
 modulePath <- "R/SpaDES/m"
 SpaDES.project::getModule(modulePath = modulePath,
-                          c("PredictiveEcology/Biomass_speciesData@505fa065399da93e817424373ee1160e46703ce3",
-                            "PredictiveEcology/Biomass_borealDataPrep@6cd0c1242cdb95f7432d37becfb2f8dd03642e76",
-                            "PredictiveEcology/Biomass_core@5f7691af755a651579408f37bf292a7274b7678f",
-                            "PredictiveEcology/Biomass_validationKNN@ec9b5362aa0d07eee844fcdb74e33abeeda89b4b",
-                            "CeresBarros/Biomass_speciesParameters@31b66f22f915cd8b5774e5b56359dc2406691895"))
+                          c("PredictiveEcology/Biomass_speciesData@1dc71ebc6181b6eb9b0813db2ca4184488312197",
+                            "PredictiveEcology/Biomass_borealDataPrep@4f9858f767a2c19d2bceacf80047dd5eac661e73",
+                            "PredictiveEcology/Biomass_core@d36a902c23283ddd1c38d6e59ce86047ccdf14d8",
+                            "PredictiveEcology/Biomass_validationKNN@30829e0a9465513169a21c0477cfffd5f9a5c936",
+                            "PredictiveEcology/Biomass_speciesParameters@c7970580c1a5e1817d8cfeb4675076748eb50917"))
 
 pkgSnapshotFile <- file.path("packages",
                              paste0("pkgSnapshot_",
@@ -45,17 +45,18 @@ pkgSnapshotFile <- file.path("packages",
                                     ".txt"))
 
 if (file.exists(pkgSnapshotFile)) {
-  Require::Require(packageVersionFile = pkgSnapshotFile,
-                   require = FALSE, standAlone = TRUE)
+  Require::Require(packageVersionFile = pkgSnapshotFile, require = FALSE, standAlone = TRUE)
 } else {
   outs <- SpaDES.project::packagesInModules(modulePath = modulePath)
   Require::Require(c(unname(unlist(outs)),
-                     "PredictiveEcology/SpaDES.experiment@development",
+                     "PredictiveEcology/SpaDES.experiment@91bfad98d67ea2b7fcee3ea0115f8746e47534ad",
                      "devtools", "ggspatial", "ggpubr", "cowplot"),
                    require = FALSE, standAlone = TRUE)
 
   ## the next line is commented to prevent accidental execution, but can be run to generate a missing pkg snapshot
-  # Require::pkgSnapshot(pkgSnapshotFile, libPaths = pkgPath, standAlone = TRUE)
+  Require::pkgSnapshot(pkgSnapshotFile, libPaths = pkgPath,
+                       standAlone = TRUE, exact = TRUE, purge = TRUE,
+                       includeBase = FALSE)
 }
 
 ## load packages
@@ -112,7 +113,6 @@ GAemail <- NULL
 googledrive::drive_auth(email = GAemail)
 
 ## Get necessary objects like the study area.
-x11() ## open a new plotting window - avoids errors if the current one is too small.
 devtools::source_url(paste0("https://raw.githubusercontent.com/CeresBarros/",
                             "LandRBiomass_publication/repPkgInstall/R/SpaDES/",
                             "1_simObjects.R?raw=TRUE"))
