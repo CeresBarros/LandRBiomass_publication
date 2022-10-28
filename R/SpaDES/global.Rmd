@@ -380,8 +380,10 @@ plotEcodist <- ggplot() +
 
 plot(stack(file.path("GitHubActionsSims", simPathName, runName, "rawBiomassMap_966512e152b53d9b.tif"),
            LandRBiomass_simInit$standAgeMap,
-           file.path("GitHubActionsSims", simPathName, runName, "rstLCC_966512e152b53d9b.tif"),
-     main = c("kNN stand biomass - kNN stand age - land-cover"))
+           file.path("GitHubActionsSims", simPathName, runName, "rstLCC_966512e152b53d9b.tif")),
+     main = "")
+
+text(1.2, labels =  "kNN stand biomass - kNN stand age - land-cover", xpd = NA, cex = 1, adj = 1.2)
 
 plot(plotEcodist, main = "ecolocations")
 ## species % cover
