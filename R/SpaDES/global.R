@@ -33,11 +33,11 @@ Require::Require("PredictiveEcology/SpaDES.project@6d7de6ee12fc967c7c60de44f1aa3
 
 modulePath <- "R/SpaDES/m"
 SpaDES.project::getModule(modulePath = modulePath,
-                          c("PredictiveEcology/Biomass_speciesData@505fa065399da93e817424373ee1160e46703ce3",
-                            "PredictiveEcology/Biomass_borealDataPrep@6cd0c1242cdb95f7432d37becfb2f8dd03642e76",
-                            "PredictiveEcology/Biomass_core@5f7691af755a651579408f37bf292a7274b7678f",
-                            "PredictiveEcology/Biomass_validationKNN@ec9b5362aa0d07eee844fcdb74e33abeeda89b4b",
-                            "CeresBarros/Biomass_speciesParameters@31b66f22f915cd8b5774e5b56359dc2406691895"))
+                          c("PredictiveEcology/Biomass_speciesData@1dc71ebc6181b6eb9b0813db2ca4184488312197",
+                            "PredictiveEcology/Biomass_borealDataPrep@4f9858f767a2c19d2bceacf80047dd5eac661e73",
+                            "PredictiveEcology/Biomass_core@d36a902c23283ddd1c38d6e59ce86047ccdf14d8",
+                            "PredictiveEcology/Biomass_validationKNN@30829e0a9465513169a21c0477cfffd5f9a5c936",
+                            "PredictiveEcology/Biomass_speciesParameters@c7970580c1a5e1817d8cfeb4675076748eb50917"))
 
 pkgSnapshotFile <- file.path("packages",
                              paste0("pkgSnapshot_",
